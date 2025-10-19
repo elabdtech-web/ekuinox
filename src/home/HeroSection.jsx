@@ -1,13 +1,26 @@
 import React from "react";
 import { BiSolidRightArrow } from "react-icons/bi";
 import { ImArrowRight } from "react-icons/im";
+import GlobeEarth from "../components/GlobeEarth";
 
 export default function HeroSection() {
   return (
-    <section className="w-full flex  bg-gradient-to-b  from-[#061428] via-[#0d2740] to-[#071026] flex-col items-center justify-center relative">
+    <section className="w-full flex  bg-gradient-to-b min-h-screen from-[#061428] via-[#0d2740] to-[#071026] flex-col items-center justify-center relative">
       {/* full-bleed visual so the rings can extend outside the container */}
-      <div className="no-side-gap w-full">
+      <div className=" w-full">
         <div className="hero-visual w-full flex items-center justify-center">
+          {/* SVG starfield background (absolute, behind globe) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 flex items-center justify-center">
+            <img
+              src="/stars.svg"
+              alt="starfield background"
+              className="w-[140%] max-w-none opacity-60 dark:opacity-40 transform-gpu scale-[1.02]"
+              style={{
+                filter: "blur(0.6px)",
+                mixBlendMode: "screen",
+              }}
+            />
+          </div>
           {/* Animated waves behind the globe */}
           <div className="hero-waves" aria-hidden>
             <div className="wave" />
@@ -16,18 +29,16 @@ export default function HeroSection() {
             <div className="wave" />
           </div>
 
-          {/* Globe image (above waves) */}
-          <img
-            src="/hero.png"
-            alt="earth"
-            className="hero-image w-full mt-16 max-w-[920px] md:max-w-[600px] h-auto object-contain"
-          />
+          {/* Globe component (above waves) */}
+          <div className="hero-image w-full mt-16 h-auto flex items-center justify-center">
+            <GlobeEarth />
+          </div>
         </div>
       </div>
 
-      <div className=" mt-6 mb-12 text-center">
+      <div className=" mt-6 mb-12 bg-gradient-to-b from-transparent to-[#071026]  text-center">
         <div className="mt-6">
-          <button className="hover-progress-btn px-6 py-3 bg-white/10 text-white rounded-full transition-all duration-700 hover:px-12 hover:py-4 relative overflow-hidden group border border-white/20 hover:border-white/40">
+          <div className="hover-progress-btn px-6 py-3 text-white rounded-full transition-all duration-700 hover:px-12 hover:py-4 relative  group border border-white/20 hover:border-white/40">
             <span className="group-hover:opacity-0 transition-opacity duration-500 delay-100">
               Hover here
             </span>
@@ -54,7 +65,7 @@ export default function HeroSection() {
                 1 Year ahead
               </span>
             </div>
-          </button>
+          </div>
         </div>
       </div>
     </section>

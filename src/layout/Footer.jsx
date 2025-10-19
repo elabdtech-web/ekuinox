@@ -3,35 +3,30 @@ import React from "react";
 export default function Footer() {
   return (
     <footer
-      className="w-full"
-      style={{
-        height: "350px", // Figma height
-        background:
-          "linear-gradient(180deg, rgba(12,18,32,1) 0%, rgba(86,149,245,1) 100%)", // your bg
-      }}
+      className="w-full bg-gradient-to-b from-[#0C1220] to-[#5695F5]/50 text-white py-10"
+      
     >
       {/* content width constrained to Figma 1440px */}
       <div
-        className="mx-auto h-full flex flex-col justify-between"
-        style={{ width: "1440px", maxWidth: "100%" }}
+        className="w-full max-w-[1440px] mx-auto mt-20 mb-0 h-[450px] overflow-hidden flex flex-col justify-between"
       >
         {/* top content */}
         <div className="container flex mt-12 flex-col md:flex-row md:justify-between md:items-start gap-10 pt-10">
           {/* Left: Logo and tagline */}
-          <div>
-            <div className="text-2xl font-bold text-[#5695F5]">EKUINOX</div>
-            <div className="mt-2 text-xs text-white/80 max-w-[180px]">
+          <div className="w-1/4">
+            <div className="text-5xl font-medium text-[#5695F5]">EKUINOX</div>
+            <div className="mt-2 text-base text-white/80 max-w-[180px]">
               Crafted for those who move with time.
             </div>
           </div>
 
           {/* Columns */}
-          <div className="flex flex-1 justify-center gap-16">
+          <div className="flex flex-1 justify-start gap-16 w-3/4">
             <div>
-              <div className="text-[10px] tracking-wide font-semibold text-white/60 mb-2">
+              <div className="text-base tracking-wide  text-white/60 mb-2">
                 GENERAL
               </div>
-              <ul className="space-y-1 text-sm text-white/90">
+              <ul className="space-y-3 text-base text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Pricing
@@ -51,10 +46,10 @@ export default function Footer() {
             </div>
 
             <div>
-              <div className="text-[10px] tracking-wide font-semibold text-white/60 mb-2">
+              <div className="text-base tracking-wide text-white/60 mb-2">
                 SOCIALS
               </div>
-              <ul className="space-y-1 text-sm text-white/90">
+              <ul className="space-y-3 text-base text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     X
@@ -79,10 +74,10 @@ export default function Footer() {
             </div>
 
             <div>
-              <div className="text-[10px] tracking-wide font-semibold text-white/60 mb-2">
+              <div className="text-base tracking-wide text-white/60 mb-2">
                 OTHERS
               </div>
-              <ul className="space-y-1 text-sm text-white/90">
+              <ul className="space-y-3 text-base text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Terms & Conditions
@@ -100,7 +95,7 @@ export default function Footer() {
 
         {/* Copyright pill */}
         <div className="flex justify-center pb-6">
-          <div className="bg-white/10 text-white/70 rounded-full px-6 py-2 text-xs backdrop-blur-sm">
+          <div className="bg-white/10 text-white/70 w-68 text-center rounded-full px-6 py-2 text-xl backdrop-blur-sm">
             Copyright© {new Date().getFullYear()}
           </div>
         </div>

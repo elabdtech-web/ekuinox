@@ -33,7 +33,9 @@
   min-height: 600px;
 }
 .hero-waves {
+  
   position: absolute;
+  margin-top: 40px;
   inset: 0;
   display: flex;
   align-items: center;
@@ -44,9 +46,10 @@
 .hero-waves .wave {
   position: absolute;
   border-radius: 50%;
-  border: 2px solid rgba(100, 150, 255, 0.4);
-  width: 300px;
-  height: 300px;
+  border: 2px  rgba(32, 68, 145, 0.4);
+  width: 400px;
+  height: 400px;
+  box-shadow: 0 0 20px rgba(85, 100, 133, 0.2);
   animation: expandRing 5s ease-out infinite;
 }
 .hero-waves .wave:nth-child(2) {

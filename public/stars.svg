@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <symbol id="s-small" viewBox="0 0 4 4">
+      <circle cx="2" cy="2" r="1.2" fill="#ffffff" fill-opacity="0.85"/>
+    </symbol>
+    <symbol id="s-tiny" viewBox="0 0 2 2">
+      <circle cx="1" cy="1" r="0.6" fill="#ffffff" fill-opacity="0.6"/>
+    </symbol>
+    <symbol id="s-glow" viewBox="0 0 10 10">
+      <circle cx="5" cy="5" r="3" fill="url(#g1)" />
+    </symbol>
+  </defs>
+
+  <!-- Background subtle gradient to blend with page bg -->
+  <rect width="100%" height="100%" fill="rgba(2,6,23,0)" />
+
+  <!-- Randomized stars layout (hand-crafted pattern that tiles nicely) -->
+  <g fill="none" stroke="none" opacity="0.9">
+    <!-- Row 1 -->
+    <use href="#s-small" x="80" y="50" />
+    <use href="#s-tiny" x="180" y="120" />
+    <use href="#s-small" x="280" y="40" />
+    <use href="#s-tiny" x="360" y="86" />
+    <use href="#s-tiny" x="440" y="160" />
+    <use href="#s-glow" x="520" y="110" />
+
+    <!-- Row 2 -->
+    <use href="#s-tiny" x="120" y="240" />
+    <use href="#s-small" x="220" y="190" />
+    <use href="#s-small" x="340" y="240" />
+    <use href="#s-tiny" x="420" y="200" />
+    <use href="#s-tiny" x="520" y="280" />
+
+    <!-- Fill with more stars across the canvas -->
+    <!-- We'll create a subtle repeating grid of tiny stars to give depth -->
+    <g fill="#ffffff" fill-opacity="0.08">
+      <circle cx="60" cy="360" r="1" />
+      <circle cx="120" cy="420" r="1" />
+      <circle cx="180" cy="320" r="1" />
+      <circle cx="240" cy="460" r="1" />
+      <circle cx="300" cy="380" r="1" />
+      <circle cx="360" cy="440" r="1" />
+      <circle cx="420" cy="400" r="1" />
+      <circle cx="480" cy="360" r="1" />
+      <circle cx="540" cy="420" r="1" />
+      <circle cx="600" cy="320" r="1" />
+      <circle cx="660" cy="460" r="1" />
+      <circle cx="720" cy="380" r="1" />
+    </g>
+
+    <!-- More clusters toward the right side -->
+    <use href="#s-small" x="980" y="80" />
+    <use href="#s-tiny" x="1040" y="150" />
+    <use href="#s-small" x="1120" y="60" />
+    <use href="#s-tiny" x="1200" y="200" />
+    <use href="#s-glow" x="1300" y="120" />
+
+    <g fill="#ffffff" fill-opacity="0.06">
+      <circle cx="860" cy="360" r="1" />
+      <circle cx="920" cy="420" r="1" />
+      <circle cx="980" cy="320" r="1" />
+      <circle cx="1040" cy="460" r="1" />
+      <circle cx="1100" cy="380" r="1" />
+      <circle cx="1160" cy="440" r="1" />
+    </g>
+
+    <!-- Bottom area subtle stars -->
+    <g fill="#ffffff" fill-opacity="0.04">
+      <circle cx="200" cy="860" r="1" />
+      <circle cx="360" cy="780" r="1" />
+      <circle cx="520" cy="820" r="1" />
+      <circle cx="760" cy="880" r="1" />
+      <circle cx="980" cy="760" r="1" />
+    </g>
+  </g>
+
+  <!-- Make the svg tile-friendly by repeating a subtle pattern across the width -->
+  <rect x="0" y="0" width="1920" height="1080" fill="none"/>
+</svg>

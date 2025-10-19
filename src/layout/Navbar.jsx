@@ -1,35 +1,69 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PiShoppingBag } from "react-icons/pi";
+import { Link } from "react-router-dom";
 
-export default function Navbar() {
+const Navbar = () => {
+  const [isSticky, setIsSticky] = useState(false);
+  const [showSticky, setShowSticky] = useState(false);
+
+  useEffect(() => {
+    let timeoutId = null;
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      const shouldBeSticky = y > 100; // threshold
+      if (shouldBeSticky && !isSticky) {
+        setIsSticky(true);
+        // allow DOM to apply fixed position then animate in
+        timeoutId = setTimeout(() => setShowSticky(true), 20);
+      } else if (!shouldBeSticky && isSticky) {
+        // animate out then remove fixed
+        setShowSticky(false);
+        timeoutId = setTimeout(() => setIsSticky(false), 300);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isSticky]);
+
+  // compute classes and styles
+  const baseClasses = "left-0 right-0 z-50 px-6 md:px-10 text-white";
+  const positionClass = isSticky ? "fixed" : "absolute top-0";
+  const bgClass = isSticky ? "bg-black/60 backdrop-blur-sm shadow-lg" : "bg-transparent";
+  const transformStyle = isSticky ? (showSticky ? "translateY(0)" : "translateY(-100%)") : "translateY(0)";
+
   return (
     <header
-      className="absolute top-0 left-0 right-0 z-50 bg-transparent text-white"
-      style={{ height: "72px" }}
+      className={`${positionClass} ${baseClasses} ${bgClass}`}
+      style={{ transform: transformStyle, transition: "transform 300ms ease" }}
     >
-      <div className="container flex items-center  py-4 justify-between h-full">
-        <div className="flex items-center gap-16 ">
-          <div className="text-xl font-semibold">EKUINOX</div>
-          <nav className="hidden md:flex gap-11 text-sm opacity-90">
-            <a href="#" className="hover:underline">
+      <div className="flex items-center py-4 md:py-6 justify-between max-w-[1440px] mx-auto h-full">
+        <div className="flex items-center gap-8 md:gap-16">
+          <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>
+          <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">
+            <Link to="/product" className="hover:underline">
               HOME
-            </a>
-            <a href="#" className="hover:underline">
+            </Link>
+            <Link to="/product" className="hover:underline">
               PRODUCT
-            </a>
-            <a href="#" className="hover:underline">
+            </Link>
+            <Link to="/short-story" className="hover:underline">
               SHORT STORY
-            </a>
+            </Link>
           </nav>
         </div>
 
-        <div className="flex items-center gap-4 ">
-          <p className="text-sm text-gray-600">Cart</p>
+        <div className="flex items-center gap-4">
+          <p className="text-sm text-gray-400 hidden md:block">Cart</p>
           <button aria-label="cart" className="">
-            <PiShoppingBag size={28} />
+            <PiShoppingBag size={24} />
           </button>
         </div>
       </div>
     </header>
   );
 }
+
+export default Navbar;
