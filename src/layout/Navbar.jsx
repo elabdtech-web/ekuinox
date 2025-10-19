@@ -43,7 +43,7 @@ const Navbar = () => {
         <div className="flex items-center gap-8 md:gap-16">
           <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>
           <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">
-            <Link to="/product" className="hover:underline">
+            <Link to="/" className="hover:underline">
               HOME
             </Link>
             <Link to="/product" className="hover:underline">

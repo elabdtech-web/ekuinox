@@ -1,0 +1,14 @@
+{
+  "cities": [
+    { "id": 1, "name": "New York", "country": "United States", "countryCode": "us", "lat": 40.7128, "lng": -74.006 },
+    { "id": 2, "name": "London", "country": "United Kingdom", "countryCode": "gb", "lat": 51.5074, "lng": -0.1278 },
+    { "id": 3, "name": "Tokyo", "country": "Japan", "countryCode": "jp", "lat": 35.6762, "lng": 139.6503 },
+    { "id": 4, "name": "Sydney", "country": "Australia", "countryCode": "au", "lat": -33.8688, "lng": 151.2093 },
+    { "id": 5, "name": "Dubai", "country": "United Arab Emirates", "countryCode": "ae", "lat": 25.2048, "lng": 55.2708 },
+    { "id": 6, "name": "Moscow", "country": "Russia", "countryCode": "ru", "lat": 55.7558, "lng": 37.6173 },
+    { "id": 7, "name": "Paris", "country": "France", "countryCode": "fr", "lat": 48.8566, "lng": 2.3522 },
+    { "id": 8, "name": "Rio de Janeiro", "country": "Brazil", "countryCode": "br", "lat": -22.9068, "lng": -43.1729 },
+    { "id": 9, "name": "Cape Town", "country": "South Africa", "countryCode": "za", "lat": -33.9249, "lng": 18.4241 },
+    { "id": 10, "name": "Beijing", "country": "China", "countryCode": "cn", "lat": 39.9042, "lng": 116.4074 }
+  ]
+}

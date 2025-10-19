@@ -1,34 +1,9 @@
 import React, { useState } from "react";
 import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { PiShoppingBag } from "react-icons/pi";
+import productData from "../../data/productData.json";
 
-const SIZES = ["42 MM", "47 MM", "51 MM"];
-const EDITIONS = ["Pro Solar", "Pro Solar No Wifi"];
-const COLORS = [
-  {
-    id: "silver",
-    thumb: "/watch-1.png",
-    gallery: ["/watch-1.png", "/watch-1-2.png", "/watch-1-3.png"],
-    alt: "Silver",
-  },
-  {
-    id: "black",
-    thumb: "/watch-2.png",
-    gallery: ["/watch-2.png", "/watch-2-2.png", "/watch-2-3.png"],
-    alt: "Black",
-  },
-  {
-    id: "beige",
-    thumb: "/watch-3.png",
-    gallery: ["/watch-3.png", "/watch-3-2.png", "/watch-3-3.png"],
-    alt: "Beige",
-  },
-];
-const STATs = [
-  { label: "Product Sale", value: "20K +" },
-  { label: "Satisfied Customers", value: "5M +" },
-  { label: "Warranty", value: "5 Years" },
-];
+const { sizes: SIZES, editions: EDITIONS, colors: COLORS, stats: STATs, product } = productData;
 
 const ProductDetail = () => {
   const [size, setSize] = useState("47 MM");
@@ -57,13 +32,13 @@ const ProductDetail = () => {
         <div className="grid grid-cols-12 gap-8 items-center">
           {/* left column */}
           <div className="col-span-12 lg:col-span-4">
-            <h1 className="text-4xl md:text-5xl  leading-tight">Garmin Fenix 7 Pro</h1>
+            <h1 className="text-4xl md:text-5xl  leading-tight">{product.name}</h1>
             <p className="text-slate-300 mt-3 text-xl max-w-md opacity-40">
-              Sapphire Solar Edition Titanium Carbon Gray DLC – black silicone strap 47 mm watch
+              {product.description}
             </p>
 
             <div className="mt-6">
-              <div className="text-4xl font-semibold text-[#5695F5]">$2,499</div>
+              <div className="text-4xl font-semibold text-[#5695F5]">{product.price}</div>
             </div>
 
             <div className="mt-8">
@@ -160,7 +135,7 @@ const ProductDetail = () => {
           <div className="col-span-12 lg:col-span-4">
             <div className="bg-white/5   rounded-xl py-4 overflow-hidden border border-white/10">
               <div className="relative rounded-lg  h-[280px]">
-                <img src="/watch-video.jpg" alt="video" className="w-full object-cover h-full" />
+                <img src={product.videoUrl} alt="video" className="w-full object-cover h-full" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-black/50 border border-white/10 flex items-center justify-center">
                     ▶
@@ -169,7 +144,7 @@ const ProductDetail = () => {
               </div>
               
             </div>
-            <h4 className="mt-4 text-white/90 text-2xl max-w-xs ">Experience True Elegance With Modern Craftsmanship</h4>
+            <h4 className="mt-4 text-white/90 text-2xl max-w-xs ">{product.videoTitle}</h4>
             <div className="mt-6 grid grid-cols-3 gap-4">
               {STATs.map((s, i) => (
                 <div key={i} className="">

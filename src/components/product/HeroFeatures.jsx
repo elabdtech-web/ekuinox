@@ -1,18 +1,22 @@
 import React from "react";
-import { AiOutlinePoweroff, AiOutlineBulb, AiOutlineCloud, AiOutlineCheckCircle, AiOutlineHeart } from "react-icons/ai";
-import { IoBluetoothOutline } from "react-icons/io5";
 import { MdGpsFixed } from "react-icons/md";
 import { PiBatteryChargingVerticalFill, PiFlashlightFill, PiHeartbeatFill, PiSneakerMoveFill, PiSolarPanelFill } from "react-icons/pi";
+import heroFeaturesData from "../../data/heroFeaturesData.json";
 
-const FEATURES = [
-  { id: 1, icon: <PiSolarPanelFill size={58} />, label: "Power Glass Solar\nCharging Lens" },
-  {
-    id: 2, icon: <PiBatteryChargingVerticalFill size={58} />, label: "High-Contrast\nDisplay" },
-  { id: 3, icon: <PiFlashlightFill size={58} />, label: "Weather\nReady" },
-  { id: 4, icon: <PiSneakerMoveFill size={58} />, label: "Smart\nConnectivity" },
-  { id: 5, icon: <PiHeartbeatFill size={58} />, label: "Accurate\nTimekeeping" },
-  { id: 6, icon: <MdGpsFixed size={58} />, label: "Activity\nTracking" }
-];
+// Icon mapping
+const iconMap = {
+  PiSolarPanelFill: <PiSolarPanelFill size={58} />,
+  PiBatteryChargingVerticalFill: <PiBatteryChargingVerticalFill size={58} />,
+  PiFlashlightFill: <PiFlashlightFill size={58} />,
+  PiSneakerMoveFill: <PiSneakerMoveFill size={58} />,
+  PiHeartbeatFill: <PiHeartbeatFill size={58} />,
+  MdGpsFixed: <MdGpsFixed size={58} />
+};
+
+const FEATURES = heroFeaturesData.features.map(f => ({
+  ...f,
+  icon: iconMap[f.iconName]
+}));
 
 const HeroFeatures = () => {
   return (
@@ -20,16 +24,15 @@ const HeroFeatures = () => {
       {/* large hero image with overlay */}
       <div className="relative w-full overflow-hidden">
         <img
-          src="/product-hero.png"
+          src={heroFeaturesData.heroImage}
           alt="hero"
           className="w-full object-cover  transform-gpu"
         />
         <div className="absolute inset-0 space-y-6 flex flex-col items-center justify-end text-center bg-gradient-to-t from-[#070B13]  to-[#070B13]/20 px-6">
-          {/* <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-wide">FĒNIX 7<br />SERIES</h2> */}
-          <div className="mt-3 text-xl md:text-5xl text-white/90 font-medium">ALL DAY, EVERY DAY</div>
+          {/* <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-wide">{heroFeaturesData.title}</h2> */}
+          <div className="mt-3 text-xl md:text-5xl text-white/90 font-medium">{heroFeaturesData.subtitle}</div>
           <p className="mt-4 max-w-3xl text-sm md:text-lg text-white/60">
-            Precision-crafted watches inspired by the rhythm of the Earth. Discover handcrafted design and
-            advanced solar charging for longer adventures.
+            {heroFeaturesData.description}
           </p>
           {/* icons row */}
           <div className="max-w-[1440px]  mx-auto px-6 lg:px-0 mt-6">

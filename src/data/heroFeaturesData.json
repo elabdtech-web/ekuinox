@@ -1,0 +1,38 @@
+{
+  "heroImage": "/product-hero.png",
+  "title": "FĒNIX 7 SERIES",
+  "subtitle": "ALL DAY, EVERY DAY",
+  "description": "Precision-crafted watches inspired by the rhythm of the Earth. Discover handcrafted design and advanced solar charging for longer adventures.",
+  "features": [
+    {
+      "id": 1,
+      "iconName": "PiSolarPanelFill",
+      "label": "Power Glass Solar\nCharging Lens"
+    },
+    {
+      "id": 2,
+      "iconName": "PiBatteryChargingVerticalFill",
+      "label": "High-Contrast\nDisplay"
+    },
+    {
+      "id": 3,
+      "iconName": "PiFlashlightFill",
+      "label": "Weather\nReady"
+    },
+    {
+      "id": 4,
+      "iconName": "PiSneakerMoveFill",
+      "label": "Smart\nConnectivity"
+    },
+    {
+      "id": 5,
+      "iconName": "PiHeartbeatFill",
+      "label": "Accurate\nTimekeeping"
+    },
+    {
+      "id": 6,
+      "iconName": "MdGpsFixed",
+      "label": "Activity\nTracking"
+    }
+  ]
+}

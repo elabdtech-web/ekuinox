@@ -1,43 +1,6 @@
+import featuresData from "../../data/featuresData.json";
 
-
-const FEATURES = [
-  {
-    id: 1,
-    title: "Long Battery Life with Solar Charging",
-    desc: "Precision-crafted watches that embody the perfect fusion of astronomical inspiration and design.",
-    img: "/watch-2.png",
-  },
-  {
-    id: 2,
-    title: "Accurate Timekeeping",
-    desc: "IANA tzdb + luxon powered local times with DST-aware calculations.",
-    img: "/watch-2.png",
-  },
-  {
-    id: 3,
-    title: "Premium Materials",
-    desc: "Sapphire crystal, titanium cases and engineered straps for longevity.",
-    img: "/watch-2.png",
-  },
-  {
-    id: 4,
-    title: "Water Resistance",
-    desc: "Designed and tested for adventurous lifestyles.",
-    img: "/watch-2.png",
-  },
-  {
-    id: 5,
-    title: "Smart Notifications",
-    desc: "Sync with your phone to get timely alerts and activity insights.",
-    img: "/watch-2.png",
-  },
-  {
-    id: 6,
-    title: "Customizable Faces",
-    desc: "Multiple watchfaces and complications to match your day.",
-    img: "/watch-2.png",
-  },
-];
+const { features: FEATURES, heroImage, heroTitle } = featuresData;
 
 const FeaturesSection = () => {
   return (
@@ -45,13 +8,13 @@ const FeaturesSection = () => {
       {/* hero background image */}
       <div className="relative w-full h-[130vh] rounded-xl overflow-hidden mb-12">
         <img
-          src="/feature-hero.png"
+          src={heroImage}
           alt="feature hero"
           className="w-full h-full object-full brightness-75"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#070B13] via-transparent to-black/20" />
         <div className="absolute inset-0 flex items-end mb-18 justify-center pointer-events-none">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white">Features</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white">{heroTitle}</h2>
         </div>
       </div>
 
