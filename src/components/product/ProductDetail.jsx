@@ -28,7 +28,7 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-0 py-16">
         <div className="grid grid-cols-12 gap-8 items-center">
           {/* left column */}
           <div className="col-span-12 lg:col-span-4">

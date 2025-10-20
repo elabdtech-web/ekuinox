@@ -19,7 +19,7 @@ const FeaturesSection = () => {
       </div>
 
       {/* features grid */}
-      <div className="max-w-[1440px] mx-auto px-6 py-6 lg:px-0 ">
+      <div className="max-w-7xl mx-auto px-6 py-6 lg:px-0 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map((f) => (
             <article

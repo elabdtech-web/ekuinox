@@ -35,7 +35,7 @@ const HeroFeatures = () => {
             {heroFeaturesData.description}
           </p>
           {/* icons row */}
-          <div className="max-w-[1440px]  mx-auto px-6 lg:px-0 mt-6">
+          <div className="max-w-7xl  mx-auto px-6 lg:px-0 mt-6">
             <div className="bg-transparent rounded-xl p-6">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-10 items-stretch
                                divide-y divide-white/6 lg:divide-y-0 lg:divide-x lg:divide-white/6">

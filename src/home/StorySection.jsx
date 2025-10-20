@@ -10,11 +10,8 @@ const Stat = ({ label, value }) => (
 export default function StorySection() {
   return (
     <section className="w-full min-h-screen bg-[#070B13]">
-      <div className=" px-6 lg:px-0 py-16 max-w-[1440px] mx-auto ">
-
-
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div className=" px-6 lg:px-0 py-16 ">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-7xl mx-auto overflow-hidden">
           {/* Left text column */}
           <div className="relative lg:col-span-6 text-2xl">
             <div className="absolute bg-white/50 top-0 w-[560px] h-[140px]  overflow-hidden -z-10" />

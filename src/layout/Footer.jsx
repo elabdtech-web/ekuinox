@@ -8,7 +8,7 @@ export default function Footer() {
     >
       {/* content width constrained to Figma 1440px */}
       <div
-        className="w-full max-w-[1440px] mx-auto mt-20 mb-0 h-[450px] overflow-hidden flex flex-col justify-between"
+        className="w-full max-w-7xl mx-auto mt-20 mb-0 h-[450px] overflow-hidden flex flex-col justify-between"
       >
         {/* top content */}
         <div className="container flex mt-12 flex-col md:flex-row md:justify-between md:items-start gap-10 pt-10">

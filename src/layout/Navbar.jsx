@@ -39,7 +39,7 @@ const Navbar = () => {
       className={`${positionClass} ${baseClasses} ${bgClass}`}
       style={{ transform: transformStyle, transition: "transform 300ms ease" }}
     >
-      <div className="flex items-center py-4 md:py-6 justify-between max-w-[1440px] mx-auto h-full">
+      <div className="flex items-center py-4 md:py-6 justify-between max-w-7xl mx-auto h-full">
         <div className="flex items-center gap-8 md:gap-16">
           <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>
           <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">

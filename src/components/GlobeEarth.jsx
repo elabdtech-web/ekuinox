@@ -29,7 +29,7 @@ function latLngToCartesian(latDeg, lonDeg) {
 export default function GlobeEarth({ className = '' }) {
   const globeRef = useRef();
   const [cities] = useState(EXAMPLE_CITIES.slice(0, 10));
-  const [activeCity, setActiveCity] = useState(null);
+  // const [activeCity, setActiveCity] = useState(null);
   const [hoverCity, setHoverCity] = useState(null);
   const [nightMode, setNightMode] = useState(false);
   const [sunPoint, setSunPoint] = useState(() => computeSubsolarPointUTC());
@@ -230,19 +230,20 @@ export default function GlobeEarth({ className = '' }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  function formatLocalTime(lat, lng) {
-    try {
-      const tz = tzlookup(lat, lng);
-      const dt = manualTime ? manualTime.setZone(tz) : DateTime.now().setZone(tz);
-      return { time: dt.toFormat('HH:mm:ss'), zone: tz, iso: dt.toISO() };
-    } catch {
-      const dt = manualTime ? manualTime : DateTime.utc();
-      return { time: dt.toFormat('HH:mm:ss'), zone: 'UTC', iso: dt.toISO() };
-    }
-  }
+  // function formatLocalTime(lat, lng) {
+  //   try {
+  //     const tz = tzlookup(lat, lng);
+  //     const dt = manualTime ? manualTime.setZone(tz) : DateTime.now().setZone(tz);
+  //     return { time: dt.toFormat('HH:mm:ss'), zone: tz, iso: dt.toISO() };
+  //   } catch {
+  //     const dt = manualTime ? manualTime : DateTime.utc();
+  //     return { time: dt.toFormat('HH:mm:ss'), zone: 'UTC', iso: dt.toISO() };
+  //   }
+  // }
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
+      {/* Responsive Globe: show canvas on md+, fallback image on mobile */}
       <div className="hidden md:block">
         <Globe
           ref={globeRef}
@@ -255,41 +256,21 @@ export default function GlobeEarth({ className = '' }) {
           pointAltitude={() => 0.001}
           pointRadius={1}
           pointColor={() => '#10aaff'}
-          onPointClick={(d) => setActiveCity(d)}
+          // onPointClick={(d) => setActiveCity(d)}
           onPointHover={(d) => setHoverCity(d || null)}
           animateIn
-          width={920}
-          height={920}
+          width={860}
+          height={860}
         />
       </div>
-
-      {/* Mobile fallback */}
-      <div className="block md:hidden">
-        <img src="/hero.png" alt="earth" className="w-full h-auto object-contain" />
+      {/* Mobile fallback: static image, smaller and centered */}
+      <div className="block md:hidden w-full flex justify-center items-center">
+        <img
+          src="/hero.png"
+          alt="earth"
+          className="w-full max-w-xs sm:max-w-sm h-auto object-contain"
+        />
       </div>
-
-      {/* Active city popup */}
-      {activeCity && (
-        <div className="absolute top-6 right-6 w-64 bg-white/5 backdrop-blur-md rounded-xl p-3 text-white">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-sm text-white/80">{activeCity.name}</div>
-              <div className="text-xs text-white/60 mt-1">
-                {(() => {
-                  const info = formatLocalTime(activeCity.lat, activeCity.lng);
-                  return (
-                    <>
-                      <div className="font-mono text-lg">{info.time}</div>
-                      <div className="text-xs text-white/60">{info.zone}</div>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-            <button className="text-white/60 hover:text-white ml-2" onClick={() => setActiveCity(null)} aria-label="close">✕</button>
-          </div>
-        </div>
-      )}
 
       {/* Hover preview card */}
       {hoverCity && (() => {
@@ -308,8 +289,8 @@ export default function GlobeEarth({ className = '' }) {
         const flagUrl = hoverCity.countryCode ? `https://flagcdn.com/w80/${hoverCity.countryCode.toLowerCase()}.png` : null;
 
         // Position card near mouse with corrected offset
-        const offsetX = -650; // Small offset
-        const offsetY = -250;
+        const offsetX = -500; // Small offset
+        const offsetY = -120;
         const cardWidth = 320;
         const cardHeight = 160;
         const margin = 8;
@@ -334,7 +315,7 @@ export default function GlobeEarth({ className = '' }) {
               position: 'absolute',
               transition: 'left 0.1s ease, top 0.1s ease'
             }}
-            className="w-80 backdrop-blur-2xl text-white bg-white/10 rounded-2xl p-4 shadow-inner drop-shadow-xl flex gap-3 items-start z-30 pointer-events-none"
+            className="w-80 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner  flex gap-3 items-start z-30 pointer-events-none"
           >
             <div className="flex-shrink-0">
               {flagUrl ? (
