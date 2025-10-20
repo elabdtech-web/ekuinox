@@ -49,7 +49,7 @@ const Navbar = () => {
             <Link to="/product" className="hover:underline">
               PRODUCT
             </Link>
-            <Link to="/short-story" className="hover:underline">
+            <Link to="/story" className="hover:underline">
               SHORT STORY
             </Link>
           </nav>

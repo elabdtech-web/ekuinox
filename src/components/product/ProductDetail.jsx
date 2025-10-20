@@ -126,8 +126,7 @@ const ProductDetail = () => {
                 <button onClick={next} aria-label="next" className="absolute right-[180px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                   <IoArrowForward />
                 </button>
-              </div>
-              
+              </div>     
             </div>
           </div>
 

@@ -110,3 +110,11 @@
   background: linear-gradient(90deg, #3b82f6, #06b6d4);
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.group:hover .spin-gradient-border {
+  animation: spin-slow 1.5s linear infinite;
+}
