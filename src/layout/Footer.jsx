@@ -2,14 +2,9 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer
-      className="w-full bg-gradient-to-b from-[#0C1220] to-[#5695F5]/50 text-white py-10"
-      
-    >
+    <footer className="w-full bg-gradient-to-b from-[#0C1220] to-[#5695F5]/50 text-white py-10">
       {/* content width constrained to Figma 1440px */}
-      <div
-        className="w-full max-w-7xl mx-auto mt-20 mb-0 h-[450px] overflow-hidden flex flex-col justify-between"
-      >
+      <div className="w-full max-w-7xl mx-auto  mb-0 h-[350px] overflow-hidden flex flex-col justify-between">
         {/* top content */}
         <div className="container flex mt-12 flex-col md:flex-row md:justify-between md:items-start gap-10 pt-10">
           {/* Left: Logo and tagline */}
@@ -26,7 +21,7 @@ export default function Footer() {
               <div className="text-base tracking-wide  text-white/60 mb-2">
                 GENERAL
               </div>
-              <ul className="space-y-3 text-base text-white/90">
+              <ul className="space-y-3 text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Pricing
@@ -49,7 +44,7 @@ export default function Footer() {
               <div className="text-base tracking-wide text-white/60 mb-2">
                 SOCIALS
               </div>
-              <ul className="space-y-3 text-base text-white/90">
+              <ul className="space-y-3 text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     X
@@ -77,7 +72,7 @@ export default function Footer() {
               <div className="text-base tracking-wide text-white/60 mb-2">
                 OTHERS
               </div>
-              <ul className="space-y-3 text-base text-white/90">
+              <ul className="space-y-3 text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Terms & Conditions
@@ -94,7 +89,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright pill */}
-        <div className="flex justify-center pb-6">
+        <div className="flex justify-center pb-3">
           <div className="bg-white/10 text-white/70 w-68 text-center rounded-full px-6 py-2 text-xl backdrop-blur-sm">
             Copyright© {new Date().getFullYear()}
           </div>
@@ -103,6 +98,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-
-

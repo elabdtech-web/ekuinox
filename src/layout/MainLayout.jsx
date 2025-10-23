@@ -4,7 +4,7 @@ import Footer from "./Footer";
 
 export default function MainLayout({ children }) {
   return (
-    <div className="relative bg-gradient-to-b min-h-screen from-[#061428] via-[#0d2740] to-[#071026]">
+    <div className="relative">
 
       <Navbar />
 

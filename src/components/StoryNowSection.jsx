@@ -3,7 +3,7 @@ import React from "react";
 export default function StoryNowSection() {
   return (
     <section className="relative w-full  px-4 bg-[#070B13] ">
-      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 h-full md:h-[100vh] gap-8 items-center overflow-x-hidden">
+      <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 h-full md:h-[100vh] gap-8 items-center overflow-hidden">
         <div
           className="hidden sm:block absolute inset-0 -top-20 md:top-0 bg-gradient-to-r h-full z-50 right-0 from-transparent to-[#070B13]/90 "
         />
@@ -22,7 +22,7 @@ export default function StoryNowSection() {
             className="hidden sm:absolute inset-0 -top-20 md:top-0 bg-gradient-to-r h-full  z-50 right-0 from-transparent to-[#070B13] "
 
           />
-          <div className="relative w-full max-w-[600px] h-full md:h-[70vh]">
+          <div className="relative w-full max-w-[600px] h-full md:h-[90vh]">
             
             {/* Large screens: Rotated, offset image */}
             <img

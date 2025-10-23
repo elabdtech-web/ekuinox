@@ -33,7 +33,6 @@
   min-height: 600px;
 }
 .hero-waves {
-  
   position: absolute;
   margin-top: 40px;
   inset: 0;
@@ -46,7 +45,7 @@
 .hero-waves .wave {
   position: absolute;
   border-radius: 50%;
-  border: 2px  rgba(32, 68, 145, 0.4);
+  border: 2px rgba(32, 68, 145, 0.4);
   width: 400px;
   height: 400px;
   box-shadow: 0 0 20px rgba(85, 100, 133, 0.2);
@@ -101,7 +100,7 @@
 
 .hover-progress-btn:hover {
   min-width: 600px;
-  
+
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
 }
@@ -112,9 +111,59 @@
 }
 
 @keyframes spin-slow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .group:hover .spin-gradient-border {
   animation: spin-slow 1.5s linear infinite;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-4%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(-4%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.80s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-slideOut {
+  animation: slideOut 0.80s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+.hide-scrollbar {
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; 
 }
