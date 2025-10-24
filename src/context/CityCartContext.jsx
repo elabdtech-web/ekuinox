@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const CityCartContext = createContext(undefined);
 
@@ -13,35 +13,59 @@ export const useCityCart = () => {
 export function CityCartProvider({ children }) {
   const [savedCities, setSavedCities] = useState([]);
 
+  // load initial seed data once on mount if not already present
+  useEffect(() => {
+    if (savedCities && savedCities.length) return;
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    (async () => {
+      try {
+        const mod = await import("../data/mycityData.json");
+        const data = Array.isArray(mod.default) ? mod.default : mod;
+        if (!cancelled && Array.isArray(data)) setSavedCities(data);
+      } catch (_err) {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const addCity = (city) => {
-    if (!city || !city.name || !city.lat || !city.lng) {
+    if (!city || !city.name) {
       console.error("Invalid city data:", city);
       return;
     }
 
     setSavedCities((prev) => {
-      // Check if city already exists
-      const exists = prev.some(
-        (c) => c.name === city.name && c.country === city.country
-      );
+      // check by id if present otherwise by name
+      const exists = city.id ? prev.some((c) => c.id === city.id) : prev.some((c) => c.name === city.name);
       if (exists) {
-        console.log("City already added:", city.name);
+        // already present
         return prev;
       }
 
-      // Limit to 10 cities
-      if (prev.length >= 10) {
-        console.log("Maximum cities reached (10)");
+      if (prev.length >= 50) {
+      // arbitrary guard
         return prev;
       }
 
-      console.log("Adding city:", city.name);
       return [...prev, { ...city, addedAt: new Date().toISOString() }];
     });
   };
 
-  const removeCity = (cityName) => {
-    setSavedCities((prev) => prev.filter((c) => c.name !== cityName));
+  // remove by id (preferred) or by name
+  const removeCity = (cityIdOrName) => {
+    setSavedCities((prev) => {
+      if (typeof cityIdOrName === "number") {
+        return prev.filter((c) => c.id !== cityIdOrName);
+      }
+      if (typeof cityIdOrName === "string") {
+        return prev.filter((c) => c.name !== cityIdOrName);
+      }
+      return prev;
+    });
   };
 
   const clearCities = () => {

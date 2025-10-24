@@ -120,10 +120,10 @@ const ProductDetail = () => {
 
               <div>
                 {/* arrows */}
-                <button onClick={prev} aria-label="previous" className="absolute left-[180px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                <button onClick={prev} aria-label="previous" className="absolute left-[160px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                   <IoArrowBack />
                 </button>
-                <button onClick={next} aria-label="next" className="absolute right-[180px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                <button onClick={next} aria-label="next" className="absolute right-[160px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                   <IoArrowForward />
                 </button>
               </div>     

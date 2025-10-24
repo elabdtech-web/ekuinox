@@ -29,27 +29,14 @@ export default function Cart({ open, onClose }) {
       {/* Overlay */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 z-[998] bg-[#293A51]/50 backdrop-blur-sm transition-opacity duration-300 ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className="fixed inset-0 z-[998]  transition-opacity duration-300"
       />
 
-      {/* Slide-in panel: make it a flex column so children can size properly */}
-      {/* <aside
-        className={`fixed top-0 right-0 h-full rounded-3xl w-full  sm:w-[490px] z-[999]
-          bg-[#293A5180] backdrop-blur-xl border-l border-white/10 shadow-2xl
-          transition-transform duration-300 ease-in-out
-          ${open ? "translate-x-0" : "translate-x-full"}
-          flex flex-col
-        `}
-        aria-hidden={!open}
-      > */}
-
+      {/* Slide-in panel */}
       <aside
-        className="fixed top-0 right-0 h-full  rounded-4xl w-full sm:w-[490px] z-[999]
-          bg-[#293A51]/50 backdrop-blur-xl border-l border-white/10 shadow-2xl
+        onClick={(e) => e.stopPropagation()}
+        className="fixed top-0 right-0 h-full rounded-4xl w-full sm:w-[490px] z-[999]
+          bg-[#293A5180] backdrop-blursm border-l border-white/10 shadow-2xl
           animate-slideIn flex flex-col"
       >
         {/* Header */}
@@ -79,7 +66,7 @@ export default function Cart({ open, onClose }) {
             >
               {/* Remove */}
               <button
-                onClick={() => remove(it.id)}
+                onClick={(e) => { e.stopPropagation(); remove(it.id); }}
                 className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow transition"
                 aria-label="Remove item"
               >
@@ -110,7 +97,7 @@ export default function Cart({ open, onClose }) {
                   {/* Qty pill */}
                   <div className="flex items-center gap-2 bg-white/12 border border-white/10 rounded-full h-9 px-2 shrink-0">
                     <button
-                      onClick={() => dec(it.id)}
+                      onClick={(e) => { e.stopPropagation(); dec(it.id); }}
                       className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
                       aria-label="Decrease"
                     >
@@ -120,7 +107,7 @@ export default function Cart({ open, onClose }) {
                       {it.qty}
                     </span>
                     <button
-                      onClick={() => inc(it.id)}
+                      onClick={(e) => { e.stopPropagation(); inc(it.id); }}
                       className="h-7 w-7 rounded-full bg-[#4f83ff] hover:brightness-110 text-white flex items-center justify-center transition"
                       aria-label="Increase"
                     >

@@ -1,6 +1,5 @@
 import React from "react";
 import { PiShoppingBag } from "react-icons/pi";
-import luxuryTimepieces from "../../data/LuxuryProductsData.json";
 import { useProductCart } from "../../context/ProductCartContext";
 
 const parsePrice = (p) => {
@@ -8,6 +7,33 @@ const parsePrice = (p) => {
   const n = String(p).replace(/[^0-9.]/g, "");
   return Number(n) || 0;
 };
+
+const luxuryTimepieces = [
+  {
+    id: 1,
+    name: "Ekuinox Eclipse",
+    price: "$12,999",
+    img: "/Luxury1.png",
+  },
+  {
+    id: 2,
+    name: "Ekuinox Zenith",
+    price: "$14,499",
+    img: "/Luxury2.png",
+  },
+  {
+    id: 3,
+    name: "Ekuinox Aurora",
+    price: "$15,299",
+    img: "/Luxury3.png",
+  },
+  {
+    id: 4,
+    name: "Ekuinox Solstice",
+    price: "$16,799",
+    img: "/Luxury4.png",
+  },
+];
 
 const LuxuryProducts = () => {
   const { addItem } = useProductCart();
@@ -21,7 +47,7 @@ const LuxuryProducts = () => {
         </div>
 
         <div className="grid grid-cols-1  py-18 sm:grid-cols-2 lg:grid-cols-4 gap-8  mt-10">
-          {luxuryTimepieces.luxuryTimepieces.map((item) => {
+          {luxuryTimepieces.map((item) => {
             const priceNum = parsePrice(item.price);
             return (
               <div

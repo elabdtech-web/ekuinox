@@ -2,11 +2,45 @@
   {
     "id": 1,
     "name": "New Zealand",
+    "flag": "🇳🇿",
     "flagImg": "http://purecatamphetamine.github.io/country-flag-icons/3x2/NZ.svg",
-    "timezone": "12.11ut5",
-    "date": "8 october 2025",
-    "weather": "sunny"
-    
+    "time": "12:11",
+    "timezone": "UTC-5",
+    "date": "8 October 2025",
+    "weather": "sunny",
+    "isOnline": true
+  },
+  {
+    "id": 2,
+    "name": "London",
+    "flag": "🇬🇧",
+    "flagImg": "http://purecatamphetamine.github.io/country-flag-icons/3x2/GB.svg",
+    "time": "12:11",
+    "timezone": "UTC+0",
+    "date": "8 October 2025",
+    "weather": "sunny",
+    "isOnline": true
+  },
+  {
+    "id": 3,
+    "name": "New York",
+    "flag": "🇺🇸",
+    "flagImg": "http://purecatamphetamine.github.io/country-flag-icons/3x2/US.svg",
+    "time": "07:11",
+    "timezone": "UTC-4",
+    "date": "8 October 2025",
+    "weather": "cloudy",
+    "isOnline": false
+  },
+  {
+    "id": 4,
+    "name": "Tokyo",
+    "flag": "🇯🇵",
+    "flagImg": "http://purecatamphetamine.github.io/country-flag-icons/3x2/JP.svg",
+    "time": "21:11",
+    "timezone": "UTC+9",
+    "date": "8 October 2025",
+    "weather": "clear",
+    "isOnline": true
   }
-  
 ]

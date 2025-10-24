@@ -2,28 +2,28 @@ import React from "react";
 
 const timeline = [
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2022",
+		desc: "Ekuinox is founded by a group of passionate innovators who believe in the power of technology to connect and inspire. Our mission is set: to create a platform where creativity, collaboration, and progress thrive. The groundwork is laid for a community-driven ecosystem.",
 	},
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2023",
+		desc: "We launch our first platform prototype, inviting early adopters to join and shape the future of Ekuinox. Through feedback and collaboration, we refine our vision and expand our features, building a strong foundation for growth and innovation.",
 	},
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2024",
+		desc: "With the support of key partners and a rapidly growing team, Ekuinox accelerates development. We introduce new tools and resources, making it easier for creators and thinkers to connect, share ideas, and bring their projects to life.",
 	},
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2025",
+		desc: "Our flagship product officially launches, empowering users worldwide to collaborate seamlessly and turn their ideas into reality. Ekuinox gains recognition for its user-centric approach and commitment to fostering a vibrant, inclusive community.",
 	},
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2026",
+		desc: "Ekuinox reaches significant growth milestones, with a thriving user base and expanding global presence. We host our first international summit, bringing together thought leaders, creators, and innovators to share insights and celebrate achievements.",
 	},
 	{
-		year: "1995",
-		desc: "Borem ipsum dolor sit amet, consectetur adipisicing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+		year: "2027",
+		desc: "Looking ahead, Ekuinox continues to evolve by introducing advanced features, launching new initiatives, and deepening our commitment to social impact. Our journey is just beginning, and we remain dedicated to shaping a brighter, more connected future for all.",
 	},
 ];
 
@@ -45,9 +45,9 @@ export default function StoryTimelineSection() {
 					<div className="sticky top-1/3 w-full bg-[#6ea9ff] h-80 z-50 rounded-full" />
 				</div>
 				{/* Left column */}
-				<div className="flex flex-col gap-6 md:gap-52">
+				<div className="flex flex-col gap-6 md:gap-56">
 					{timeline.slice(0, 3).map((item, idx) => (
-						<div key={idx} className="overflow-hidden mr:mr-0 md:mr-6 p-0.5 rounded-2xl shadow-sm">
+						<div key={idx} className="overflow-hidden mr:mr-0 md:mr-6 p-0.5  rounded-2xl shadow-sm">
 							<div className="relative group">
 
 								<div
@@ -65,7 +65,7 @@ export default function StoryTimelineSection() {
 					))}
 				</div>
 				{/* Right column */}
-				<div className="flex flex-col mt-0 md:mt-52 gap-6 md:gap-52 ">
+				<div className="flex flex-col mt-0 md:mt-60 gap-6 md:gap-56">
 					{timeline.slice(3).map((item, idx) => (
 						<div key={idx} className="overflow-hidden p-0.5 ml-0 md:ml-6 rounded-[16px]">
 							<div className="relative group">

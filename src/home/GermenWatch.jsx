@@ -16,10 +16,10 @@ export default function GermenWatch() {
       <div className="w-full bg-gradient-to-t from-[#1D3253]/40 to-[#1728433D]/30 backdrop-blur-sm px-4 md:px-0 py-6 pb-12 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 min-w-0 flex-wrap">
           <div className="text-center md:text-left space-y-2.5 flex-1 min-w-0">
-            <h3 className="text-white text-3xl sm:text-5xl md:text-6xl font-medium">
+            <h3 className="text-white text-3xl sm:text-4xl md:text-5xl font-medium">
               Garmin Fenix 7 Pro
             </h3>
-            <p className="mt-1 text-sm sm:text-lg md:text-xl text-white/60 max-w-xs sm:max-w-md md:max-w-[460px] mx-auto md:mx-0">
+            <p className="mt-1 text-sm sm:text-base md:text-lg text-white/60 max-w-xs sm:max-w-md md:max-w-[460px] mx-auto md:mx-0">
               Seepohre Solar Edition Titanium Carbon Gray DLC · black silicone
               strap 47 mm watch
             </p>

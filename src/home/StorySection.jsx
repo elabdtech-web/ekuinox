@@ -13,7 +13,7 @@ export default function StorySection() {
       <div className=" px-6 lg:px-0 py-16 ">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-7xl mx-auto overflow-hidden">
           {/* Left text column */}
-          <div className="relative lg:col-span-6 text-2xl">
+          <div className="relative lg:col-span-6 text-xl">
             <div className="absolute bg-white/50 top-0 w-[560px] h-[140px]  overflow-hidden -z-10" />
 
             <h2 className="text-4xl lg:text-5xl font-medium text-white leading-tight">
@@ -101,7 +101,7 @@ export default function StorySection() {
                 Own Your Moment in Time
               </h3>
 
-              <p className="mt-3 text-slate-300 max-w-[500px] ">
+              <p className="mt-3 text-slate-300 text-base max-w-[500px] ">
                 Discover handcrafted watches inspired by the rhythm of the Earth.
                 Precision, elegance, and timeless design await.
               </p>

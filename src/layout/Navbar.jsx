@@ -296,7 +296,7 @@ import Setting from "../common/Setting";
 import MyCities from "../common/MyCities";
 import { useProductCart } from "../context/ProductCartContext";
 import { RiShoppingBagLine } from "react-icons/ri";
-import citiesData from "../data/mycityData.json"; // import flags from JSON
+// (cities data used by MyCities component)
 
 const Navbar = () => {
   const [isSticky, setIsSticky] = useState(false);
@@ -306,12 +306,14 @@ const Navbar = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isCitiesOpen, setIsCitiesOpen] = useState(false);
   const [isCitiesVisible, setIsCitiesVisible] = useState(false);
+  const [citiesBox, setCitiesBox] = useState(null);
 
   const { items } = useProductCart();
   const cartRef = useRef(null);
   const settingsRef = useRef(null);
   const citiesRef = useRef(null);
   const citiesPanelRef = useRef(null);
+  // const citiesPanelRef = useRef(null);
 
   // Sticky navbar behavior
   useEffect(() => {
@@ -341,23 +343,19 @@ const Navbar = () => {
         isCartOpen &&
         cartRef.current &&
         !cartRef.current.contains(event.target)
-      ) {
-        setIsCartOpen(false);
-      }
-      if (
-        isSettingsOpen &&
-        settingsRef.current &&
-        !settingsRef.current.contains(event.target)
-      ) {
-        setIsSettingsOpen(false);
-      }
-      if (
-        isCitiesOpen &&
-        citiesRef.current &&
-        !citiesRef.current.contains(event.target)
-      ) {
-        setIsCitiesOpen(false);
-      }
+      )
+        if (
+          isSettingsOpen &&
+          settingsRef.current &&
+          !settingsRef.current.contains(event.target)
+        )
+          if (
+            isCitiesOpen &&
+            citiesRef.current &&
+            !citiesRef.current.contains(event.target)
+          ) {
+            setIsCitiesOpen(false);
+          }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -379,6 +377,34 @@ const Navbar = () => {
       const timeout = setTimeout(() => setIsCitiesVisible(false), 300);
       return () => clearTimeout(timeout);
     }
+  }, [isCitiesOpen]);
+
+  // compute rect of the button and keep panel sized/aligned to it
+  const updateCitiesBox = () => {
+    const btn = citiesRef.current?.querySelector("button");
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    setCitiesBox({
+      top: Math.round(r.bottom + window.scrollY + 8), // place below the button with small gap
+      right: Math.round(window.innerWidth - r.right),
+      width: Math.round(r.width),
+    });
+  };
+
+  // measure when opening + on resize/scroll
+  useEffect(() => {
+    if (isCitiesOpen) {
+      // show then measure on next frame
+      requestAnimationFrame(updateCitiesBox);
+      const onResize = () => updateCitiesBox();
+      window.addEventListener("resize", onResize);
+      window.addEventListener("scroll", onResize, { passive: true });
+      return () => {
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("scroll", onResize);
+      };
+    }
+    return undefined;
   }, [isCitiesOpen]);
 
   // Sticky navbar styles
@@ -440,9 +466,8 @@ const Navbar = () => {
               type="button"
               aria-label="settings"
               onClick={() => setIsSettingsOpen((v) => !v)}
-              className={`h-10 w-12 rounded-xl border border-white/10 backdrop-blur-md shadow-lg shadow-black/20 flex items-center justify-center transition ${
-                isSettingsOpen ? "" : "bg-[#182434] hover:bg-white/10"
-              }`}
+              className={`h-10 w-12 rounded-xl border border-white/10 backdrop-blur-md shadow-lg shadow-black/20 flex items-center justify-center transition ${isSettingsOpen ? "" : "bg-[#293A5180]  hover:bg-white/10"
+                }`}
             >
               <FiSettings
                 size={18}
@@ -452,11 +477,10 @@ const Navbar = () => {
 
             {isSettingsVisible && (
               <div
-                className={`absolute -left-2 top-14 z-[60] transition-all duration-300 ${
-                  isSettingsOpen
+                className={`absolute -left-2 top-14 z-[60] transition-all duration-300 ${isSettingsOpen
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                  }`}
                 style={{ transitionProperty: "opacity, transform" }}
               >
                 <Setting />
@@ -468,10 +492,10 @@ const Navbar = () => {
           <div className="relative inline-block" ref={citiesRef}>
             <button
               onClick={() => setIsCitiesOpen((v) => !v)}
-              className="flex items-center h-10 px-4 min-w-[290px] rounded-xl
-             bg-[#182434] border border-white/10 backdrop-blur-md shadow-inner transition"
+              className={`flex items-center h-12 px-4 min-w-sm rounded-t-xl
+             bg-[#293A5180]  border border-white/10 backdrop-blur-md shadow-inner transition ${isCitiesOpen ? "rounded-b-none" : "rounded-b-xl"}`}
             >
-              <span className="text-[12px] md:text-sm tracking-wide text-white/90 flex-1 text-left">
+              <span className="text-sm md:text-lg tracking-wide text-white/90 flex-1 text-left">
                 MY CITIES
               </span>
 
@@ -493,33 +517,30 @@ const Navbar = () => {
               <>
                 {/* Backdrop */}
                 <div
-                  className={`fixed inset-0 z-[58] transition-opacity duration-300 ${
-                    isCitiesOpen
+                  className={`fixed inset-0 z-[58] transition-opacity duration-300 ${isCitiesOpen
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none"
-                  }`}
+                    }`}
                   onClick={() => setIsCitiesOpen(false)}
                 />
 
-                {/* Expanded content panel */}
+                {/* Expanded content panel (position relative to button) */}
                 <div
-                  className={`absolute top-0 left-0 z-[60] w-[290px] bg-[#182434] border border-white/10 
-                             backdrop-blur-md shadow-inner rounded-xl overflow-hidden
-                             transition-all duration-500 ease-out transform-gpu
-                             ${
-                               isCitiesOpen
-                                 ? "h-[320px] opacity-100 scale-100 pointer-events-auto"
-                                 : "h-10 opacity-0 scale-95 pointer-events-none"
-                             }`}
+                  ref={citiesPanelRef}
+                  className={`z-[60] transition-all duration-300 ease-out ${isCitiesOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                  style={
+                    citiesBox
+                      ? {
+                        top: citiesBox.top + "px",
+                        right: citiesBox.right + "px",
+                        width: Math.max(290, citiesBox.width) + "px",
+                      }
+                      : undefined
+                  }
                 >
                   {/* Header with transformed icons */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center h-10 px-4 gap-2  w-full">
-                      <p className="text-[12px] md:text-sm  text-white/90 ">
-                        MY CITIES
-                      </p>
-                      <RiShoppingBagLine size={18} />
-                    </div>
+                  {/* <div className="flex items-center justify-between">
+
                     <div className="ml-auto h-8 w-10 flex items-center justify-center">
                       <div className="grid grid-cols-3 gap-[3px]">
                         {Array.from({ length: 6 }).map((_, i) => {
@@ -539,57 +560,11 @@ const Navbar = () => {
                         })}
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
-                  {/* Expanded Content with staggered animation */}
-                  <div
-                    className={`transition-all duration-400 delay-100 ease-out overflow-hidden ${
-                      isCitiesOpen
-                        ? "max-h-[270px] opacity-100"
-                        : "max-h-0 opacity-0"
-                    }`}
-                  >
-                    {/* Cities Section Header */}
-                    <div className="px-4 py-3 border-t border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-white/70 uppercase tracking-wide">
-                          MY CITIES
-                        </span>
-                        <button className="flex text-white px-8 py-3 rounded-full items-center gap-1 text-sm bg-[#5695F5]  transition">
-                          <span className="text-xs">+</span>
-                          Add New
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Cities List with staggered entrance */}
-                    <div className="px-4 pb-4 space-y-3">
-                      {citiesData.map((city) => (
-                        <div
-                          key={city.id}
-                          className={`flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10
-                                      transition-all duration-300 delay-200 ${
-                                        isCitiesOpen
-                                          ? "opacity-100 translate-y-0"
-                                          : "opacity-0 translate-y-2"
-                                      }`}
-                        >
-                          {/* Flag FIRST (from JSON) */}
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={city.flagImg}
-                              alt={`${city.name} flag`}
-                              className="w-8 h-6  object-cover"
-                              loading="lazy"
-                            />
-                            {/* You can add more city fields here later */}
-                            <span className="text-white/90 font-medium">
-                              {city.name}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  {/* Expanded Content: render MyCities component */}
+                  <div className={`transition-all duration-400 delay-100 ease-out overflow-hidden ${isCitiesOpen ? "opacity-100" : "max-h-0 opacity-0"}`}>
+                    <MyCities />
                   </div>
                 </div>
               </>

@@ -2,11 +2,11 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gradient-to-b from-[#0C1220] to-[#5695F5]/50 text-white py-10">
+    <footer className="w-full bg-gradient-to-b from-[#0C1220]  to-[#192d49] text-white py-10">
       {/* content width constrained to Figma 1440px */}
       <div className="w-full max-w-7xl mx-auto  mb-0 h-[350px] overflow-hidden flex flex-col justify-between">
         {/* top content */}
-        <div className="container flex mt-12 flex-col md:flex-row md:justify-between md:items-start gap-10 pt-10">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-16 pt-4">
           {/* Left: Logo and tagline */}
           <div className="w-1/4">
             <div className="text-5xl font-medium text-[#5695F5]">EKUINOX</div>
@@ -16,7 +16,7 @@ export default function Footer() {
           </div>
 
           {/* Columns */}
-          <div className="flex flex-1 justify-start gap-16 w-3/4">
+          <div className="flex flex-1 justify-start gap-24 w-3/4">
             <div>
               <div className="text-base tracking-wide  text-white/60 mb-2">
                 GENERAL

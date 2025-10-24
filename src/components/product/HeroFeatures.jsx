@@ -20,8 +20,9 @@ const FEATURES = heroFeaturesData.features.map(f => ({
 
 const HeroFeatures = () => {
   return (
-    <section className="w-full relative min-h-screen bg-[#070B13] text-white">
-      {/* large hero image with overlay */}
+    <section className="w-full relative  bg-[#070B13] text-white">
+      <div className="relative w-full  rounded-xl overflow-hidden mb-12" >
+        {/* large hero image with overlay */}
         <img
           src={heroFeaturesData.heroImage}
           alt="hero"
@@ -51,7 +52,9 @@ const HeroFeatures = () => {
             </div>
           </div>
         </div>
-      {/* <div className="h-44 bg-[#070B13]" /> */}
+      </div>
+      
+      <div className="md:h-24 bg-[#0C1220]" />
 
     </section>
   );

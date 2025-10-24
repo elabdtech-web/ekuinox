@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import Globe from "globe.gl";
 import * as THREE from "three";
 import { DateTime } from "luxon";
-import tzlookup from "tz-lookup";
 import citiesData from "../data/citiesData.json";
 import { useCityCart } from "../context/CityCartContext";
+import tz_lookup from "tz-lookup";
 
 const EXAMPLE_CITIES = citiesData.cities;
 
@@ -35,7 +35,7 @@ export default function GlobeEarth({
   const containerRef = useRef();
   const globeRef = useRef();
   const [cities] = useState(EXAMPLE_CITIES.slice(0, 10));
-  const [activeCity, setActiveCity] = useState(null);
+  // const [activeCity, setActiveCity] = useState(null);
   const [hoverCity, setHoverCity] = useState(null);
   const [nightMode, setNightMode] = useState(false);
   const [sunPoint, setSunPoint] = useState(() => computeSubsolarPointUTC());
@@ -44,27 +44,26 @@ export default function GlobeEarth({
   const { addCity } = useCityCart();
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const globe = Globe()
-      .globeImageUrl(
-        "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-      )
-      .bumpImageUrl(
-        "https://unpkg.com/three-globe/example/img/earth-topology.png"
-      )
-      .backgroundImageUrl(
-        "https://unpkg.com/three-globe/example/img/night-sky.png"
-      )
-      .showAtmosphere(false)
-      .pointsData(cities)
-      .pointLat((d) => d.lat)
-      .pointLng((d) => d.lng)
-      .pointAltitude(0.001)
-      .pointRadius(1)
-      .pointColor(() => "#10aaff")
-      .onPointClick((d) => setActiveCity(d))
-      .onPointHover((d) => setHoverCity(d || null));
+    const globe = Globe();
+    globe.globeImageUrl(
+      "https://unpkg.com/three-globe/example/img/earth-day.jpg"
+    );
+    globe.bumpImageUrl(
+      "https://unpkg.com/three-globe/example/img/earth-topology.png"
+    );
+    globe.backgroundImageUrl(
+      "https://unpkg.com/three-globe/example/img/night-sky.png"
+    );
+    globe.showAtmosphere(false);
+    globe.pointsData(cities);
+    globe.pointLat((d) => d.lat);
+    globe.pointLng((d) => d.lng);
+    globe.pointAltitude(0.001);
+    globe.pointRadius(1);
+    globe.pointColor(() => "#10aaff");
+    // globe.onPointClick((d) => setActiveCity(d));
+    globe.onPointHover((d) => setHoverCity(d || null));
+    globe.pointOfView({ altitude: 1.4 }); // Changed from cameraPosition to pointOfView
 
     globe(containerRef.current);
     globeRef.current = globe;
@@ -72,8 +71,8 @@ export default function GlobeEarth({
     const controls = globe.controls();
     if (controls) {
       controls.enableZoom = false;
-      controls.autoRotate = isPlaying;
-      controls.autoRotateSpeed = isPlaying ? 0.5 : 0;
+      controls.autoRotate = false; // Start with autoRotate off
+      controls.autoRotateSpeed = 0.5;
     }
 
     return () => {
@@ -81,7 +80,7 @@ export default function GlobeEarth({
         containerRef.current.removeChild(containerRef.current.firstChild);
       }
     };
-  }, [cities, isPlaying]);
+  }, [cities]); // Removed isPlaying from dependencies to prevent recreation
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -221,6 +220,84 @@ export default function GlobeEarth({
           className="w-full max-w-xs sm:max-w-sm h-auto object-contain"
         />
       </div>
+
+      {/* Hover preview card */}
+      {hoverCity && (() => {
+        const tz = (function (lat, lng) {
+          try {
+            return tz_lookup(lat, lng);
+          } catch {
+            return 'UTC';
+          }
+        })(hoverCity.lat, hoverCity.lng);
+
+        const dt = manualTime ? manualTime.setZone(tz) : DateTime.now().setZone(tz);
+        const offsetHours = dt.offset / 60;
+        const offsetLabel = `UTC${offsetHours >= 0 ? '+' + offsetHours : offsetHours}`;
+        const dateLabel = dt.toFormat('d LLLL yyyy');
+        const flagUrl = hoverCity.countryCode ? `https://flagcdn.com/w80/${hoverCity.countryCode.toLowerCase()}.png` : null;
+
+        // Position card near mouse with corrected offset
+        const offsetX = -500; // Small offset
+        const offsetY = -120;
+        const cardWidth = 320;
+        const cardHeight = 160;
+        const margin = 8;
+        let clampedX = mousePos.x + offsetX;
+        let clampedY = mousePos.y + offsetY;
+
+        // Adjust position if card would go off-screen
+        if (clampedX + cardWidth > window.innerWidth - margin) {
+          clampedX = mousePos.x - cardWidth - offsetX; // Place to left
+        }
+        if (clampedY + cardHeight > window.innerHeight - margin) {
+          clampedY = mousePos.y - cardHeight - offsetY; // Place above
+        }
+        clampedX = Math.max(margin, Math.min(clampedX, window.innerWidth - cardWidth - margin));
+        clampedY = Math.max(margin, Math.min(clampedY, window.innerHeight - cardHeight - margin));
+
+        return (
+          <div
+            style={{
+              left: `${clampedX}px`,
+              top: `${clampedY}px`,
+              position: 'absolute',
+              transition: 'left 0.1s ease, top 0.1s ease'
+            }}
+            className="w-80 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner flex gap-3 items-start z-30 pointer-events-none"
+          >
+            <div className="flex-shrink-0">
+              {flagUrl ? (
+                <img src={flagUrl} alt={`${hoverCity.country} flag`} className="w-10 h-7 rounded-sm object-cover" />
+              ) : (
+                <div className="w-10 h-7 bg-white/10 rounded-sm" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">{hoverCity.name}</div>
+                <div className="text-yellow-400 text-lg">☀️</div>
+              </div>
+              <div className="mt-2 text-3xl font-semibold text-sky-400">
+                {dt.toFormat('HH:mm')} <span className="text-sm text-white/60">{offsetLabel}</span>
+              </div>
+              <div className="text-xs text-white/60 mt-1">{dateLabel}</div>
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <div className="w-4 h-4 bg-white/10 rounded-full" />
+                  <div>22 C Sunny</div>
+                </div>
+                <button
+                  className="bg-sky-500 text-white px-3 py-1 rounded-full pointer-events-auto hover:bg-sky-600 transition"
+                  onClick={() => addCity(hoverCity)}
+                >
+                  + Add
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

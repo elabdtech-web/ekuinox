@@ -8,6 +8,7 @@ export default function HeroSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rotationProgress, setRotationProgress] = useState(0); // 0-100%
   const [timeOfDay, setTimeOfDay] = useState(50); // 0=midnight, 50=noon, 100=midnight
+  const [showSection, setShowSection] = useState(false);
 
   // Update rotation progress when playing
   React.useEffect(() => {
@@ -34,22 +35,10 @@ export default function HeroSection() {
   return (
     <section className="w-full flex flex-col items-center justify-center  relative">
       {/* full-bleed visual so the rings can extend outside the container */}
-      <div className="hero-visual w-full flex flex-col items-center justify-center relative">
-        {/* SVG starfield background (absolute, behind globe) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 flex items-center justify-center">
-          <img
-            src="/stars.svg"
-            alt="starfield background"
-            className="w-[180vw] max-w-none opacity-60 dark:opacity-40 transform-gpu scale-[1.02]"
-            style={{
-              filter: "blur(0.6px)",
-              mixBlendMode: "screen",
-            }}
-          />
-        </div>
+      <div className=" w-full flex flex-col items-center justify-center relative">
         {/* Animated waves behind the globe */}
         <div
-          className="hero-waves absolute w-full h-full top-0 left-0"
+          className="hero-waves absolute z-50 w-full h-full top-0 left-0"
           aria-hidden
         >
           <div className="wave" />
@@ -59,7 +48,7 @@ export default function HeroSection() {
         </div>
 
         {/* Globe component (above waves) */}
-        <div className="hero-image w-full mt-8 md:mt-16 h-[50vh] md:h-[80vh] flex items-center justify-center">
+        <div className=" w-full flex items-center overflow-hidden justify-center">
           {/* pass hover state and a target view (lat,lng,alt) so globe moves on hover */}
           <GlobeEarth
             hoverActive={hoverProgress}
@@ -70,95 +59,74 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Responsive hover-progress button section */}
-      <div className="my-8 md:my-12 px-2 w-full max-w-lg mx-auto absolute -bottom-12 z-50 text-center">
-        <div>
-          <div
-            className="hover-progress-btn px-4 md:px-6 py-3 text-white hover:overflow-hidden rounded-full transition-all duration-700 hover:px-12 hover:py-4 w-36 mx-auto relative group border border-white/20 hover:border-white/40"
-            onMouseEnter={() => setHoverProgress(true)}
-            onMouseLeave={() => setHoverProgress(false)}
-            onFocus={() => setHoverProgress(true)}
-            onBlur={() => setHoverProgress(false)}
+      {/* Responsive hover-progress control (expanded style) */}
+      <div className="my-8 md:my-12 px-2 w-full max-w-4xl mx-auto absolute bottom-6 z-50 text-center">
+        {/* Show the button only when section is hidden */}
+        {!showSection && (
+          <span
+            className="mb-4 inline-block text-base text-white/60 py-3 px-6 font-medium rounded-full bg-[#070B13] border cursor-pointer"
+            onMouseEnter={() => setShowSection(true)}
+            onFocus={() => setShowSection(true)}
+            tabIndex={0}
           >
-            <span className="group-hover:opacity-0 transition-opacity duration-500 delay-100">
-              Hover here
-            </span>
-            <div className="progress-content opacity-0 group-hover:opacity-100 absolute inset-0 flex items-center justify-between px-2 md:px-4 bg-gray-900 rounded-full transition-opacity duration-500 delay-300">
-              <span className="text-xs md:text-sm font-medium bg-gray-600 rounded-full py-1 px-2">
-                1 Year ago
-              </span>
-              <button
-                type="button"
-                className="bg-white ml-2 rounded-full cursor-pointer text-black inline p-1 hover:bg-gray-200 transition-colors"
-                onClick={() => setIsPlaying(!isPlaying)}
-              >
-                {isPlaying ? (
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+            Hover Here
+          </span>
+        )}
+        {/* Show the section only when showSection is true */}
+        {showSection && (
+          <div
+            className={`w-full transition-all duration-700 ease-in-out ${showSection ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
+              } overflow-hidden`}
+            onMouseLeave={() => setShowSection(false)}
+          >
+            <div className="w-full relative group">
+              <div className="rounded-full bg-[#0b1320]/80 border border-white/10 px-4 py-3 flex items-center gap-4 shadow-inner">
+                {/* Left: play + label */}
+                <div className="flex items-center gap-3 min-w-[160px]">
+                  <button
+                    type="button"
+                    aria-label="play"
+                    onClick={() => setIsPlaying((v) => !v)}
+                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
+                    {isPlaying ? (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      <BiSolidRightArrow />
+                    )}
+                  </button>
+                  <div className="text-sm text-white/60">6 mon ago</div>
+                </div>
+                {/* Center: dotted track */}
+                <div className="flex-1 px-4">
+                  <div className="relative h-4  overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,#0b1320,#0b1320)]" />
+                    <div className="absolute inset-0 bg-[url('/dotted-line.png')] bg-repeat-x opacity-30" />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#5695F5] shadow-md z-10 transition-all ease-linear"
+                      style={{ left: `calc(${rotationProgress}% - 12px)` }}
                     />
-                  </svg>
-                ) : (
-                  <BiSolidRightArrow />
-                )}
-              </button>
-              <div
-                className="flex-1 mx-2 md:mx-4 h-6 relative flex items-center px-2 md:px-4 overflow-hidden rounded-full"
-                style={{
-                  backgroundImage: "url('/line.png')",
-                  backgroundRepeat: "repeat-x",
-                  backgroundPosition: "center",
-                  backgroundSize: "",
-                }}
-              >
-                {/* Progress indicator with day/night cycle */}
-                <div
-                  className="absolute top-0 left-0 h-full transition-all duration-100 ease-linear"
-                  style={{
-                    width: `${rotationProgress}%`,
-                    background: `linear-gradient(90deg, 
-                      rgba(30, 58, 138, 0.6) 0%,
-                      rgba(59, 130, 246, 0.6) 25%,
-                      rgba(251, 191, 36, 0.8) 50%,
-                      rgba(239, 68, 68, 0.6) 75%,
-                      rgba(30, 58, 138, 0.6) 100%
-                    )`,
-                  }}
-                />
-
-                {/* Moving sun/moon indicator */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 transition-all duration-100 ease-linear z-10"
-                  style={{
-                    left: `${rotationProgress}%`,
-                    transform: `translateX(-50%) translateY(-50%)`,
-                  }}
-                >
-                  {timeOfDay < 25 || timeOfDay > 75 ? (
-                    // Night: Moon
-                    <div className="w-4 h-4 rounded-full bg-blue-800 shadow-lg flex items-center justify-center text-xs">
-                    
-                    </div>
-                  ) : timeOfDay >= 25 && timeOfDay <= 75 ? (
-                    // Day: Sun
-                    <div className="w-4 h-4 rounded-full bg-blue-400 shadow-lg flex items-center justify-center text-xs animate-pulse">
-                      ☀️
-                    </div>
-                  ) : null}
+                  </div>
+                </div>
+                {/* Right: action pills */}
+                <div className="flex items-center gap-3">
+                  <div className="text-xs md:text-sm font-medium bg-[#111827] text-white/80 rounded-full py-2 px-3">
+                    6 mon Ahead
+                  </div>
+                  <button className="text-xs md:text-sm font-medium bg-[#5695F5] text-white rounded-full py-2 px-4">
+                    Return Now
+                  </button>
                 </div>
               </div>
-              <span className="text-xs md:text-sm font-medium bg-gray-600 rounded-full py-1 px-2">
-                1 Year ahead
-              </span>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

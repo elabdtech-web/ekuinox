@@ -10,7 +10,7 @@ export default function StoryStartedSection() {
             We’re just getting <span className="text-[#5695F5]">started</span>
           </h2>
           <p className="text-lg md:text-xl text-white/60 leading-relaxed">
-            Korem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim, metus nec fringilla accumsan, risus sem sollicitudin lacus, ut interdum tellus elit sed risus. Maecenas eget condimentum velit, sit amet feugiat lectus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent auctor purus luctus enim egestas, ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in elementum tellus.
+            At Ekuinox, our journey is only beginning. We are committed to pushing boundaries, exploring new ideas, and building a future where innovation and collaboration thrive. With every milestone, we grow stronger—expanding our reach, empowering our community, and embracing challenges as opportunities. The road ahead is full of possibilities, and we invite you to join us as we shape what comes next, together.
           </p>
         </div>
         {/* Right: Dot world map */}
