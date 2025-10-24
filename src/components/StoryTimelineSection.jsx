@@ -55,6 +55,7 @@ export default function StoryTimelineSection() {
 								>
 									<div className="w-full h-full rounded-2xl  bg-gradient-to-b from-[#6ea9ff] to-[#232b3b]" />
 								</div>
+								
 								{/* Card content */}
 								<div className="relative z-10 rounded-2xl bg-[#101828] py-6 px-10">
 									<div className="text-4xl font-semibold text-[#6ea9ff] mb-2">{item.year}</div>
