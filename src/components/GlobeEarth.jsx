@@ -238,8 +238,8 @@ export default function GlobeEarth({
         const flagUrl = hoverCity.countryCode ? `https://flagcdn.com/w80/${hoverCity.countryCode.toLowerCase()}.png` : null;
 
         // Position card near mouse with corrected offset
-        const offsetX = -500; // Small offset
-        const offsetY = -120;
+        const offsetX = -120; // Small offset
+        const offsetY = -180;
         const cardWidth = 320;
         const cardHeight = 160;
         const margin = 8;
@@ -264,11 +264,11 @@ export default function GlobeEarth({
               position: 'absolute',
               transition: 'left 0.1s ease, top 0.1s ease'
             }}
-            className="w-80 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner flex gap-3 items-start z-30 pointer-events-none"
+            className="w-64 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner flex gap-3 items-start z-30 pointer-events-none"
           >
             <div className="flex-shrink-0">
               {flagUrl ? (
-                <img src={flagUrl} alt={`${hoverCity.country} flag`} className="w-10 h-7 rounded-sm object-cover" />
+                <img src={flagUrl} alt={`${hoverCity.country} flag`} className="w-7 h-5 rounded-sm object-cover" />
               ) : (
                 <div className="w-10 h-7 bg-white/10 rounded-sm" />
               )}
@@ -278,7 +278,7 @@ export default function GlobeEarth({
                 <div className="text-sm font-medium">{hoverCity.name}</div>
                 <div className="text-yellow-400 text-lg">☀️</div>
               </div>
-              <div className="mt-2 text-3xl font-semibold text-sky-400">
+              <div className="mt-2 text-xl font-semibold text-sky-400">
                 {dt.toFormat('HH:mm')} <span className="text-sm text-white/60">{offsetLabel}</span>
               </div>
               <div className="text-xs text-white/60 mt-1">{dateLabel}</div>

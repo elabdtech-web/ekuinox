@@ -499,17 +499,24 @@ const Navbar = () => {
                 MY CITIES
               </span>
 
-              {/* Custom 6-dot grid */}
-              <div className="ml-auto h-8 w-10 flex items-center justify-center">
-                <div className="grid grid-cols-3 gap-[3px]">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-[5px] h-[5px] bg-white/70 rounded-full"
-                    />
-                  ))}
+              {isCitiesOpen ? (
+
+                <svg width="28" height="18" viewBox="0 0 28 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle opacity="0.1" cx="2" cy="2" r="2" fill="white" />
+                  <circle cx="2" cy="16" r="2" fill="white" />
+                  <circle cx="14" cy="2" r="2" fill="white" />
+                  <circle opacity="0.1" cx="14" cy="16" r="2" fill="white" />
+                  <circle opacity="0.1" cx="26" cy="2" r="2" fill="white" />
+                  <circle cx="26" cy="16" r="2" fill="white" />
+                </svg>
+
+              ) : (
+                <div className="ml-auto h-8 w-10 flex items-center justify-center">
+                  <PiDotsSixLight size={40} className="text-white/70" />
                 </div>
-              </div>
+              )}
+              {/* Custom 6-dot grid */}
+              
             </button>
 
             {/* Expanded overlay panel */}

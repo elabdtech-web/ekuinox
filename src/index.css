@@ -167,3 +167,29 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none; 
 }
+
+/* Custom 1px width scrollbar for all scrollable elements */
+::-webkit-scrollbar {
+  width: 0.5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6ea9ff; /* or any color you prefer */
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6ea9ff transparent;
+}

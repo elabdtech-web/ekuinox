@@ -113,6 +113,8 @@ export default function StorySection() {
           </div>
         </div>
       </div>
+      <div className="md:h-24 bg-[#0C1220]" />
+
     </section>
   );
 }

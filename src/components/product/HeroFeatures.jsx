@@ -53,8 +53,7 @@ const HeroFeatures = () => {
           </div>
         </div>
       </div>
-      
-      <div className="md:h-24 bg-[#0C1220]" />
+      <div className="md:h-10 bg-[#0C1220]" />
 
     </section>
   );
