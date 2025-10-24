@@ -19,7 +19,7 @@ export default function MyCities() {
   }, [savedCities, query]);
 
   return (
-    <div className="absolute min-w-sm rounded-b-2xl bg-[#293A5180] max-h-[70vh] overflow-y-auto backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden">
+    <div className="absolute min-w-sm rounded-b-2xl bg-[#293A5180] max-h-[90vh] overflow-y-auto backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden">
 
       {/* Header */}
       <div className="p-4 border-b border-white/5">

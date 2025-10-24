@@ -3,6 +3,7 @@ import React from "react";
 export default function GermenWatch() {
   return (
     <section className="relative w-full md:min-h-screen  flex flex-col items-center justify-center bg-gradient-to-b from-[#080C14] to-[#080C14]">
+      <div classNamae="md:h-28 bg-[#080C14]"></div>
       {/* centered watch image */}
       <div className="max-w-7xl w-full flex justify-center">
         <img

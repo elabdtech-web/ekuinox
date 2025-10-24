@@ -63,7 +63,14 @@ export default function GlobeEarth({
     globe.pointColor(() => "#10aaff");
     // globe.onPointClick((d) => setActiveCity(d));
     globe.onPointHover((d) => setHoverCity(d || null));
-    globe.pointOfView({ altitude: 1.4 }); // Changed from cameraPosition to pointOfView
+    
+
+    // globe.pointOfView({ lat: 0, lng: 0, altitude: 0.7 }, 400);
+    const screenWidth = window.innerWidth;
+    const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.8;
+
+    globe.pointOfView({ lat: 0, lng: 0, altitude }, 800);
+  
 
     globe(containerRef.current);
     globeRef.current = globe;
@@ -210,94 +217,107 @@ export default function GlobeEarth({
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
-      <div className="hidden md:block">
-        <div ref={containerRef} />
+      <div className=" ">
+        <div ref={containerRef} className=" " />
       </div>
-      <div className="md:hidden w-full flex justify-center items-center">
-        <img
-          src="/hero.png"
-          alt="earth"
-          className="w-full max-w-xs sm:max-w-sm h-auto object-contain"
-        />
-      </div>
+
+    
 
       {/* Hover preview card */}
-      {hoverCity && (() => {
-        const tz = (function (lat, lng) {
-          try {
-            return tz_lookup(lat, lng);
-          } catch {
-            return 'UTC';
+      {hoverCity &&
+        (() => {
+          const tz = (function (lat, lng) {
+            try {
+              return tz_lookup(lat, lng);
+            } catch {
+              return "UTC";
+            }
+          })(hoverCity.lat, hoverCity.lng);
+
+          const dt = manualTime
+            ? manualTime.setZone(tz)
+            : DateTime.now().setZone(tz);
+          const offsetHours = dt.offset / 60;
+          const offsetLabel = `UTC${
+            offsetHours >= 0 ? "+" + offsetHours : offsetHours
+          }`;
+          const dateLabel = dt.toFormat("d LLLL yyyy");
+          const flagUrl = hoverCity.countryCode
+            ? `https://flagcdn.com/w80/${hoverCity.countryCode.toLowerCase()}.png`
+            : null;
+
+          // Position card near mouse with corrected offset
+          const offsetX = -120; // Small offset
+          const offsetY = -180;
+          const cardWidth = 320;
+          const cardHeight = 160;
+          const margin = 8;
+          let clampedX = mousePos.x + offsetX;
+          let clampedY = mousePos.y + offsetY;
+
+          // Adjust position if card would go off-screen
+          if (clampedX + cardWidth > window.innerWidth - margin) {
+            clampedX = mousePos.x - cardWidth - offsetX; // Place to left
           }
-        })(hoverCity.lat, hoverCity.lng);
+          if (clampedY + cardHeight > window.innerHeight - margin) {
+            clampedY = mousePos.y - cardHeight - offsetY; // Place above
+          }
+          clampedX = Math.max(
+            margin,
+            Math.min(clampedX, window.innerWidth - cardWidth - margin)
+          );
+          clampedY = Math.max(
+            margin,
+            Math.min(clampedY, window.innerHeight - cardHeight - margin)
+          );
 
-        const dt = manualTime ? manualTime.setZone(tz) : DateTime.now().setZone(tz);
-        const offsetHours = dt.offset / 60;
-        const offsetLabel = `UTC${offsetHours >= 0 ? '+' + offsetHours : offsetHours}`;
-        const dateLabel = dt.toFormat('d LLLL yyyy');
-        const flagUrl = hoverCity.countryCode ? `https://flagcdn.com/w80/${hoverCity.countryCode.toLowerCase()}.png` : null;
-
-        // Position card near mouse with corrected offset
-        const offsetX = -120; // Small offset
-        const offsetY = -180;
-        const cardWidth = 320;
-        const cardHeight = 160;
-        const margin = 8;
-        let clampedX = mousePos.x + offsetX;
-        let clampedY = mousePos.y + offsetY;
-
-        // Adjust position if card would go off-screen
-        if (clampedX + cardWidth > window.innerWidth - margin) {
-          clampedX = mousePos.x - cardWidth - offsetX; // Place to left
-        }
-        if (clampedY + cardHeight > window.innerHeight - margin) {
-          clampedY = mousePos.y - cardHeight - offsetY; // Place above
-        }
-        clampedX = Math.max(margin, Math.min(clampedX, window.innerWidth - cardWidth - margin));
-        clampedY = Math.max(margin, Math.min(clampedY, window.innerHeight - cardHeight - margin));
-
-        return (
-          <div
-            style={{
-              left: `${clampedX}px`,
-              top: `${clampedY}px`,
-              position: 'absolute',
-              transition: 'left 0.1s ease, top 0.1s ease'
-            }}
-            className="w-64 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner flex gap-3 items-start z-30 pointer-events-none"
-          >
-            <div className="flex-shrink-0">
-              {flagUrl ? (
-                <img src={flagUrl} alt={`${hoverCity.country} flag`} className="w-7 h-5 rounded-sm object-cover" />
-              ) : (
-                <div className="w-10 h-7 bg-white/10 rounded-sm" />
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">{hoverCity.name}</div>
-                <div className="text-yellow-400 text-lg">☀️</div>
+          return (
+            <div
+              style={{
+                left: `${clampedX}px`,
+                top: `${clampedY}px`,
+                position: "absolute",
+                transition: "left 0.1s ease, top 0.1s ease",
+              }}
+              className="w-64 backdrop-blur-2xl text-white bg-white/5 rounded-2xl p-4 shadow-inner flex gap-3 items-start z-30 pointer-events-none"
+            >
+              <div className="flex-shrink-0">
+                {flagUrl ? (
+                  <img
+                    src={flagUrl}
+                    alt={`${hoverCity.country} flag`}
+                    className="w-7 h-5 rounded-sm object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-7 bg-white/10 rounded-sm" />
+                )}
               </div>
-              <div className="mt-2 text-xl font-semibold text-sky-400">
-                {dt.toFormat('HH:mm')} <span className="text-sm text-white/60">{offsetLabel}</span>
-              </div>
-              <div className="text-xs text-white/60 mt-1">{dateLabel}</div>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <div className="w-4 h-4 bg-white/10 rounded-full" />
-                  <div>22 C Sunny</div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">{hoverCity.name}</div>
+                  <div className="text-yellow-400 text-lg">☀️</div>
                 </div>
-                <button
-                  className="bg-sky-500 text-white px-3 py-1 rounded-full pointer-events-auto hover:bg-sky-600 transition"
-                  onClick={() => addCity(hoverCity)}
-                >
-                  + Add
-                </button>
+                <div className="mt-2 text-xl font-semibold text-sky-400">
+                  {dt.toFormat("HH:mm")}{" "}
+                  <span className="text-sm text-white/60">{offsetLabel}</span>
+                </div>
+                <div className="text-xs text-white/60 mt-1">{dateLabel}</div>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-white/80">
+                    <div className="w-4 h-4 bg-white/10 rounded-full" />
+                    <div>22 C Sunny</div>
+                  </div>
+                  <button
+                    className="bg-sky-500 text-white px-3 py-1 rounded-full pointer-events-auto hover:bg-sky-600 transition"
+                    onClick={() => addCity(hoverCity)}
+                  >
+                    + Add
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
     </div>
   );
 }
