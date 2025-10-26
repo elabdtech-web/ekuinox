@@ -4,11 +4,11 @@ export default function Footer() {
   return (
     <footer className="w-full bg-gradient-to-b from-[#0C1220]  to-[#192d49] text-white py-10">
       {/* content width constrained to Figma 1440px */}
-      <div className="w-full max-w-7xl mx-auto  mb-0 h-[350px] overflow-hidden flex flex-col justify-between">
+      <div className="w-full max-w-7xl mx-auto mb-0 h-auto md:h-[350px] overflow-hidden flex flex-col justify-between px-4 md:px-0">
         {/* top content */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-16 pt-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-8 md:gap-16 pt-4">
           {/* Left: Logo and tagline */}
-          <div className="w-1/4">
+          <div className="w-full md:w-1/4">
             <div className="text-5xl font-medium text-[#5695F5]">EKUINOX</div>
             <div className="mt-2 text-base text-white/80 max-w-[180px]">
               Crafted for those who move with time.
@@ -16,12 +16,12 @@ export default function Footer() {
           </div>
 
           {/* Columns */}
-          <div className="flex flex-1 justify-start gap-24 w-3/4">
-            <div>
-              <div className="text-base tracking-wide  text-white/60 mb-2">
+          <div className="flex flex-col md:flex-row flex-1 justify-start gap-6 md:gap-24 w-full md:w-3/4">
+            <div className="w-full md:w-auto">
+              <div className="text-base tracking-wide text-white/60 mb-2">
                 GENERAL
               </div>
-              <ul className="space-y-3 text-xl text-white/90">
+              <ul className="space-y-3 text-base md:text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Pricing
@@ -40,11 +40,11 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div>
+            <div className="w-full md:w-auto">
               <div className="text-base tracking-wide text-white/60 mb-2">
                 SOCIALS
               </div>
-              <ul className="space-y-3 text-xl text-white/90">
+              <ul className="space-y-3 text-base md:text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     X
@@ -68,11 +68,11 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div>
+            <div className="w-full md:w-auto">
               <div className="text-base tracking-wide text-white/60 mb-2">
                 OTHERS
               </div>
-              <ul className="space-y-3 text-xl text-white/90">
+              <ul className="space-y-3 text-base md:text-xl text-white/90">
                 <li>
                   <a href="#" className="hover:underline">
                     Terms & Conditions
@@ -89,8 +89,8 @@ export default function Footer() {
         </div>
 
         {/* Copyright pill */}
-        <div className="flex justify-center pb-3">
-          <div className="bg-white/10 text-white/70 w-68 text-center rounded-full px-6 py-2 text-xl backdrop-blur-sm">
+        <div className="flex justify-center pb-3 pt-4">
+          <div className="bg-white/10 text-white/70 w-auto text-center rounded-full px-4 py-2 text-base md:text-xl backdrop-blur-sm">
             Copyright© {new Date().getFullYear()}
           </div>
         </div>

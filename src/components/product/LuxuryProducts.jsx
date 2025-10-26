@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { PiShoppingBag } from "react-icons/pi";
 import { useProductCart } from "../../context/ProductCartContext";
 
@@ -37,35 +38,63 @@ const luxuryTimepieces = [
 
 const LuxuryProducts = () => {
   const { addItem } = useProductCart();
+
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
       <div className="max-w-7xl mx-auto px-6 lg:px-0">
-        <div className="flex justify-center ">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white">
+        {/* Heading with animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="flex justify-center"
+        >
+          <h2 className="text-3xl md:text-4xl mb-8 lg:text-5xl font-semibold text-white">
             Luxury Timepieces
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1  py-18 sm:grid-cols-2 lg:grid-cols-4 gap-8  mt-10">
-          {luxuryTimepieces.map((item) => {
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 mt-16">
+          {luxuryTimepieces.map((item, index) => {
             const priceNum = parsePrice(item.price);
+
             return (
-              <div
+              <motion.div
                 key={item.id}
-                className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 flex flex-col items-center min-h-[360px]"
+                initial={{ opacity: 0, y: 80 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.2,
+                  ease: "easeOut",
+                }}
+                viewport={{ once: true, amount: 0.2 }}
+                className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 flex flex-col items-center min-h-[380px]"
               >
-                {/* image container - elevated */}
-                <div className="w-full flex justify-center mb-2">
-                  <div className="h-[180px] w-[150px] absolute -top-12 rounded-xl bg-transparent flex items-center justify-center z-20">
+                {/* Animated image container */}
+                <motion.div
+                  initial={{ opacity: 0, y: -50, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.8,
+                    delay: index * 0.25,
+                    ease: "easeOut",
+                  }}
+                  viewport={{ once: true }}
+                  className="w-full flex justify-center mb-2"
+                >
+                  <div className="h-[180px] w-[150px] absolute -top-12 rounded-xl flex items-center justify-center z-20">
                     <img
                       src={item.img}
                       alt={item.name}
                       className="h-full w-auto object-contain drop-shadow-2xl"
                     />
                   </div>
-                </div>
+                </motion.div>
 
-                {/* card body - pushed below the absolute image and centered */}
+                {/* Card body */}
                 <div className="w-full flex flex-col items-center text-center mt-28 z-10">
                   <h3 className="text-white text-lg md:text-xl font-medium mb-2">
                     {item.name}
@@ -75,9 +104,8 @@ const LuxuryProducts = () => {
                   </p>
                 </div>
 
-                {/* buttons */}
-                <div className="w-full mt-auto  flex items-center gap-3">
-                  {/* Primary action: add to product cart */}
+                {/* Buttons */}
+                <div className="w-full mt-auto flex items-center gap-3">
                   <button
                     className="px-8 h-12 py-3 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition"
                     onClick={() =>
@@ -93,7 +121,7 @@ const LuxuryProducts = () => {
                     Buy Now
                   </button>
                   <button
-                    className="h-12 w-1/3 border border-white/8 rounded-full bg-[#0b1218]  flex items-center justify-center"
+                    className="h-12 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center"
                     onClick={() =>
                       addItem({
                         id: item.id,
@@ -104,10 +132,10 @@ const LuxuryProducts = () => {
                       })
                     }
                   >
-                    <PiShoppingBag size={24} className=" text-white" />
+                    <PiShoppingBag size={24} className="text-white" />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -117,3 +145,8 @@ const LuxuryProducts = () => {
 };
 
 export default LuxuryProducts;
+
+
+
+
+

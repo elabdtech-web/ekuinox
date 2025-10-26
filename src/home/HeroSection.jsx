@@ -19,7 +19,7 @@ export default function HeroSection() {
   }, [isPlaying]);
 
   return (
-    <section className="w-full flex flex-col items-center justify-center relative">
+    <section className="w-full bg-[#070B13]  flex flex-col items-center justify-center relative">
       {/* Background & Globe */}
       <div className="w-full flex flex-col items-center justify-center relative">
         <div
@@ -34,6 +34,7 @@ export default function HeroSection() {
 
         <div className="w-full  flex items-center overflow-hidden justify-center">
           <GlobeEarth
+            className=" "
             hoverActive={hovered}
             hoverView={{ lat: 20, lng: -60, altitude: 1.6 }}
             isPlaying={isPlaying}
@@ -43,7 +44,7 @@ export default function HeroSection() {
       </div>
 
       {/* Smooth expanding section */}
-      <div className="px-2 w-full max-w-4xl mx-auto absolute bottom-3 z-50 text-center">
+      <div className="px-2  w-full max-w-4xl mx-auto absolute -bottom-1 z-50 text-center">
         <div
           className={`mx-auto rounded-full border bg-[#070B13] text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${
             hovered ? "w-full max-w-3xl py-3 px-4" : "w-[160px] py-3 px-6"
