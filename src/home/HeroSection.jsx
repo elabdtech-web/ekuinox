@@ -44,11 +44,10 @@ export default function HeroSection() {
       </div>
 
       {/* Smooth expanding section */}
-      <div className="px-2  w-full max-w-4xl mx-auto absolute -bottom-1 z-50 text-center">
+      <div className="px-2  w-full max-w-4xl mx-auto absolute bottom-4 z-50 text-center">
         <div
-          className={`mx-auto rounded-full border bg-[#070B13] text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${
-            hovered ? "w-full max-w-3xl py-3 px-4" : "w-[160px] py-3 px-6"
-          }`}
+          className={`mx-auto rounded-full border bg-[#070B13] text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${hovered ? "w-full max-w-3xl py-1.5 px-4" : "w-[160px] py-3 px-6"
+            }`}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
@@ -60,11 +59,12 @@ export default function HeroSection() {
             <div className="flex items-center justify-between gap-4 transition-all duration-700 ease-in-out">
               {/* Play / Pause Button */}
               <div className="flex items-center gap-3 min-w-[160px]">
+                <div className="text-sm text-white/60">1 year ago</div>
                 <button
                   type="button"
                   aria-label="play"
                   onClick={() => setIsPlaying((v) => !v)}
-                  className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black"
+                  className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-black"
                 >
                   {isPlaying ? (
                     <svg
@@ -82,12 +82,11 @@ export default function HeroSection() {
                     <BiSolidRightArrow />
                   )}
                 </button>
-                <div className="text-sm text-white/60">6 mon ago</div>
               </div>
 
               {/* Timeline Bar */}
               <div className="flex-1 px-4">
-                <div className="relative h-4 overflow-hidden">
+                <div className="relative h-2 overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,#0b1320,#0b1320)]" />
                   <div className="absolute inset-0 bg-[url('/dotted-line.png')] bg-repeat-x opacity-30" />
                   <div
@@ -100,7 +99,7 @@ export default function HeroSection() {
               {/* Right-side buttons */}
               <div className="flex items-center gap-3">
                 <div className="text-xs md:text-sm font-medium bg-[#111827] text-white/80 rounded-full py-2 px-3">
-                  6 mon Ahead
+                  1 year Ahead
                 </div>
                 <button className="text-xs md:text-sm font-medium bg-[#5695F5] text-white rounded-full py-2 px-4">
                   Return Now

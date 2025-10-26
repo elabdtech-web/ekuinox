@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 export default function GermenWatch() {
@@ -43,12 +44,15 @@ export default function GermenWatch() {
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
             viewport={{ once: true }}
           >
+            <Link to="/product">
             <button
               type="button"
+              
               className="w-full max-w-xs md:w-[277px] h-12 md:h-[64px] justify-center rounded-full bg-gradient-to-r from-[#6ea9ff] to-[#4c8eff] px-6 md:px-12 py-2.5 cursor-pointer text-base md:text-xl font-medium text-white shadow-lg hover:to-blue-600 transition"
             >
               Buy Now
-            </button>
+              </button>
+            </Link>
           </motion.div>
         </div>
       </div>

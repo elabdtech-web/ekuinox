@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { PiDotsSixLight, PiShoppingBag } from "react-icons/pi";
 import { FiSettings, FiMenu, FiX } from "react-icons/fi"; // + add FiMenu, FiX
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Cart from "../common/Cart";
 import Setting from "../common/Setting";
 import MyCities from "../common/MyCities";
@@ -24,7 +24,10 @@ const Navbar = () => {
   const settingsRef = useRef(null);
   const citiesRef = useRef(null);
   const citiesPanelRef = useRef(null);
-  // const citiesPanelRef = useRef(null);
+  const location = useLocation();
+  const showNav = ["/product", "/story"].some((p) =>
+    location.pathname.startsWith(p)
+  );
 
   // Sticky navbar behavior
   useEffect(() => {
@@ -140,18 +143,20 @@ const Navbar = () => {
         <div className="flex items-center gap-3 md:gap-16">
           <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>
 
-          {/* Desktop links */}
-          <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">
-            <Link to="/" className="hover:underline">
-              HOME
-            </Link>
-            <Link to="/product" className="hover:underline">
-              PRODUCT
-            </Link>
-            <Link to="/story" className="hover:underline">
-              SHORT STORY
-            </Link>
-          </nav>
+          {/* Desktop links: only show on /product or /story */}
+          {showNav && (
+            <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">
+              <Link to="/" className="hover:underline">
+                HOME
+              </Link>
+              <Link to="/product" className="hover:underline">
+                PRODUCT
+              </Link>
+              <Link to="/story" className="hover:underline">
+                SHORT STORY
+              </Link>
+            </nav>
+          )}
         </div>
 
         {/* Right Section */}

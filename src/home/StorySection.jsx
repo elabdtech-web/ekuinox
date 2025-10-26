@@ -20,7 +20,7 @@ export default function StorySection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-7xl mx-auto">
           {/* Left Text Column */}
           <motion.div
-            className="relative lg:col-span-6 text-xl"
+            className="relative lg:col-span-6  text-xl"
             initial={{ opacity: 0, x: -80 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
