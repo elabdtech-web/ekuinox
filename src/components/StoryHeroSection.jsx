@@ -28,10 +28,10 @@ export default function StoryHeroSection() {
         {/* Short Story pill */}
         <motion.div
           variants={{
-            hidden: { opacity: 0, y: 40 },
+            hidden: { opacity: 0, y: 10 },
             visible: { opacity: 1, y: 0 },
           }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.4 }}
           className="mb-8"
         >
           <span className="inline-block px-6 py-4 rounded-full bg-[#3b82f6]/20 text-[#6ea9ff] text-xl font-medium shadow-sm backdrop-blur-md">

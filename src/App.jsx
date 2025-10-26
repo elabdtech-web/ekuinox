@@ -6,6 +6,7 @@ import Product from "./Pages/Product";
 import StoryPage from "./Pages/StoryPage";
 import { CityCartProvider } from "./context/CityCartContext";
 import { ProductCartProvider } from "./context/ProductCartContext";
+import ScrollToTop from "./components/ScrollToTop";
 // import other pages as needed
 // import About from "./Pages/About";
 
@@ -14,6 +15,8 @@ const App = () => {
     <CityCartProvider>
       <ProductCartProvider>
         <Router>
+          <ScrollToTop behavior="auto" /> {/* or "smooth" */}
+
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/story" element={<StoryPage />} />
