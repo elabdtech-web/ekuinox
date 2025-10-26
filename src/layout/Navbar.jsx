@@ -121,31 +121,35 @@ const Navbar = () => {
     return undefined;
   }, [isCitiesOpen]);
 
-  // Sticky navbar styles
-  const baseClasses = "left-0 right-0 z-50 px-6 md:px-10 text-white";
-  const positionClass = isSticky ? "fixed" : "absolute top-0";
-  const bgClass = isSticky
-    ? "bg-black/60 backdrop-blur-sm shadow-lg"
-    : "bg-transparent";
+  // Sticky navbar styles — always fixed to avoid layout jumps
+  const baseClasses = "w-full z-[90] px-6 md:px-10 text-white";
+  const positionClass = "fixed top-0 left-0 right-0";
+  const bgClass = isSticky ? "bg-[#293A5180] backdrop-blur-sm shadow-lg" : "bg-transparent";
   const transformStyle = isSticky
     ? showSticky
       ? "translateY(0)"
       : "translateY(-100%)"
     : "translateY(0)";
 
+  // lower threshold so navbar becomes sticky sooner (adjust as needed)
   return (
     <header
       className={`${positionClass} ${baseClasses} ${bgClass}`}
-      style={{ transform: transformStyle, transition: "transform 300ms ease" }}
+      style={{
+        transform: transformStyle,
+        transition: "transform 300ms ease",
+        // expose navbar height variable for .page-content padding
+        "--navbar-height": "56px",
+      }}
     >
-      <div className="flex items-center py-4 md:py-6 justify-between max-w-7xl mx-auto h-full">
+      <div className="flex items-center py-2 md:px-6 justify-between max-w-7xl mx-auto h-full">
         {/* Left Section */}
         <div className="flex items-center gap-3 md:gap-16">
           <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>
 
           {/* Desktop links: only show on /product or /story */}
           {showNav && (
-            <nav className="hidden md:flex gap-8 md:gap-11 text-sm opacity-90">
+            <nav className="hidden md:flex gap-8 md:gap-8 text-sm opacity-90">
               <Link to="/" className="hover:underline">
                 HOME
               </Link>
@@ -162,13 +166,13 @@ const Navbar = () => {
         {/* Right Section */}
         <div className="flex items-center gap-3 md:gap-4">
           {/* Cart Icon (always visible) */}
-          <div className="flex gap-2 items-center" ref={cartRef}>
-            <p className="text-xs text-gray-500 hidden md:block">Cart</p>
+          <div className="flex gap-2 items-center justify-center py-1.5" ref={cartRef}>
+            <p className="text-base  text-gray-500 hidden md:block">Cart</p>
             <div className="relative">
               <button
                 aria-label="cart"
                 onClick={() => setIsCartOpen(true)}
-                className="hover:opacity-80 transition"
+                className="hover:opacity-80 flex transition"
               >
                 <PiShoppingBag size={24} />
               </button>

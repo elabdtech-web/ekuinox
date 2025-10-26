@@ -30,12 +30,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 600px;
+  min-height: 720px;
 }
 .hero-waves {
   position: absolute;
-  margin-top: 40px;
-  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,11 +43,14 @@
 .hero-waves .wave {
   position: absolute;
   border-radius: 50%;
-  border: 8px rgba(83, 112, 173, 0.4);
   width: 400px;
   height: 400px;
-  box-shadow: 0 0 60px rgba(85, 100, 133, 0.2);
+  /* inner glow (inset) + outer glow (outset) */
+   box-shadow:
+    inset 0 60px 20px rgba(15, 28, 52, 0.85),   /* deep inner glow on left */
+    inset 0 20px 60px rgba(36, 60, 98, 0.25);  /* subtle lower inner */    
   animation: expandRing 5s ease-out infinite;
+  
 }
 .hero-waves .wave:nth-child(2) {
   animation-delay: 1.25s;
@@ -61,15 +62,26 @@
   animation-delay: 3.75s;
 }
 
-.hero-image {
+.hero-waves .wave::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 60%, rgba(255,255,255,0.06) 100%);
+  mix-blend-mode: overlay;
+}
+
+/* .hero-image {
   position: relative;
   z-index: 10;
   filter: drop-shadow(0 0 60px rgba(100, 150, 255, 0.2));
-}
+} */
 
 @keyframes expandRing {
   0% {
-    transform: scale(0.1);
+    /* start at full defined size (no tiny scale) */
+    transform: scale(3);
     opacity: 0.9;
     border-color: rgba(73, 94, 138, 0.6);
   }
@@ -86,9 +98,10 @@
     border-color: rgba(100, 150, 255, 0.2);
   }
   100% {
-    transform: scale(4);
+    /* expand from 800px to larger — adjust scale as needed */
+    transform: scale(5);
     opacity: 0;
-    border-color: rgba(100, 150, 255, 0.05);
+    /* border-color: rgba(100, 150, 255, 0.05); */
   }
 }
 
@@ -170,26 +183,41 @@
 
 /* Custom 1px width scrollbar for all scrollable elements */
 ::-webkit-scrollbar {
-  width: 0.5px;
+  width: 2px;
+  /* Width of the vertical scrollbar */
+}
+
+/* Horizontal scrollbar */
+::-webkit-scrollbar:horizontal {
+  height: 2px;
+  /* Height of the horizontal scrollbar */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6ea9ff; /* or any color you prefer */
-  border-radius: 1px;
+  background-color: #d8d9d9;
+  /* Color of the scroll thumb */
+  border-radius: 11px;
+  /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  height: 2px;
+  min-width: 10%;
+  /* Minimum width of the horizontal thumb */
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f2f2;
+  /* Background of the scrollbar track */
+  border-radius: 42px;
 }
 
-::-webkit-scrollbar-button {
+/* Hide scrollbar classes */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
   display: none;
-  height: 0;
-  width: 0;
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #6ea9ff transparent;
 }

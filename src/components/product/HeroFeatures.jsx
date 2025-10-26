@@ -33,7 +33,7 @@ const HeroFeatures = () => {
         <img
           src={heroFeaturesData.heroImage}
           alt="hero"
-          className="w-full object-cover transform-gpu"
+          className="w-full object-cover  transform-gpu"
         />
 
         {/* Overlay Content */}

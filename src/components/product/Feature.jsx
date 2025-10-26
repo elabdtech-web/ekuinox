@@ -8,11 +8,11 @@ const FeaturesSection = () => {
   return (
     <section className="w-full min-h-screen relative bg-[#070B13]">
       {/* hero background image */}
-      <div className="relative w-full h-[130vh] rounded-xl overflow-hidden mb-12">
+      <div className="relative w-full h-[60vh] md:h-[130vh] rounded-xl overflow-hidden mb-12">
         <img
           src={heroImage}
           alt="feature hero"
-          className="w-full h-full object-cover brightness-75"
+          className="w-full h-[60vh] md:h-full object-cover brightness-75"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#070B13] via-transparent to-black/20" />
         <div className="absolute inset-0 flex items-end mb-18 justify-center pointer-events-none">

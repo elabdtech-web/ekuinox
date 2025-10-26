@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function GermenWatch() {
   return (
-    <section className="relative w-full md:min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#080C14] to-[#080C14] overflow-hidden">
+    <section className="relative w-full lg:min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#080C14] to-[#080C14] overflow-hidden">
       <div className="md:h-28 bg-[#080C14]"></div>
 
       {/* Centered Watch Image */}
@@ -17,11 +17,11 @@ export default function GermenWatch() {
       </div>
 
       {/* Bottom Info Bar */}
-      <div className="w-full bg-gradient-to-t from-[#1D3253]/40 to-[#1728433D]/30 backdrop-blur-sm px-4 md:px-0 py-6 pb-12 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="w-full bg-gradient-to-t from-[#1D3253]/40 to-[#1728433D]/30 backdrop-blur-sm px-4 md:px-6 py-6 pb-12 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 flex-wrap">
           {/* Animated Text */}
           <motion.div
-            className="text-center md:text-left space-y-2.5 flex-1 min-w-0"
+            className="text-center md:text-left space-y-2.5  flex-1 min-w-0"
             initial={{ opacity: 0, x: -80 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}

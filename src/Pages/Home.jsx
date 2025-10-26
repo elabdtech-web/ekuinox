@@ -1,8 +1,9 @@
 import React from 'react'
 import MainLayout from '../layout/MainLayout'
-import HeroSection from '../home/HeroSection'
-import GermenWatch from '../home/GermenWatch'
-import StorySection from '../home/StorySection'
+import HeroSection from '../components/home/HeroSection'
+import GermenWatch from '../components/home/GermenWatch'
+import StorySection from '../components/home/StorySection'
+
 
 const Home = () => {
   return (

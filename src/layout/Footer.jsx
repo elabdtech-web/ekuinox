@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-gradient-to-b from-[#0C1220]  to-[#192d49] text-white py-10">
       {/* content width constrained to Figma 1440px */}
-      <div className="w-full max-w-7xl mx-auto mb-0 h-auto md:h-[350px] overflow-hidden flex flex-col justify-between px-4 md:px-0">
+      <div className="w-full max-w-7xl mx-auto mb-0 h-auto md:h-[350px] overflow-hidden flex flex-col justify-between px-4 ">
         {/* top content */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-8 md:gap-16 pt-4">
           {/* Left: Logo and tagline */}

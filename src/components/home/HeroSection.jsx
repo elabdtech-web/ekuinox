@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BiSolidRightArrow } from "react-icons/bi";
-import GlobeEarth from "../components/GlobeEarth";
+import GlobeEarth from "../GlobeEarth";
 
 export default function HeroSection() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -19,9 +19,9 @@ export default function HeroSection() {
   }, [isPlaying]);
 
   return (
-    <section className="w-full bg-[#070B13]  flex flex-col items-center justify-center relative">
+    <section className="w-full   flex flex-col items-center justify-center relative">
       {/* Background & Globe */}
-      <div className="w-full flex flex-col items-center justify-center relative">
+      <div className="w-full flex flex-col items-center  justify-center relative">
         <div
           className="hero-waves absolute z-50 w-full h-full top-0 left-0"
           aria-hidden
@@ -30,9 +30,10 @@ export default function HeroSection() {
           <div className="wave" />
           <div className="wave" />
           <div className="wave" />
+          
         </div>
 
-        <div className="w-full  flex items-center overflow-hidden justify-center">
+        <div className="w-full  flex overflow-hidden justify-center">
           <GlobeEarth
             className=" "
             hoverActive={hovered}
@@ -46,7 +47,7 @@ export default function HeroSection() {
       {/* Smooth expanding section */}
       <div className="px-2  w-full max-w-4xl mx-auto absolute bottom-4 z-50 text-center">
         <div
-          className={`mx-auto rounded-full border bg-[#070B13] text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${hovered ? "w-full max-w-3xl py-1.5 px-4" : "w-[160px] py-3 px-6"
+          className={`mx-auto rounded-full border  text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${hovered ? "w-full max-w-3xl py-1.5 px-4" : "w-[160px] py-3 px-6"
             }`}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
