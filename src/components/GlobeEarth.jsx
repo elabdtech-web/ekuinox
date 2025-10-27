@@ -251,7 +251,7 @@ export default function GlobeEarth({
           const offsetY = -180;
           const cardWidth = 320;
           const cardHeight = 160;
-          const margin = 8;
+          const margin = 0;
           let clampedX = mousePos.x + offsetX;
           let clampedY = mousePos.y + offsetY;
 
