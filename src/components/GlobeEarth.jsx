@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import citiesData from "../data/citiesData.json";
 import { useCityCart } from "../context/CityCartContext";
 import tz_lookup from "tz-lookup";
+import Loader from "./Loader";
 
 const EXAMPLE_CITIES = citiesData.cities;
 
@@ -41,6 +42,7 @@ export default function GlobeEarth({
   const [sunPoint, setSunPoint] = useState(() => computeSubsolarPointUTC());
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [manualTime, setManualTime] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { addCity } = useCityCart();
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function GlobeEarth({
 
     // globe.pointOfView({ lat: 0, lng: 0, altitude: 0.7 }, 400);
     const screenWidth = window.innerWidth;
-    const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.8;
+    const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.85;
 
     globe.pointOfView({ lat: 0, lng: 0, altitude }, 800);
   
@@ -211,13 +213,20 @@ export default function GlobeEarth({
         // Store material reference to update sun position
         if (!globe.userData) globe.userData = {};
         globe.userData.dayNightMaterial = material;
+
+        // Globe is now fully loaded
+        setIsLoading(false);
       })
-      .catch((error) => console.error("Failed to load textures:", error));
+      .catch((error) => {
+        console.error("Failed to load textures:", error);
+        setIsLoading(false); // Set loading to false even on error
+      });
   }, [sunPoint, nightMode]);
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
-      <div className=" ">
+      {isLoading && <Loader />}
+      <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <div ref={containerRef} className=" " />
       </div>
 

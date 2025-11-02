@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { PiShoppingBag } from "react-icons/pi";
-import productData from "../../data/productData.json";
+import CustomVideoPlayer from "./CustomVideoPlayer";
+import { motion } from "framer-motion";
+import { useProductCart } from "../../context/ProductCartContext";
+import Loader from "../Loader";
 
-const {
-  sizes: SIZES,
-  editions: EDITIONS,
-  colors: COLORS,
-  stats: STATs,
-  product,
-} = productData;
 
-const ProductDetail = () => {
-  const [size, setSize] = useState("47 MM");
-  const [edition, setEdition] = useState(EDITIONS[0]);
-  const [color, setColor] = useState(COLORS[1].id);
+const ProductDetail = ({ product, loading }) => {
+  // Use product directly since it's now a single product object
+  const productData = product;
+
+  const { addItem } = useProductCart();
+
+  const [size, setSize] = useState("40mm");
+  const [edition, setEdition] = useState("");
+  const [color, setColor] = useState("");
   const [index, setIndex] = useState(0);
 
-  const images = ["/watch-1.png", "/watch-2.png", "/watch-3.png"];
-  const activeGallery = COLORS.find((c) => c.id === color)?.gallery || images;
+  // Use images array from product data for gallery, handle both string URLs and objects
+  const activeGallery = productData?.images?.map(img =>
+    typeof img === 'string' ? img : img.url || img.src || '/watch-1.png'
+  ) || ["/watch-1.png", "/watch-2.png", "/watch-3.png"];
+
+  // Initialize state when product data is loaded
+  useEffect(() => {
+    if (productData?.editions?.length > 0) {
+      setEdition(productData.editions[0]);
+    }
+    if (productData?.sizes?.length > 0) {
+      setSize(productData.sizes[0]);
+    }
+    if (productData?.colors?.length > 0) {
+      setColor(productData.colors[0].id);
+    }
+  }, [productData]);
 
   useEffect(() => {
     setIndex(0);
@@ -28,6 +43,26 @@ const ProductDetail = () => {
   const prev = () =>
     setIndex((i) => (i - 1 + activeGallery.length) % activeGallery.length);
   const next = () => setIndex((i) => (i + 1) % activeGallery.length);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Loader/>
+    );
+  }
+
+  // Show message if no product data
+  if (!productData) {
+    return (
+      <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-0 py-16">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-white text-2xl">No product found</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
@@ -42,10 +77,10 @@ const ProductDetail = () => {
             className="col-span-12 lg:col-span-4"
           >
             <h1 className="text-4xl md:text-5xl leading-tight">
-              {product.name}
+              {productData?.name || 'Product Name'}
             </h1>
             <p className="text-slate-300 mt-3 text-xl max-w-md opacity-40">
-              {product.description}
+              {productData?.description || 'Product description'}
             </p>
 
             <motion.div
@@ -56,7 +91,7 @@ const ProductDetail = () => {
               className="mt-6"
             >
               <div className="text-4xl font-semibold text-[#5695F5]">
-                {product.price}
+                {productData?.price || '$0.00'}
               </div>
             </motion.div>
 
@@ -70,7 +105,7 @@ const ProductDetail = () => {
             >
               <div className="text-2xl text-white mb-2">Case Size</div>
               <div className="flex flex-wrap gap-3 text-lg">
-                {SIZES.map((s, i) => (
+                {(productData?.sizes || []).map((s, i) => (
                   <motion.button
                     key={s}
                     onClick={() => setSize(s)}
@@ -100,7 +135,7 @@ const ProductDetail = () => {
             >
               <div className="text-2xl text-white mb-2">Edition</div>
               <div className="flex flex-wrap gap-3">
-                {EDITIONS.map((e, i) => (
+                {(productData?.editions || []).map((e, i) => (
                   <motion.button
                     key={e}
                     onClick={() => setEdition(e)}
@@ -130,7 +165,7 @@ const ProductDetail = () => {
             >
               <div className="text-2xl text-white mb-2">Model Colors</div>
               <div className="flex flex-wrap items-center gap-3">
-                {COLORS.map((c, i) => (
+                {(productData?.colors || []).map((c, i) => (
                   <motion.button
                     key={c.id}
                     onClick={() => setColor(c.id)}
@@ -163,10 +198,58 @@ const ProductDetail = () => {
               viewport={{ once: true }}
               className="mt-8 flex gap-4 items-center text-xl w-full sm:w-[400px]"
             >
-              <button className="px-8 h-16 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition">
+              <button
+                onClick={async () => {
+                  if (productData) {
+                    try {
+                      await addItem({
+                        id: productData._id || productData.id,
+                        name: productData.name,
+                        price: productData.price,
+                        img: productData.images && Array.isArray(productData.images)
+                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                          : '/watch-1.png',
+                        size: size,
+                        color: color,
+                        edition: edition
+                      });
+                      alert('Product added to cart successfully!');
+                    } catch (error) {
+                      console.error('Error adding to cart:', error);
+                      alert('Failed to add product to cart. Please try again.');
+                    }
+                  }
+                }}
+                className="px-8 h-16 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
+                disabled={!productData}
+              >
                 Buy Now
               </button>
-              <button className="h-16 w-1/3 rounded-full border border-white/10 flex items-center justify-center">
+              <button
+                onClick={async () => {
+                  if (productData) {
+                    try {
+                      await addItem({
+                        id: productData._id || productData.id,
+                        name: productData.name,
+                        price: productData.price,
+                        img: productData.images && Array.isArray(productData.images)
+                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                          : '/watch-1.png',
+                        size: size,
+                        color: color,
+                        edition: edition
+                      });
+                      alert('Product added to cart successfully!');
+                    } catch (error) {
+                      console.error('Error adding to cart:', error);
+                      alert('Failed to add product to cart. Please try again.');
+                    }
+                  }
+                }}
+                className="h-16 w-1/3 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                disabled={!productData}
+              >
                 <PiShoppingBag className="w-10 h-10" />
               </button>
             </motion.div>
@@ -189,7 +272,7 @@ const ProductDetail = () => {
 
               {/* Indicators */}
               <div className="absolute bottom-0 flex items-center gap-3 mt-6">
-                {images.map((_, i) => (
+                {activeGallery.map((_, i) => (
                   <span
                     key={i}
                     className={`w-1.5 h-1.5 rounded-full ${
@@ -226,32 +309,23 @@ const ProductDetail = () => {
             className="col-span-12 lg:col-span-4"
           >
             <div className="bg-white/5 rounded-xl py-4 overflow-hidden border border-white/10">
-              <div className="relative rounded-lg h-[220px] sm:h-[280px]">
-                <img
-                  src={product.videoUrl}
-                  alt="video"
-                  className="w-full object-cover h-full"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-black/50 border border-white/10 flex items-center justify-center">
-                    ▶
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <motion.h4
+              <CustomVideoPlayer
+                videoUrl={productData?.videoUrl}
+                videoTitle={productData?.videoTitle || 'Product Video'}
+                className="h-[220px] sm:h-[280px]"
+              />
+            </div>            <motion.h4
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
               viewport={{ once: true }}
               className="mt-4 text-white/90 text-2xl max-w-xs"
             >
-              {product.videoTitle}
+              {productData?.videoTitle || 'Product Video'}
             </motion.h4>
 
-            <div className="mt-6 grid grid-cols-3 gap-4">
-              {STATs.map((s, i) => (
+            <div className="mt-6 grid grid-cols-3 items-end text-center gap-4">
+              {(productData?.stats || []).map((s, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 30 }}

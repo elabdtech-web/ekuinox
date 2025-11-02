@@ -142,7 +142,7 @@ const Navbar = () => {
         "--navbar-height": "56px",
       }}
     >
-      <div className="flex items-center py-4 md:px-6 justify-between max-w-7xl mx-auto h-full">
+      <div className="flex items-center py-4 md:px-0 justify-between max-w-7xl mx-auto h-full">
         {/* Left Section */}
         <div className="flex items-center gap-3 md:gap-16">
           <div className="text-2xl md:text-4xl font-semibold">EKUINOX</div>

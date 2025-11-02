@@ -1,10 +1,22 @@
 import React from "react";
 import { motion } from "framer-motion";
 import featuresData from "../../data/featuresData.json";
+import Loader from "../Loader";
 
-const { features: FEATURES, heroImage, heroTitle } = featuresData;
+const { heroImage, heroTitle } = featuresData;
 
-const FeaturesSection = () => {
+const FeaturesSection = ({ features, loading }) => {
+
+
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#070B13]">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <section className="w-full min-h-screen relative bg-[#070B13]">
       {/* hero background image */}
@@ -30,36 +42,42 @@ const FeaturesSection = () => {
 
       {/* features grid */}
       <div className="max-w-7xl mx-auto px-6 py-6 lg:px-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((f, index) => (
-            <motion.article
-              key={f.id}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: index * 0.2, // animation stagger
-                ease: "easeOut",
-              }}
-              viewport={{ once: true, amount: 0.2 }}
-              className="bg-white/3 rounded-2xl p-6 min-h-[220px] flex flex-col gap-4 hover:translate-y-[-6px] hover:shadow-lg transition transform-gpu"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-full h-80 rounded-lg flex items-center justify-center overflow-hidden p-2">
-                  <img
-                    src={f.img}
-                    alt={f.title}
-                    className="w-full h-full object-contain"
-                  />
+        {(!features || features.length === 0) ? (
+          <div className="text-center py-12">
+            <p className="text-white/60 text-lg">No features available</p>
+          </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(features || []).map((f, index) => (
+                <motion.article
+                key={f.id || f._id || index}
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.2, // animation stagger
+                  ease: "easeOut",
+                }}
+                viewport={{ once: true, amount: 0.2 }}
+                className="bg-white/3 rounded-2xl p-6 min-h-[220px] flex flex-col gap-4 hover:translate-y-[-6px] hover:shadow-lg transition transform-gpu"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-full h-80 rounded-lg flex items-center justify-center overflow-hidden p-2">
+                    <img
+                      src={f.image || f.img || '/feature-default.png'}
+                      alt={f.title || f.name || 'Feature'}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-4xl text-white">{f.title}</h3>
-              <p className="text-base opacity-40 text-slate-300 flex-1">
-                {f.desc}
-              </p>
-            </motion.article>
-          ))}
-        </div>
+                <h3 className="text-4xl text-white">{f.title || f.name || 'Feature Title'}</h3>
+                <p className="text-base opacity-40 text-slate-300 flex-1">
+                  {f.description || 'Feature description'}
+                </p>
+              </motion.article>
+            ))}
+            </div>
+        )}
       </div>
     </section>
   );

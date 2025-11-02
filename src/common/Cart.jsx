@@ -5,8 +5,7 @@ import { FiX } from "react-icons/fi";
 import { useProductCart } from "../context/ProductCartContext";
 
 export default function Cart({ open, onClose }) {
-  const { items, inc, dec, remove, subtotal, delivery, total } =
-    useProductCart();
+  const { items, inc, dec, remove, subtotal, delivery, total, loading, error, checkout, clearCart } = useProductCart();
 
   function currency(n) {
     return `$${Number(n || 0).toLocaleString(undefined, {
@@ -40,16 +39,58 @@ export default function Cart({ open, onClose }) {
           animate-slideIn flex flex-col"
       >
         {/* Header */}
-        <div className="relative h-16 flex items-center justify-center border-b border-white/10 flex-shrink-0 px-4">
-          <span className="text-white/95 text-lg tracking-wider">CART</span>
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/12 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center transition"
-          >
-            <FiX size={18} />
-          </button>
+        <div className="relative h-16 flex items-center justify-between border-b border-white/10 flex-shrink-0 px-4">
+          <div className="flex items-center">
+            <span className="text-white/95 text-lg tracking-wider">CART</span>
+            {items.length > 0 && (
+              <span className="ml-2 px-2 py-1 text-xs bg-[#5695F5] text-white rounded-full">
+                {items.length}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {items.length > 0 && (
+              <button
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to clear your cart?')) {
+                    try {
+                      await clearCart();
+                    } catch (error) {
+                      console.error('Error clearing cart:', error);
+                      alert('Failed to clear cart. Please try again.');
+                    }
+                  }
+                }}
+                className="px-3 py-1 text-xs bg-red-500/20 text-red-400 rounded-full hover:bg-red-500/30 transition"
+                disabled={loading}
+              >
+                Clear
+              </button>
+            )}
+            <button
+              aria-label="Close"
+              onClick={onClose}
+              className="h-9 w-9 rounded-full bg-white/12 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center transition"
+            >
+              <FiX size={18} />
+            </button>
+          </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="px-5 py-3 bg-red-500/20 border-b border-red-500/30">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="px-5 py-3 border-b border-white/10">
+            <p className="text-white/60 text-sm">Syncing cart...</p>
+          </div>
+        )}
 
         {/* Scrollable items area */}
         <div className="flex-1 overflow-y-auto hide-scrollbar px-5 md:px-6 py-6 space-y-6 min-h-0">
@@ -66,9 +107,13 @@ export default function Cart({ open, onClose }) {
             >
               {/* Remove */}
               <button
-                onClick={(e) => { e.stopPropagation(); remove(it.id); }}
-                className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(it.id);
+                }}
+                className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow transition disabled:opacity-50"
                 aria-label="Remove item"
+                disabled={loading}
               >
                 <FiX size={14} />
               </button>
@@ -97,9 +142,13 @@ export default function Cart({ open, onClose }) {
                   {/* Qty pill */}
                   <div className="flex items-center gap-2 bg-white/12 border border-white/10 rounded-full h-9 px-2 shrink-0">
                     <button
-                      onClick={(e) => { e.stopPropagation(); dec(it.id); }}
-                      className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dec(it.id);
+                      }}
+                      className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition disabled:opacity-50"
                       aria-label="Decrease"
+                      disabled={loading}
                     >
                       <HiMinusSm />
                     </button>
@@ -107,9 +156,13 @@ export default function Cart({ open, onClose }) {
                       {it.qty}
                     </span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); inc(it.id); }}
-                      className="h-7 w-7 rounded-full bg-[#4f83ff] hover:brightness-110 text-white flex items-center justify-center transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        inc(it.id);
+                      }}
+                      className="h-7 w-7 rounded-full bg-[#4f83ff] hover:brightness-110 text-white flex items-center justify-center transition disabled:opacity-50"
                       aria-label="Increase"
+                      disabled={loading}
                     >
                       <HiPlusSm />
                     </button>
@@ -141,10 +194,19 @@ export default function Cart({ open, onClose }) {
 
             <div className="-mb-4 mt-2 -mx-4">
               <button
-                className="w-full h-12 rounded-[18px] bg-gradient-to-r from-[#5ea0ff] to-[#3a7cff] text-white font-semibold shadow-lg hover:brightness-105 transition"
-                disabled={items.length === 0}
+                onClick={async () => {
+                  try {
+                    await checkout();
+                    alert('Checkout successful!');
+                    onClose();
+                  } catch (error) {
+                    alert('Checkout failed: ' + error.message);
+                  }
+                }}
+                className="w-full h-12 rounded-[18px] bg-gradient-to-r from-[#5ea0ff] to-[#3a7cff] text-white font-semibold shadow-lg hover:brightness-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={items.length === 0 || loading}
               >
-                Check Out
+                {loading ? 'Processing...' : 'Check Out'}
               </button>
             </div>
           </div>

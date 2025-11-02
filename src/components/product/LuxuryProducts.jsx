@@ -36,8 +36,49 @@ const luxuryTimepieces = [
   },
 ];
 
-const LuxuryProducts = () => {
+const LuxuryProducts = ({ products, loading }) => {
+
+  console.log('LuxuryProducts received products:', products);
+
   const { addItem } = useProductCart();
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#070B13]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5695F5] mx-auto"></div>
+          <p className="text-white mt-4">Loading luxury products...</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  // Filter out any string IDs and only show valid product objects
+  const validProducts = (products || []).filter(item => typeof item === 'object' && item !== null);
+
+  if (validProducts.length === 0) {
+    return (
+      <section className="w-full min-h-screen relative bg-[#070B13] py-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-0">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true }}
+            className="flex justify-center"
+          >
+            <h2 className="text-3xl md:text-4xl mb-8 lg:text-5xl font-semibold text-white">
+              Luxury Timepieces
+            </h2>
+          </motion.div>
+          <div className="text-center py-12">
+            <p className="text-white/60 text-lg">No luxury products available</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
@@ -57,12 +98,14 @@ const LuxuryProducts = () => {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 mt-16">
-          {luxuryTimepieces.map((item, index) => {
-            const priceNum = parsePrice(item.price);
+          {validProducts.map((item, index) => {
+            // Handle both full product objects and product IDs
+            const productData = typeof item === 'string' ? null : item;
+            const priceNum = parsePrice(productData?.price);
 
             return (
               <motion.div
-                key={item.id}
+                key={productData?._id || productData?.id || item || index}
                 initial={{ opacity: 0, y: 80 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{
@@ -87,8 +130,12 @@ const LuxuryProducts = () => {
                 >
                   <div className="h-[180px] w-[150px] absolute -top-12 rounded-xl flex items-center justify-center z-20">
                     <img
-                      src={item.img}
-                      alt={item.name}
+                      src={
+                        productData?.images && Array.isArray(productData.images)
+                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
+                          : '/Luxury1.png'
+                      }
+                      alt={productData?.name || 'Luxury Watch'}
                       className="h-full w-auto object-contain drop-shadow-2xl"
                     />
                   </div>
@@ -97,40 +144,62 @@ const LuxuryProducts = () => {
                 {/* Card body */}
                 <div className="w-full flex flex-col items-center text-center mt-28 z-10">
                   <h3 className="text-white text-lg md:text-xl font-medium mb-2">
-                    {item.name}
+                    {productData?.name || 'Luxury Watch'}
                   </h3>
                   <p className="text-blue-400 text-2xl md:text-3xl font-semibold mt-1">
-                    {item.price}
+                    ${productData?.price || '0.00'}
                   </p>
                 </div>
 
                 {/* Buttons */}
                 <div className="w-full mt-auto flex items-center gap-3">
                   <button
-                    className="px-8 h-12 py-3 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition"
-                    onClick={() =>
-                      addItem({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        priceNum,
-                        img: item.img,
-                      })
-                    }
+                    className="px-8 h-12 py-3 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
+                    onClick={async () => {
+                      if (productData) {
+                        try {
+                          await addItem({
+                            id: productData._id || productData.id,
+                            name: productData.name,
+                            price: productData.price,
+                            priceNum,
+                            img: productData.images && Array.isArray(productData.images)
+                              ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
+                              : '/Luxury1.png',
+                          });
+                          alert('Product added to cart successfully!');
+                        } catch (error) {
+                          console.error('Error adding to cart:', error);
+                          alert('Failed to add product to cart. Please try again.');
+                        }
+                      }
+                    }}
+                    disabled={!productData}
                   >
                     Buy Now
                   </button>
                   <button
-                    className="h-12 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center"
-                    onClick={() =>
-                      addItem({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        priceNum,
-                        img: item.img,
-                      })
-                    }
+                    className="h-12 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                    onClick={async () => {
+                      if (productData) {
+                        try {
+                          await addItem({
+                            id: productData._id || productData.id,
+                            name: productData.name,
+                            price: productData.price,
+                            priceNum,
+                            img: productData.images && Array.isArray(productData.images)
+                              ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
+                              : '/Luxury1.png',
+                          });
+                          alert('Product added to cart successfully!');
+                        } catch (error) {
+                          console.error('Error adding to cart:', error);
+                          alert('Failed to add product to cart. Please try again.');
+                        }
+                      }
+                    }}
+                    disabled={!productData}
                   >
                     <PiShoppingBag size={24} className="text-white" />
                   </button>
