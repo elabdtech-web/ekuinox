@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import MainLayout from '../layout/MainLayout'
 import ProductDetail from '../components/product/ProductDetail'
 import FeaturesSection from '../components/product/Feature'
@@ -7,16 +8,50 @@ import LuxuryProducts from '../components/product/LuxuryProducts'
 import { productService } from '../services/productService'
 
 const Product = () => {
+  const [searchParams] = useSearchParams();
+  const selectedProductId = searchParams.get('id');
 
   const [products, setProducts] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
-  // const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadProducts();
+    if (selectedProductId) {
+      loadProductById(selectedProductId);
+    } else {
+      loadProducts();
+    }
     getAllProducts();
-  }, []);
+  }, [selectedProductId]);
+
+  const loadProductById = async (productId) => {
+    try {
+      setLoading(true);
+      const response = await productService.getProduct(productId);
+      console.log('Specific Product API response:', response);
+
+      // Handle different response structures
+      let productData = null;
+      if (response && typeof response === 'object') {
+        if (response.data) {
+          productData = response.data;
+        } else if (response.name || response._id) {
+          productData = response;
+        } else {
+          productData = response;
+        }
+      }
+
+      console.log('Loaded specific product:', productData);
+      setSelectedProduct(productData);
+    } catch (error) {
+      console.error('Error loading specific product:', error);
+      setSelectedProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -71,14 +106,13 @@ const Product = () => {
   }
   // console.log('Rendering products:', products?.relatedProducts);
 
-  // Get the main product (first one) and related products
-  const mainProduct = Array.isArray(products) ? products[0] : products;
-  // const relatedProducts = Array.isArray(products) ? products.slice(1) : (products?.relatedProducts || []);
+  // Get the product to display (selected product or main product)
+  const displayProduct = selectedProduct || (Array.isArray(products) ? products[0] : products);
 
   return (
     <MainLayout>
-      <ProductDetail product={mainProduct} loading={loading} />
-      <FeaturesSection features={mainProduct?.features || []} loading={loading} />
+      <ProductDetail product={displayProduct} loading={loading} />
+      <FeaturesSection features={displayProduct?.features || []} loading={loading} />
       <LuxuryProducts products={allProducts} />
       <HeroFeatures />
     </MainLayout>

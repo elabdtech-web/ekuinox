@@ -325,7 +325,7 @@ const ProductDetail = ({ product }) => {
               {productData?.videoTitle || 'Product Video'}
             </motion.h4>
 
-            <div className="mt-6 grid grid-cols-3 items-end text-center gap-4">
+            <div className="mt-6 grid grid-cols-3 items-end text-left gap-4">
               {(productData?.stats || []).map((s, i) => (
                 <motion.div
                   key={i}

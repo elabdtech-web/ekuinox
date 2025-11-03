@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { PiShoppingBag } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 import { useProductCart } from "../../context/ProductCartContext";
 
 const parsePrice = (p) => {
@@ -9,38 +10,13 @@ const parsePrice = (p) => {
   return Number(n) || 0;
 };
 
-const luxuryTimepieces = [
-  {
-    id: 1,
-    name: "Ekuinox Eclipse",
-    price: "$12,999",
-    img: "/Luxury1.png",
-  },
-  {
-    id: 2,
-    name: "Ekuinox Zenith",
-    price: "$14,499",
-    img: "/Luxury2.png",
-  },
-  {
-    id: 3,
-    name: "Ekuinox Aurora",
-    price: "$15,299",
-    img: "/Luxury3.png",
-  },
-  {
-    id: 4,
-    name: "Ekuinox Solstice",
-    price: "$16,799",
-    img: "/Luxury4.png",
-  },
-];
 
 const LuxuryProducts = ({ products, loading }) => {
 
   console.log('LuxuryProducts received products:', products);
 
   const { addItem } = useProductCart();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -82,7 +58,7 @@ const LuxuryProducts = ({ products, loading }) => {
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-0">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-0 " >
         {/* Heading with animation */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -114,7 +90,9 @@ const LuxuryProducts = ({ products, loading }) => {
                   ease: "easeOut",
                 }}
                 viewport={{ once: true, amount: 0.2 }}
-                className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 flex flex-col items-center min-h-[380px]"
+                className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 cursor-pointer flex flex-col items-center min-h-[380px]"
+                onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
+                disabled={!productData}
               >
                 {/* Animated image container */}
                 <motion.div
@@ -152,57 +130,66 @@ const LuxuryProducts = ({ products, loading }) => {
                 </div>
 
                 {/* Buttons */}
-                <div className="w-full mt-auto flex items-center gap-3">
-                  <button
-                    className="px-8 h-12 py-3 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
-                    onClick={async () => {
-                      if (productData) {
-                        try {
-                          await addItem({
-                            id: productData._id || productData.id,
-                            name: productData.name,
-                            price: productData.price,
-                            priceNum,
-                            img: productData.images && Array.isArray(productData.images)
-                              ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                              : '/Luxury1.png',
-                          });
-                          alert('Product added to cart successfully!');
-                        } catch (error) {
-                          console.error('Error adding to cart:', error);
-                          alert('Failed to add product to cart. Please try again.');
-                        }
-                      }
-                    }}
+                <div className="w-full mt-auto flex flex-col gap-2">
+                  {/* <button
+                    className="px-4 py-2 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
+                    onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
                     disabled={!productData}
                   >
-                    Buy Now
-                  </button>
-                  <button
-                    className="h-12 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
-                    onClick={async () => {
-                      if (productData) {
-                        try {
-                          await addItem({
-                            id: productData._id || productData.id,
-                            name: productData.name,
-                            price: productData.price,
-                            priceNum,
-                            img: productData.images && Array.isArray(productData.images)
-                              ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                              : '/Luxury1.png',
-                          });
-                          alert('Product added to cart successfully!');
-                        } catch (error) {
-                          console.error('Error adding to cart:', error);
-                          alert('Failed to add product to cart. Please try again.');
+                    View Details
+                  </button> */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      className="px-6 h-10 py-2 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
+                      onClick={async () => {
+                        if (productData) {
+                          try {
+                            await addItem({
+                              id: productData._id || productData.id,
+                              name: productData.name,
+                              price: productData.price,
+                              priceNum,
+                              img: productData.images && Array.isArray(productData.images)
+                                ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
+                                : '/Luxury1.png',
+                            });
+                            alert('Product added to cart successfully!');
+                          } catch (error) {
+                            console.error('Error adding to cart:', error);
+                            alert('Failed to add product to cart. Please try again.');
+                          }
                         }
-                      }
-                    }}
-                    disabled={!productData}
-                  >
-                    <PiShoppingBag size={24} className="text-white" />
-                  </button>
+                      }}
+                      disabled={!productData}
+                    >
+                      Buy Now
+                    </button>
+                    <button
+                      className="h-10 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                      onClick={async () => {
+                        if (productData) {
+                          try {
+                            await addItem({
+                              id: productData._id || productData.id,
+                              name: productData.name,
+                              price: productData.price,
+                              priceNum,
+                              img: productData.images && Array.isArray(productData.images)
+                                ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
+                                : '/Luxury1.png',
+                            });
+                            alert('Product added to cart successfully!');
+                          } catch (error) {
+                            console.error('Error adding to cart:', error);
+                            alert('Failed to add product to cart. Please try again.');
+                          }
+                        }
+                      }}
+                      disabled={!productData}
+                    >
+                      <PiShoppingBag size={20} className="text-white" />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             );

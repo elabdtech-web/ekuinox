@@ -28,9 +28,6 @@ const AddProduct = () => {
     editions: [],
     colors: [],
     stats: [],
-    subItems: [], // New field for sub-items
-    relatedProducts: [], // New field for related products
-    images: [], // New field for product images
     features: [] // New field for product features
   });
 
@@ -41,7 +38,7 @@ const AddProduct = () => {
     id: '',
     alt: '',
     thumb: '',
-    gallery: ['']
+    gallery: [''],
   });
   const [newStat, setNewStat] = useState({
     label: '',
@@ -49,16 +46,11 @@ const AddProduct = () => {
   });
 
 
-  // Related products states
-  const [availableProducts, setAvailableProducts] = useState([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
-  const [newFeature, setNewFeature] = useState({
-    title: '',
-    description: '',
-    icon: '',
-    image: ''
-  });
+
+  // Form validation state
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load product data when in edit mode
   useEffect(() => {
@@ -77,32 +69,11 @@ const AddProduct = () => {
         editions: editingProduct.editions || [],
         colors: editingProduct.colors || [],
         stats: editingProduct.stats || [],
-        relatedProducts: editingProduct.relatedProducts || [],
-        images: editingProduct.images || [],
         features: editingProduct.features || []
       });
     }
   }, [isEditMode, editingProduct]);
 
-  // Fetch available products for related products selection
-  useEffect(() => {
-    const fetchAvailableProducts = async () => {
-      try {
-        setIsLoadingProducts(true);
-        const response = await productService.getProducts();
-        console.log('Fetched products for related selection:', response);
-        // Show all products in the dropdown - API returns data array
-        setAvailableProducts(response.data || response.products || []);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setAvailableProducts([]);
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
-
-    fetchAvailableProducts();
-  }, []);
 
   // Helper functions for dynamic fields
   const addSize = () => {
@@ -204,16 +175,14 @@ const AddProduct = () => {
 
 
 
-  // Related products management functions
-  const removeRelatedProduct = (productId) => {
-    setFormData(prev => ({
-      ...prev,
-      relatedProducts: prev.relatedProducts.filter(id => id !== productId)
-    }));
-  };
-
-
   // Features management functions
+  const [newFeature, setNewFeature] = useState({
+    title: '',
+    description: '',
+    icon: '',
+    image: ''
+  });
+
   const addFeature = () => {
     if (newFeature.title && newFeature.description) {
       setFormData(prev => ({
@@ -239,15 +208,132 @@ const AddProduct = () => {
   const updateFeature = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      features: prev.features.map((feature, i) =>
-        i === index ? { ...feature, [field]: value } : feature
-      )
+      features: prev.features.map((f, i) => i === index ? { ...f, [field]: value } : f)
     }));
+  };
+
+  // Form validation functions
+  const validateForm = () => {
+    const errors = {};
+
+    // Basic Information Validation
+    if (!formData.name.trim()) {
+      errors.name = 'Product name is required';
+    }
+
+    if (!formData.price.trim()) {
+      errors.price = 'Price is required';
+    } else if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
+      errors.price = 'Please enter a valid price';
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = 'Description is required';
+    }
+
+    if (!formData.sku.trim()) {
+      errors.sku = 'SKU is required';
+    } else if (!/^[A-Z0-9-_]+$/i.test(formData.sku)) {
+      errors.sku = 'SKU can only contain letters, numbers, hyphens, and underscores';
+    }
+
+    if (formData.stock === '' || formData.stock < 0) {
+      errors.stock = 'Stock quantity must be 0 or greater';
+    }
+
+    // Sizes validation - at least one size required
+    if (formData.sizes.length === 0) {
+      errors.sizes = 'At least one size is required';
+    }
+
+    // Colors validation - at least one color required
+    if (formData.colors.length === 0) {
+      errors.colors = 'At least one color is required';
+    } else {
+      // Validate each color
+      formData.colors.forEach((color, index) => {
+        if (!color.id.trim()) {
+          errors[`color_${index}_id`] = `Color ID is required for color ${index + 1}`;
+        }
+        if (!color.alt.trim()) {
+          errors[`color_${index}_alt`] = `Color name is required for color ${index + 1}`;
+        }
+        if (!color.thumb.trim()) {
+          errors[`color_${index}_thumb`] = `Thumbnail image is required for color ${index + 1}`;
+        } else if (!isValidUrl(color.thumb)) {
+          errors[`color_${index}_thumb`] = `Please enter a valid URL for thumbnail image`;
+        }
+      });
+    }
+
+    // Stats validation - if any stat is partially filled, require both fields
+    formData.stats.forEach((stat, index) => {
+      if (stat.label.trim() && !stat.value.trim()) {
+        errors[`stat_${index}_value`] = `Value is required for statistic "${stat.label}"`;
+      }
+      if (!stat.label.trim() && stat.value.trim()) {
+        errors[`stat_${index}_label`] = `Label is required for statistic with value "${stat.value}"`;
+      }
+    });
+
+    // Features validation - if any feature is partially filled, require title and description
+    formData.features.forEach((feature, index) => {
+      if (feature.title.trim() && !feature.description.trim()) {
+        errors[`feature_${index}_description`] = `Description is required for feature "${feature.title}"`;
+      }
+      if (!feature.title.trim() && feature.description.trim()) {
+        errors[`feature_${index}_title`] = `Title is required for feature with description`;
+      }
+      if (feature.image && feature.image.trim() && !isValidUrl(feature.image)) {
+        errors[`feature_${index}_image`] = `Please enter a valid URL for feature image`;
+      }
+    });
+
+    // Video validation - if video title provided, URL should be valid
+    if (formData.videoTitle.trim() && formData.videoUrl.trim() && !isValidUrl(formData.videoUrl)) {
+      errors.videoUrl = 'Please enter a valid video URL';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const clearFieldError = (fieldName) => {
+    if (validationErrors[fieldName]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form before submission
+    if (!validateForm()) {
+      // Scroll to first error
+      const firstErrorField = Object.keys(validationErrors)[0];
+      if (firstErrorField) {
+        const element = document.getElementById(firstErrorField);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const payload = {
         ...formData,
@@ -260,6 +346,7 @@ const AddProduct = () => {
             id: c.id.trim(),
             alt: c.alt.trim(),
             thumb: c.thumb.trim(),
+            hexColor: c.hexColor || '#000000', // Include hex color
             gallery: Array.isArray(c.gallery)
               ? c.gallery.filter(Boolean)
               : []
@@ -302,6 +389,8 @@ const AddProduct = () => {
       } else {
         alert('Unexpected error. Please try again.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -342,13 +431,22 @@ const AddProduct = () => {
                     Product Name *
                   </label>
                   <input
+                    id="name"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      clearFieldError('name');
+                    }}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${validationErrors.name
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                      }`}
                     placeholder="Enter product name"
-                    required
                   />
+                  {validationErrors.name && (
+                    <p className="text-red-400 text-sm mt-1">{validationErrors.name}</p>
+                  )}
                 </div>
                 
                 <div>
@@ -356,13 +454,22 @@ const AddProduct = () => {
                     Price *
                   </label>
                   <input
+                    id="price"
                     type="text"
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
+                    onChange={(e) => {
+                      setFormData({ ...formData, price: e.target.value });
+                      clearFieldError('price');
+                    }}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${validationErrors.price
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                      }`}
                     placeholder="$0.00"
-                    required
                   />
+                  {validationErrors.price && (
+                    <p className="text-red-400 text-sm mt-1">{validationErrors.price}</p>
+                  )}
                 </div>
               </div>
 
@@ -371,13 +478,22 @@ const AddProduct = () => {
                   Description *
                 </label>
                 <textarea
+                  id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value });
+                    clearFieldError('description');
+                  }}
                   rows="4"
-                  className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition resize-none"
+                  className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition resize-none ${validationErrors.description
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                    }`}
                   placeholder="Product description"
-                  required
                 />
+                {validationErrors.description && (
+                  <p className="text-red-400 text-sm mt-1">{validationErrors.description}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -386,13 +502,22 @@ const AddProduct = () => {
                     SKU *
                   </label>
                   <input
+                    id="sku"
                     type="text"
                     value={formData.sku}
-                    onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
+                    onChange={(e) => {
+                      setFormData({ ...formData, sku: e.target.value });
+                      clearFieldError('sku');
+                    }}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${validationErrors.sku
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                      }`}
                     placeholder="Product SKU"
-                    required
                   />
+                  {validationErrors.sku && (
+                    <p className="text-red-400 text-sm mt-1">{validationErrors.sku}</p>
+                  )}
                 </div>
                 
                 <div>
@@ -400,14 +525,23 @@ const AddProduct = () => {
                     Stock Quantity *
                   </label>
                   <input
+                    id="stock"
                     type="number"
                     value={formData.stock}
-                    onChange={(e) => setFormData({...formData, stock: parseInt(e.target.value) || 0})}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
+                    onChange={(e) => {
+                      setFormData({ ...formData, stock: parseInt(e.target.value) || 0 });
+                      clearFieldError('stock');
+                    }}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${validationErrors.stock
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                      }`}
                     placeholder="0"
                     min="0"
-                    required
                   />
+                  {validationErrors.stock && (
+                    <p className="text-red-400 text-sm mt-1">{validationErrors.stock}</p>
+                  )}
                 </div>
 
                 <div>
@@ -430,7 +564,7 @@ const AddProduct = () => {
             {/* Sizes Management */}
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
-                Available Sizes
+                Available Sizes *
               </h2>
               
               <div className="flex flex-wrap gap-2 mb-4">
@@ -447,6 +581,10 @@ const AddProduct = () => {
                   </span>
                 ))}
               </div>
+
+              {validationErrors.sizes && (
+                <p className="text-red-400 text-sm mb-4">{validationErrors.sizes}</p>
+              )}
 
               <div className="flex gap-2">
                 <input
@@ -508,7 +646,7 @@ const AddProduct = () => {
             {/* Colors Management */}
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
-                Product Colors
+                Product Colors *
               </h2>
               
               {/* Existing Colors */}
@@ -525,26 +663,27 @@ const AddProduct = () => {
                         <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className="w-6 h-6 rounded border border-white/30"
+                        style={{ backgroundColor: color.hexColor || '#000000' }}
+                      ></div>
+                      <span className="text-white/60 text-xs font-mono">{color.hexColor || '#000000'}</span>
+                    </div>
                     <img src={color.thumb} alt={color.alt} className="w-full h-20 object-cover rounded" />
                     <p className="text-white/60 text-xs mt-1">ID: {color.id}</p>
                   </div>
                 ))}
               </div>
 
+              {validationErrors.colors && (
+                <p className="text-red-400 text-sm mb-4">{validationErrors.colors}</p>
+              )}
+
               {/* Add New Color Form */}
               <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                 <h4 className="text-white font-medium mb-3">Add New Color</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">Color ID</label>
-                    <input
-                      type="text"
-                      value={newColor.id}
-                      onChange={(e) => setNewColor({...newColor, id: e.target.value})}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
-                      placeholder="e.g., silver, black"
-                    />
-                  </div>
+
                   <div>
                     <label className="block text-white/80 text-sm font-medium mb-2">Color Name</label>
                     <input
@@ -555,7 +694,8 @@ const AddProduct = () => {
                       placeholder="e.g., Silver, Black"
                     />
                   </div>
-                </div>
+
+
 
                 <div className="mb-4">
                   <label className="block text-white/80 text-sm font-medium mb-2">Thumbnail Image URL</label>
@@ -661,83 +801,7 @@ const AddProduct = () => {
               </div>
             </div>
 
-            {/* Related Products Management */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
-                Related Products
-              </h2>
-              
-              {/* Selected Related Products */}
-              {formData.relatedProducts.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white/90">Selected Related Products</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.relatedProducts.map((productId) => {
-                      const product = availableProducts.find(p => p._id === productId);
-                      return product ? (
-                        <span key={productId} className="flex items-center bg-[#5695F5]/20 text-[#5695F5] px-3 py-1 rounded-full text-sm">
-                          {product.name}
-                          <button
-                            type="button"
-                            onClick={() => removeRelatedProduct(productId)}
-                            className="ml-2 text-red-400 hover:text-red-300"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {/* Product Selection Dropdown */}
-              <div className="space-y-4">
-                <label className="block text-white/80 text-sm font-medium">
-                  Select Related Products
-                </label>
-                
-                {isLoadingProducts ? (
-                  <div className="flex items-center space-x-2 text-white/70">
-                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#5695F5]"></div>
-                    <span>Loading products...</span>
-                  </div>
-                ) : availableProducts.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-white/70 mb-2">No products available</p>
-                      <p className="text-white/50 text-sm">Create some products first to select related products</p>
-                    </div>
-                ) : (
-                  <select
-                    multiple
-                    value={formData.relatedProducts}
-                    onChange={(e) => {
-                      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                      setFormData(prev => ({
-                        ...prev,
-                        relatedProducts: selectedOptions
-                      }));
-                    }}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/30 rounded-lg text-white focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition min-h-[220px]"
-                        size={Math.min(availableProducts.length, 8)} // Show up to 8 items at once
-                  >
-                    {availableProducts.map((product) => (
-                        <option 
-                        key={product._id || product.id}
-                        value={product._id || product.id}
-                        className="bg-[#070B13] py-2 px-3 hover:bg-[#5695F5]/10"
-                        >
-                        {product.name || 'Unnamed Product'} - ${product.price || '0'} (SKU: {product.sku || 'N/A'})
-                        </option>
-                      ))}
-                  </select>
-                )}
-                
-                <p className="text-white/60 text-xs">
-                  Hold Ctrl (Cmd on Mac) to select multiple products. Selected products will appear as tags above.
-                </p>
-              </div>
-            </div>
 
            
 
@@ -871,12 +935,22 @@ const AddProduct = () => {
                   Video Thumbnail URL
                 </label>
                 <input
+                  id="videoUrl"
                   type="text"
                   value={formData.videoUrl}
-                  onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
+                  onChange={(e) => {
+                    setFormData({ ...formData, videoUrl: e.target.value });
+                    clearFieldError('videoUrl');
+                  }}
+                  className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${validationErrors.videoUrl
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                    }`}
                   placeholder="/watch-video.jpg"
                 />
+                {validationErrors.videoUrl && (
+                  <p className="text-red-400 text-sm mt-1">{validationErrors.videoUrl}</p>
+                )}
               </div>
 
               <div>
@@ -898,14 +972,22 @@ const AddProduct = () => {
             <div className="flex space-x-4 pt-8 border-t border-white/20">
               <button
                 type="submit"
-                className="flex-1 bg-[#5695F5] hover:bg-blue-600 text-white py-4 px-6 rounded-lg transition font-semibold text-lg"
+                disabled={isSubmitting}
+                className={`flex-1 py-4 px-6 rounded-lg transition font-semibold text-lg ${isSubmitting
+                    ? 'bg-gray-500 cursor-not-allowed text-gray-300'
+                    : 'bg-[#5695F5] hover:bg-blue-600 text-white'
+                  }`}
               >
-                {isEditMode ? 'Update Product' : 'Add Product'}
+                {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Product' : 'Add Product')}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/admin/products')}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 px-6 rounded-lg transition font-semibold text-lg"
+                disabled={isSubmitting}
+                className={`flex-1 py-4 px-6 rounded-lg transition font-semibold text-lg ${isSubmitting
+                    ? 'bg-gray-500/20 cursor-not-allowed text-gray-400'
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                  }`}
               >
                 Cancel
               </button>
