@@ -77,29 +77,35 @@ export function ProductCartProvider({ children }) {
       const cartData = await cartService.getCart();
       console.log('Raw cart data from API:', cartData);
 
-      // Handle different API response structures
+      // Normalize to an array of items regardless of envelope shape
       let cartItems = [];
       if (Array.isArray(cartData)) {
         cartItems = cartData;
       } else if (cartData && typeof cartData === 'object') {
-        // Check for common response structures
-        cartItems = cartData.items || cartData.data || cartData.cart || cartData.products || [];
-      }
-
-      // Ensure cartItems is an array
-      if (!Array.isArray(cartItems)) {
-        console.warn('Cart data is not an array:', cartItems);
-        cartItems = [];
+        if (Array.isArray(cartData.items)) {
+          cartItems = cartData.items;
+        } else if (Array.isArray(cartData.data?.items)) {
+          cartItems = cartData.data.items;
+        } else if (Array.isArray(cartData.cart?.items)) {
+          cartItems = cartData.cart.items;
+        } else if (Array.isArray(cartData.data)) {
+          cartItems = cartData.data;
+        } else if (Array.isArray(cartData.products)) {
+          cartItems = cartData.products;
+        } else {
+          console.warn('Cart data does not contain an items array. Using empty list. Shape:', cartData);
+          cartItems = [];
+        }
       }
 
       // Transform API data to match our format
       const transformedItems = cartItems.map(item => ({
-        id: item._id || item.id,
-        productId: item.productId,
-        name: item.name,
-        price: `$${item.price}`,
-        priceNum: parseFloat(item.price || 0),
-        img: item.image || item.img,
+        id: item._id || item.id, // cart item id
+        productId: item.productId?._id || item.productId || item.product?.id,
+        name: item.name || item.product?.name,
+        price: typeof item.price === 'number' ? `$${item.price}` : (item.price || '$0.00'),
+        priceNum: typeof item.price === 'number' ? item.price : parseFloat(item.price || 0),
+        img: item.image || item.img || item.product?.image || item.product?.img,
         qty: item.quantity || item.qty || 1,
         size: item.size,
         color: item.color,
@@ -311,7 +317,7 @@ export function ProductCartProvider({ children }) {
     }
   };
 
-  const checkout = async () => {
+  const checkout = async (checkoutData = {}) => {
     try {
       setError(null);
 
@@ -321,7 +327,7 @@ export function ProductCartProvider({ children }) {
       }
 
       // Use API for checkout
-      const result = await cartService.checkoutCart();
+      const result = await cartService.checkoutCart(checkoutData);
 
       // Clear cart after successful checkout
       setItems([]);

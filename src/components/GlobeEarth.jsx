@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import citiesData from "../data/citiesData.json";
 import { useCityCart } from "../context/CityCartContext";
 import tz_lookup from "tz-lookup";
-import Loader from "./Loader";
+// Removed page-level Loader usage; a global splash loader will cover initial load
 
 const EXAMPLE_CITIES = citiesData.cities;
 
@@ -66,15 +66,14 @@ export default function GlobeEarth({
     // globe.onPointClick((d) => setActiveCity(d));
     globe.onPointHover((d) => setHoverCity(d || null));
     
-
-    // globe.pointOfView({ lat: 0, lng: 0, altitude: 0.7 }, 400);
+  // globe.pointOfView({ lat: 0, lng: 0, altitude: 0.7 }, 400);
     const screenWidth = window.innerWidth;
     const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.85;
 
     globe.pointOfView({ lat: 0, lng: 0, altitude }, 800);
-  
-
-    globe(containerRef.current);
+    
+  globe(containerRef.current);
+  const mountNode = containerRef.current;
     globeRef.current = globe;
 
     const controls = globe.controls();
@@ -85,8 +84,8 @@ export default function GlobeEarth({
     }
 
     return () => {
-      if (containerRef.current && containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
+      if (mountNode && mountNode.firstChild) {
+        mountNode.removeChild(mountNode.firstChild);
       }
     };
   }, [cities]); // Removed isPlaying from dependencies to prevent recreation
@@ -225,7 +224,6 @@ export default function GlobeEarth({
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
-      {isLoading && <Loader />}
       <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <div ref={containerRef} className=" " />
       </div>

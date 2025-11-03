@@ -137,11 +137,9 @@ export const cartService = {
   // Format cart item data for API
   formatCartItem: (itemData) => {
     return {
-      productId: itemData.id || itemData._id || itemData.productId,
-      name: itemData.name,
-      price: itemData.price,
-      image: itemData.img || itemData.image,
+      productId: itemData.productId || itemData.id || itemData._id,
       quantity: itemData.qty || itemData.quantity || 1,
+      // Optional options
       size: itemData.size,
       color: itemData.color,
       edition: itemData.edition

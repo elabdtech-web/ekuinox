@@ -39,7 +39,9 @@ export const AUTH_ENDPOINTS = {
   ME: `${API_BASE_URL}/auth/me`,
   UPDATE_DETAILS: `${API_BASE_URL}/auth/updatedetails`,
   UPDATE_PASSWORD: `${API_BASE_URL}/auth/updatepassword`,
-  LOGOUT: `${API_BASE_URL}/auth/logout`
+  LOGOUT: `${API_BASE_URL}/auth/logout`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+  RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`
 };
 
 export const PRODUCT_ENDPOINTS = {

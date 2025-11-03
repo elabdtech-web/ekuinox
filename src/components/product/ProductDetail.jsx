@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { PiShoppingBag } from "react-icons/pi";
 import CustomVideoPlayer from "./CustomVideoPlayer";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useProductCart } from "../../context/ProductCartContext";
-import Loader from "../Loader";
+// Page-level loader removed; global splash handles initial loading
 
 
-const ProductDetail = ({ product, loading }) => {
+const ProductDetail = ({ product }) => {
   // Use product directly since it's now a single product object
   const productData = product;
 
@@ -53,12 +54,7 @@ const ProductDetail = ({ product, loading }) => {
     setIndex((i) => (i - 1 + activeGallery.length) % activeGallery.length);
   const next = () => setIndex((i) => (i + 1) % activeGallery.length);
 
-  // Show loading state
-  if (loading) {
-    return (
-      <Loader/>
-    );
-  }
+  // No in-page loader; allow content or fallback sections to handle state
 
   // Show message if no product data
   if (!productData) {
@@ -222,10 +218,8 @@ const ProductDetail = ({ product, loading }) => {
                         color: color,
                         edition: edition
                       });
-                      alert('Product added to cart successfully!');
                     } catch (error) {
                       console.error('Error adding to cart:', error);
-                      alert('Failed to add product to cart. Please try again.');
                     }
                   }
                 }}
@@ -249,10 +243,8 @@ const ProductDetail = ({ product, loading }) => {
                         color: color,
                         edition: edition
                       });
-                      alert('Product added to cart successfully!');
                     } catch (error) {
                       console.error('Error adding to cart:', error);
-                      alert('Failed to add product to cart. Please try again.');
                     }
                   }
                 }}

@@ -1,21 +1,14 @@
 import React from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import featuresData from "../../data/featuresData.json";
-import Loader from "../Loader";
+// Page-level loader removed; rely on global splash at app start
 
 const { heroImage, heroTitle } = featuresData;
 
-const FeaturesSection = ({ features, loading }) => {
+const FeaturesSection = ({ features }) => {
 
-
-
-  if (loading) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-[#070B13]">
-        <Loader />
-      </div>
-    );
-  }
+  // No in-page loader
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13]">

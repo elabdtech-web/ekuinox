@@ -3,9 +3,12 @@ import { createPortal } from "react-dom";
 import { HiMinusSm, HiPlusSm } from "react-icons/hi";
 import { FiX } from "react-icons/fi";
 import { useProductCart } from "../context/ProductCartContext";
+// import CheckoutForm from "../components/CheckoutForm";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart({ open, onClose }) {
-  const { items, inc, dec, remove, subtotal, delivery, total, loading, error, checkout, clearCart } = useProductCart();
+  const { items, inc, dec, remove, subtotal, delivery, total, loading, error, clearCart } = useProductCart();
+  const navigate = useNavigate();
 
   function currency(n) {
     return `$${Number(n || 0).toLocaleString(undefined, {
@@ -194,15 +197,7 @@ export default function Cart({ open, onClose }) {
 
             <div className="-mb-4 mt-2 -mx-4">
               <button
-                onClick={async () => {
-                  try {
-                    await checkout();
-                    alert('Checkout successful!');
-                    onClose();
-                  } catch (error) {
-                    alert('Checkout failed: ' + error.message);
-                  }
-                }}
+                onClick={() => { onClose(); navigate('/checkout'); }}
                 className="w-full h-12 rounded-[18px] bg-gradient-to-r from-[#5ea0ff] to-[#3a7cff] text-white font-semibold shadow-lg hover:brightness-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={items.length === 0 || loading}
               >
@@ -212,6 +207,7 @@ export default function Cart({ open, onClose }) {
           </div>
         </div>
       </aside>
+  {/* Checkout Modal removed: now using a dedicated page */}
     </>,
     document.body
   );

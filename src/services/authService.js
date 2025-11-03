@@ -90,6 +90,36 @@ export const authService = {
     }
   },
 
+  // Forgot password
+  forgotPassword: async (email) => {
+    try {
+      const response = await fetch(AUTH_ENDPOINTS.FORGOT_PASSWORD, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  },
+
+  // Reset password
+  resetPassword: async ({ token, newPassword }) => {
+    try {
+      const response = await fetch(AUTH_ENDPOINTS.RESET_PASSWORD, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword })
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  },
+
   // Update user details
   updateDetails: async (userDetails) => {
     try {

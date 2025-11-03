@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { PiDotsSixLight, PiShoppingBag } from "react-icons/pi";
-import { FiSettings, FiMenu, FiX } from "react-icons/fi"; // + add FiMenu, FiX
+import { FiSettings, FiMenu, FiX, FiUser } from "react-icons/fi"; // + add FiMenu, FiX, FiUser
 import { Link, useLocation } from "react-router-dom";
 import Cart from "../common/Cart";
 import Setting from "../common/Setting";
 import MyCities from "../common/MyCities";
 import { useProductCart } from "../context/ProductCartContext";
 import { RiShoppingBagLine } from "react-icons/ri";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const [isSticky, setIsSticky] = useState(false);
@@ -20,6 +21,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false); // + mobile menu state
 
   const { items } = useProductCart();
+  const { isAuthenticated, user, logout } = useAuth();
   const cartRef = useRef(null);
   const settingsRef = useRef(null);
   const citiesRef = useRef(null);
@@ -165,6 +167,29 @@ const Navbar = () => {
 
         {/* Right Section */}
         <div className="flex items-center gap-3 md:gap-4">
+          {/* Auth buttons (desktop) */}
+                  <div className="hidden md:flex items-center gap-2">
+                    {!isAuthenticated ? (
+                      <Link
+                        to="/login"
+                        className="h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white flex items-center justify-center hover:bg-white/10 transition"
+                        aria-label="Login"
+                        title="Login"
+                      >
+                        <FiUser size={18} />
+                      </Link>
+                    ) : (
+                      <>
+                        <span className="text-white/80 text-sm hidden lg:inline">{user?.name || user?.email}</span>
+                        <button
+                          onClick={logout}
+                          className="px-3 h-10 flex items-center rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/15 transition"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    )}
+                  </div>
           {/* Cart Icon (always visible) */}
           <div className="flex gap-2 items-center justify-center py-1.5" ref={cartRef}>
             <p className="text-base  text-gray-500 hidden md:block">Cart</p>
@@ -325,6 +350,22 @@ const Navbar = () => {
           >
             SHORT STORY
           </Link>
+          {!isAuthenticated ? (
+            <Link
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2 rounded-lg bg_white/5 border border-white/10 text-white"
+            >
+              LOGIN
+            </Link>
+          ) : (
+            <button
+              onClick={() => { logout(); setMobileOpen(false); }}
+              className="w-full text-left px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
+            >
+              LOGOUT
+            </button>
+          )}
         </nav>
       </div>
 

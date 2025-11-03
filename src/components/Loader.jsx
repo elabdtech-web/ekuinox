@@ -2,7 +2,7 @@ import React from 'react';
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 bg-gradient-primary flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-r from-[#34D073] to-[#1DA076] flex items-center justify-center z-50">
       <div className="text-center">
         {/* Main Logo */}
         <div className="relative mb-8">
