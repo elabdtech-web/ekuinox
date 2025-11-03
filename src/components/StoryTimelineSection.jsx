@@ -65,7 +65,7 @@ export default function StoryTimelineSection() {
         </motion.span>
       </h2>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+      <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 relative">
         {/* Vertical divider */}
         <div
           className="hidden md:block absolute left-1/2 top-0 h-full w-1.5 rounded-full bg-[#6ea9ff]/40"

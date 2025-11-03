@@ -60,7 +60,7 @@ const LuxuryProducts = ({ products, loading }) => {
   if (validProducts.length === 0) {
     return (
       <section className="w-full min-h-screen relative bg-[#070B13] py-12">
-        <div className="max-w-7xl mx-auto px-6 lg:px-0">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-0">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -82,7 +82,7 @@ const LuxuryProducts = ({ products, loading }) => {
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
-      <div className="max-w-7xl mx-auto px-6 lg:px-0">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-0">
         {/* Heading with animation */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}

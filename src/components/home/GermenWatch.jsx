@@ -8,17 +8,17 @@ export default function GermenWatch() {
       <div className="md:h-28 bg-[#080C14]"></div>
 
       {/* Centered Watch Image */}
-      <div className="max-w-7xl w-full flex justify-center">
+      <div className="max-w-[1440px] w-full flex justify-center">
         <img
           src="/watch.png"
           alt="Garmin Fenix 7 Pro"
-          className="pointer-events-none w-full max-w-xs sm:max-w-lg md:max-w-lg lg:max-w-7xl object-contain"
+          className="pointer-events-none w-full max-w-xs sm:max-w-lg md:max-w-lg lg:max-w-[1440px] object-contain"
         />
       </div>
 
       {/* Bottom Info Bar */}
       <div className="w-full bg-gradient-to-t from-[#1D3253]/40 to-[#1728433D]/30 backdrop-blur-sm px-4 md:px-6 py-6 pb-12 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 flex-wrap">
+        <div className="max-w-[1440px] mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 flex-wrap">
           {/* Animated Text */}
           <motion.div
             className="text-center md:text-left space-y-2.5  flex-1 min-w-0"

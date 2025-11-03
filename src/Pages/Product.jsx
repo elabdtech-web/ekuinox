@@ -9,11 +9,13 @@ import { productService } from '../services/productService'
 const Product = () => {
 
   const [products, setProducts] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
   // const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadProducts();
+    getAllProducts();
   }, []);
 
   const loadProducts = async () => {
@@ -53,17 +55,31 @@ const Product = () => {
     }
   };
 
+  // get all products
+  const getAllProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await productService.getProducts();
+      console.log('All Products API response:', response);
+      setAllProducts(response.data);
+    } catch (error) {
+      console.error('Error loading all products:', error);
+      setAllProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }
   // console.log('Rendering products:', products?.relatedProducts);
 
   // Get the main product (first one) and related products
   const mainProduct = Array.isArray(products) ? products[0] : products;
-  const relatedProducts = Array.isArray(products) ? products.slice(1) : (products?.relatedProducts || []);
+  // const relatedProducts = Array.isArray(products) ? products.slice(1) : (products?.relatedProducts || []);
 
   return (
     <MainLayout>
       <ProductDetail product={mainProduct} loading={loading} />
       <FeaturesSection features={mainProduct?.features || []} loading={loading} />
-      <LuxuryProducts products={relatedProducts} />
+      <LuxuryProducts products={allProducts} />
       <HeroFeatures />
     </MainLayout>
   );

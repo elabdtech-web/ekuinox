@@ -41,7 +41,7 @@ const FeaturesSection = ({ features, loading }) => {
       </div>
 
       {/* features grid */}
-      <div className="max-w-7xl mx-auto px-6 py-6 lg:px-0">
+      <div className="max-w-[1440px] mx-auto px-6 py-6 lg:px-0">
         {(!features || features.length === 0) ? (
           <div className="text-center py-12">
             <p className="text-white/60 text-lg">No features available</p>

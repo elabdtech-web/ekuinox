@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 export default function StoryTeamSection() {
   return (
     <section className="w-full bg-gradient-to-r from-[#23375a] via-[#23375a] to-black overflow-hidden">
-      <div className="max-w-7xl mx-auto min-h-[700px] flex flex-col md:flex-row h-full">
+      <div className="max-w-[1440px] mx-auto min-h-[700px] flex flex-col md:flex-row h-full">
         {/* Left: Text & Button */}
         <motion.div
           className="bg-[#23375a] w-full md:w-[60%] rounded-none flex flex-col justify-center p-6 md:py-12 md:pr-6"

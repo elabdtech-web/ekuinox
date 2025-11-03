@@ -43,7 +43,7 @@ const HeroFeatures = () => {
         {/* Overlay Content (unchanged) */}
         <div className="absolute inset-0 space-y-6 flex flex-col items-center justify-end text-center bg-gradient-to-t from-[#070B13] to-[#070B13]/20 px-6 pb-10">
           {/* Features Grid */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 mt-6 w-full">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-0 mt-6 w-full">
             <div className="flex text-center flex-col items-center mb-4 max-w-3xl mx-auto">
               <div className="text-xl sm:text-2xl md:text-4xl lg:text-5xl text-white/90 font-medium">
                 {heroFeaturesData.subtitle}

@@ -18,10 +18,19 @@ const ProductDetail = ({ product, loading }) => {
   const [color, setColor] = useState("");
   const [index, setIndex] = useState(0);
 
-  // Use images array from product data for gallery, handle both string URLs and objects
-  const activeGallery = productData?.images?.map(img =>
-    typeof img === 'string' ? img : img.url || img.src || '/watch-1.png'
-  ) || ["/watch-1.png", "/watch-2.png", "/watch-3.png"];
+  // Use color-specific gallery images when a color is selected, otherwise use main product images
+  const activeGallery = React.useMemo(() => {
+    if (color && productData?.colors) {
+      const selectedColor = productData.colors.find(c => c.id === color);
+      if (selectedColor?.gallery && selectedColor.gallery.length > 0) {
+        return selectedColor.gallery;
+      }
+    }
+    // Fallback to main product images
+    return productData?.images?.map(img =>
+      typeof img === 'string' ? img : img.url || img.src || '/watch-1.png'
+    ) || ["/watch-1.png", "/watch-2.png", "/watch-3.png"];
+  }, [color, productData?.colors, productData?.images]);
 
   // Initialize state when product data is loaded
   useEffect(() => {
@@ -55,7 +64,7 @@ const ProductDetail = ({ product, loading }) => {
   if (!productData) {
     return (
       <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-0 py-16">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
           <div className="flex items-center justify-center h-96">
             <div className="text-white text-2xl">No product found</div>
           </div>
@@ -66,8 +75,8 @@ const ProductDetail = ({ product, loading }) => {
 
   return (
     <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-0 py-16">
-        <div className="grid grid-cols-12 gap-8 items-center">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
+        <div className="grid grid-cols-12 gap-8 ">
           {/* Left column */}
           <motion.div
             initial={{ opacity: 0, x: -60 }}
@@ -306,7 +315,7 @@ const ProductDetail = ({ product, loading }) => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="col-span-12 lg:col-span-4"
+            className="col-span-12 lg:col-span-4 flex flex-col w-full"
           >
             <div className="bg-white/5 rounded-xl py-4 overflow-hidden border border-white/10">
               <CustomVideoPlayer

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 export default function StoryStartedSection() {
   return (
     <section className="relative w-full py-16 min-h-[780px] flex items-center px-4 bg-[#070B13] overflow-hidden">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Left: Headline and paragraph */}
         <motion.div
           initial={{ opacity: 0, x: -100 }}

@@ -75,9 +75,25 @@ export function ProductCartProvider({ children }) {
 
       // Load from API if authenticated
       const cartData = await cartService.getCart();
+      console.log('Raw cart data from API:', cartData);
+
+      // Handle different API response structures
+      let cartItems = [];
+      if (Array.isArray(cartData)) {
+        cartItems = cartData;
+      } else if (cartData && typeof cartData === 'object') {
+        // Check for common response structures
+        cartItems = cartData.items || cartData.data || cartData.cart || cartData.products || [];
+      }
+
+      // Ensure cartItems is an array
+      if (!Array.isArray(cartItems)) {
+        console.warn('Cart data is not an array:', cartItems);
+        cartItems = [];
+      }
 
       // Transform API data to match our format
-      const transformedItems = (cartData.items || cartData || []).map(item => ({
+      const transformedItems = cartItems.map(item => ({
         id: item._id || item.id,
         productId: item.productId,
         name: item.name,
