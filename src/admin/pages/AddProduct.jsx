@@ -29,7 +29,9 @@ const AddProduct = () => {
     colors: [],
     stats: [],
     subItems: [], // New field for sub-items
-    relatedProducts: [] // New field for related products
+    relatedProducts: [], // New field for related products
+    images: [], // New field for product images
+    features: [] // New field for product features
   });
 
   // Dynamic field states
@@ -45,16 +47,24 @@ const AddProduct = () => {
     label: '',
     value: ''
   });
-  const [newSubItem, setNewSubItem] = useState({
-    name: '',
-    price: '',
-    description: '',
-    image: ''
-  });
+
 
   // Related products states
   const [availableProducts, setAvailableProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  // Images and features states
+  const [newImage, setNewImage] = useState({
+    url: '',
+    alt: '',
+    isMain: false
+  });
+  const [newFeature, setNewFeature] = useState({
+    title: '',
+    description: '',
+    icon: '',
+    image: ''
+  });
 
   // Load product data when in edit mode
   useEffect(() => {
@@ -73,8 +83,9 @@ const AddProduct = () => {
         editions: editingProduct.editions || [],
         colors: editingProduct.colors || [],
         stats: editingProduct.stats || [],
-        subItems: editingProduct.subItems || [],
-        relatedProducts: editingProduct.relatedProducts || []
+        relatedProducts: editingProduct.relatedProducts || [],
+        images: editingProduct.images || [],
+        features: editingProduct.features || []
       });
     }
   }, [isEditMode, editingProduct]);
@@ -86,10 +97,11 @@ const AddProduct = () => {
         setIsLoadingProducts(true);
         const response = await productService.getProducts();
         console.log('Fetched products for related selection:', response);
-        // Show all products in the dropdown
-        setAvailableProducts(response.data || []);
+        // Show all products in the dropdown - API returns data array
+        setAvailableProducts(response.data || response.products || []);
       } catch (error) {
         console.error('Error fetching products:', error);
+        setAvailableProducts([]);
       } finally {
         setIsLoadingProducts(false);
       }
@@ -196,43 +208,76 @@ const AddProduct = () => {
     }));
   };
 
-  // Sub-items management functions
-  const addSubItem = () => {
-    if (newSubItem.name && newSubItem.price) {
-      setFormData(prev => ({
-        ...prev,
-        subItems: [...prev.subItems, { ...newSubItem, id: Date.now() }]
-      }));
-      setNewSubItem({
-        name: '',
-        price: '',
-        description: '',
-        image: ''
-      });
-    }
-  };
 
-  const removeSubItem = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      subItems: prev.subItems.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateSubItem = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      subItems: prev.subItems.map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
-  };
 
   // Related products management functions
   const removeRelatedProduct = (productId) => {
     setFormData(prev => ({
       ...prev,
       relatedProducts: prev.relatedProducts.filter(id => id !== productId)
+    }));
+  };
+
+  // Images management functions
+  const addImage = () => {
+    if (newImage.url && newImage.alt) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, { ...newImage, id: Date.now() }]
+      }));
+      setNewImage({
+        url: '',
+        alt: '',
+        isMain: false
+      });
+    }
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateImage = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((image, i) =>
+        i === index ? { ...image, [field]: value } : image
+      )
+    }));
+  };
+
+  // Features management functions
+  const addFeature = () => {
+    if (newFeature.title && newFeature.description) {
+      setFormData(prev => ({
+        ...prev,
+        features: [...prev.features, { ...newFeature, id: Date.now() }]
+      }));
+      setNewFeature({
+        title: '',
+        description: '',
+        icon: '',
+        image: ''
+      });
+    }
+  };
+
+  const removeFeature = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateFeature = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.map((feature, i) =>
+        i === index ? { ...feature, [field]: value } : feature
+      )
     }));
   };
 
@@ -261,15 +306,22 @@ const AddProduct = () => {
             label: s.label.trim(),
             value: s.value.trim()
           })),
-        subItems: formData.subItems
-          .filter(s => s.name && s.price)
-          .map(s => ({
-            name: s.name.trim(),
-            price: String(s.price).trim(),
-            description: s.description?.trim() || '',
-            image: s.image?.trim() || ''
+        relatedProducts: formData.relatedProducts || [],
+        images: formData.images
+          .filter(img => img.url && img.alt)
+          .map(img => ({
+            url: img.url.trim(),
+            alt: img.alt.trim(),
+            isMain: Boolean(img.isMain)
           })),
-        relatedProducts: formData.relatedProducts || []
+        features: formData.features
+          .filter(f => f.title && f.description)
+          .map(f => ({
+            title: f.title.trim(),
+            description: f.description.trim(),
+            icon: f.icon?.trim() || '',
+            image: f.image?.trim() || ''
+          }))
       };
 
 
@@ -415,133 +467,6 @@ const AddProduct = () => {
                     <option value="Accessories" className="bg-[#070B13]">Accessories</option>
                   </select>
                 </div>
-              </div>
-            </div>
-
-            {/* Sub-Items Section */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
-                Sub-Items Management
-              </h2>
-              
-              {/* Existing Sub-Items */}
-              {formData.subItems.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-white/90">Current Sub-Items</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {formData.subItems.map((subItem, index) => (
-                      <div key={subItem.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className="text-white font-medium">{subItem.name}</h4>
-                          <button
-                            type="button"
-                            onClick={() => removeSubItem(index)}
-                            className="text-red-400 hover:text-red-300"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <input
-                            type="text"
-                            value={subItem.name}
-                            onChange={(e) => updateSubItem(index, 'name', e.target.value)}
-                            className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm"
-                            placeholder="Sub-item name"
-                          />
-                          <input
-                            type="text"
-                            value={subItem.price}
-                            onChange={(e) => updateSubItem(index, 'price', e.target.value)}
-                            className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm"
-                            placeholder="Price"
-                          />
-                          <textarea
-                            value={subItem.description}
-                            onChange={(e) => updateSubItem(index, 'description', e.target.value)}
-                            rows="2"
-                            className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm resize-none"
-                            placeholder="Description"
-                          />
-                          <input
-                            type="text"
-                            value={subItem.image}
-                            onChange={(e) => updateSubItem(index, 'image', e.target.value)}
-                            className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm"
-                            placeholder="Image URL"
-                          />
-                        </div>
-                        
-                        <div className="mt-3 pt-3 border-t border-white/10">
-                          <span className="text-[#5695F5] font-semibold text-lg">{subItem.price}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Add New Sub-Item Form */}
-              <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-                <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                  <FiPlus className="w-5 h-5 mr-2" />
-                  Add New Sub-Item
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">Sub-Item Name</label>
-                    <input
-                      type="text"
-                      value={newSubItem.name}
-                      onChange={(e) => setNewSubItem({...newSubItem, name: e.target.value})}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
-                      placeholder="e.g., Watch Band, Charger"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">Price</label>
-                    <input
-                      type="text"
-                      value={newSubItem.price}
-                      onChange={(e) => setNewSubItem({...newSubItem, price: e.target.value})}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
-                      placeholder="$0.00"
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-white/80 text-sm font-medium mb-2">Description</label>
-                  <textarea
-                    value={newSubItem.description}
-                    onChange={(e) => setNewSubItem({...newSubItem, description: e.target.value})}
-                    rows="3"
-                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition resize-none"
-                    placeholder="Sub-item description"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-white/80 text-sm font-medium mb-2">Image URL</label>
-                  <input
-                    type="text"
-                    value={newSubItem.image}
-                    onChange={(e) => setNewSubItem({...newSubItem, image: e.target.value})}
-                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
-                    placeholder="/sub-item-image.jpg"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={addSubItem}
-                  className="w-full px-4 py-2 bg-[#5695F5] hover:bg-blue-600 text-white rounded-lg transition font-medium"
-                >
-                  Add Sub-Item
-                </button>
               </div>
             </div>
 
@@ -821,7 +746,10 @@ const AddProduct = () => {
                     <span>Loading products...</span>
                   </div>
                 ) : availableProducts.length === 0 ? (
-                  <p className="text-white/70">No other products available</p>
+                    <div className="text-center py-8">
+                      <p className="text-white/70 mb-2">No products available</p>
+                      <p className="text-white/50 text-sm">Create some products first to select related products</p>
+                    </div>
                 ) : (
                   <select
                     multiple
@@ -833,15 +761,16 @@ const AddProduct = () => {
                         relatedProducts: selectedOptions
                       }));
                     }}
-                    className="w-full px-4 py-3 border border-white/30 rounded-lg text-white focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition min-h-[220px]"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/30 rounded-lg text-white focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition min-h-[220px]"
+                        size={Math.min(availableProducts.length, 8)} // Show up to 8 items at once
                   >
                     {availableProducts.map((product) => (
                         <option 
-                          key={product._id} 
-                          value={product._id}
-                          className="b py-1"
+                        key={product._id || product.id}
+                        value={product._id || product.id}
+                        className="bg-[#070B13] py-2 px-3 hover:bg-[#5695F5]/10"
                         >
-                          {product.name} - ${product.price} (SKU: {product.sku})
+                        {product.name || 'Unnamed Product'} - ${product.price || '0'} (SKU: {product.sku || 'N/A'})
                         </option>
                       ))}
                   </select>
@@ -850,6 +779,222 @@ const AddProduct = () => {
                 <p className="text-white/60 text-xs">
                   Hold Ctrl (Cmd on Mac) to select multiple products. Selected products will appear as tags above.
                 </p>
+              </div>
+            </div>
+
+            {/* Images Management */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
+                Product Images
+              </h2>
+
+              {/* Existing Images */}
+              {formData.images.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-white/90">Current Images</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {formData.images.map((image, index) => (
+                      <div key={image.id || index} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="text-white font-medium text-sm">{image.alt}</h4>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <img src={image.url} alt={image.alt} className="w-full h-24 object-cover rounded mb-3" />
+
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={image.url}
+                            onChange={(e) => updateImage(index, 'url', e.target.value)}
+                            className="w-full px-2 py-1 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-xs"
+                            placeholder="Image URL"
+                          />
+                          <input
+                            type="text"
+                            value={image.alt}
+                            onChange={(e) => updateImage(index, 'alt', e.target.value)}
+                            className="w-full px-2 py-1 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-xs"
+                            placeholder="Alt text"
+                          />
+                          <label className="flex items-center text-white/70 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={image.isMain}
+                              onChange={(e) => updateImage(index, 'isMain', e.target.checked)}
+                              className="mr-2"
+                            />
+                            Main image
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add New Image Form */}
+              <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                  <FiPlus className="w-5 h-5 mr-2" />
+                  Add New Image
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">Image URL</label>
+                    <input
+                      type="text"
+                      value={newImage.url}
+                      onChange={(e) => setNewImage({ ...newImage, url: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">Alt Text</label>
+                    <input
+                      type="text"
+                      value={newImage.alt}
+                      onChange={(e) => setNewImage({ ...newImage, alt: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
+                      placeholder="Image description"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="flex items-center text-white/80 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={newImage.isMain}
+                      onChange={(e) => setNewImage({ ...newImage, isMain: e.target.checked })}
+                      className="mr-2"
+                    />
+                    Set as main image
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addImage}
+                  className="w-full px-4 py-2 bg-[#5695F5] hover:bg-blue-600 text-white rounded-lg transition font-medium"
+                >
+                  Add Image
+                </button>
+              </div>
+            </div>
+
+            {/* Features Management */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
+                Product Features
+              </h2>
+
+              {/* Existing Features */}
+              {formData.features.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-white/90">Current Features</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {formData.features.map((feature, index) => (
+                      <div key={feature.id || index} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="text-white font-medium">{feature.title}</h4>
+                          <button
+                            type="button"
+                            onClick={() => removeFeature(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={feature.title}
+                            onChange={(e) => updateFeature(index, 'title', e.target.value)}
+                            className="w-full px-2 py-1 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm"
+                            placeholder="Feature title"
+                          />
+                          <textarea
+                            value={feature.description}
+                            onChange={(e) => updateFeature(index, 'description', e.target.value)}
+                            rows="2"
+                            className="w-full px-2 py-1 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm resize-none"
+                            placeholder="Feature description"
+                          />
+                          <input
+                            type="text"
+                            value={feature.image}
+                            onChange={(e) => updateFeature(index, 'image', e.target.value)}
+                            className="w-full px-2 py-1 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 text-sm"
+                            placeholder="Feature image URL"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add New Feature Form */}
+              <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                <h3 className="text-lg font-medium text-white mb-4 flex items-center">
+                  <FiPlus className="w-5 h-5 mr-2" />
+                  Add New Feature
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-white/80 text-sm font-medium mb-2">Feature Title</label>
+                    <input
+                      type="text"
+                      value={newFeature.title}
+                      onChange={(e) => setNewFeature({ ...newFeature, title: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
+                      placeholder="e.g., Health Monitoring"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-white/80 text-sm font-medium mb-2">Feature Image URL (Optional)</label>
+                    <input
+                      type="text"
+                      value={newFeature.image}
+                      onChange={(e) => setNewFeature({ ...newFeature, image: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition"
+                      placeholder="/feature-image.jpg"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-white/80 text-sm font-medium mb-2">Description</label>
+                  <textarea
+                    value={newFeature.description}
+                    onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+                    rows="3"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#5695F5] focus:ring-1 focus:ring-[#5695F5] transition resize-none"
+                    placeholder="Describe the feature"
+                  />
+                </div>
+
+
+                <button
+                  type="button"
+                  onClick={addFeature}
+                  className="w-full px-4 py-2 bg-[#5695F5] hover:bg-blue-600 text-white rounded-lg transition font-medium"
+                >
+                  Add Feature
+                </button>
               </div>
             </div>
 

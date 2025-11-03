@@ -48,7 +48,7 @@ export const authService = {
   },
 
   // Login user
-    login: async (credentials) => {
+  login: async (credentials) => {
       console.log('authService login called with:', credentials);
     try {
       const response = await fetch(AUTH_ENDPOINTS.LOGIN, {

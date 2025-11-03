@@ -267,7 +267,7 @@ const ProductDetail = ({ product, loading }) => {
               <img
                 src={activeGallery[index]}
                 alt="watch"
-                className="w-full h-full object-cover transform-gpu transition-transform duration-500 rounded-lg"
+                className="w-full h-full object-contain transform-gpu transition-transform duration-500 rounded-lg"
               />
 
               {/* Indicators */}

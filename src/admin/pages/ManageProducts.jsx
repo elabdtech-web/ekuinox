@@ -55,7 +55,7 @@ const ManageProducts = () => {
 
   const handleEditProduct = (product) => {
     // Navigate to edit product page with product data
-    navigate(`/admin/add-product?edit=${product.id}`, { state: { product } });
+    navigate(`/admin/add-product?edit=${product._id}`, { state: { product } });
   };
 
   const handleViewProduct = (product) => {
@@ -68,7 +68,7 @@ const ManageProducts = () => {
       try {
         await productService.deleteProduct(productId);
         // Remove from local state after successful API call
-        setProducts(prev => prev.filter(p => p.id !== productId));
+        setProducts(prev => prev.filter(p => p._id !== productId));
         alert('Product deleted successfully!');
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -79,14 +79,14 @@ const ManageProducts = () => {
 
   const toggleProductStatus = async (productId) => {
     try {
-      const product = products.find(p => p.id === productId);
+      const product = products.find(p => p._id === productId);
       const newStatus = product.status === 'Active' ? 'Inactive' : 'Active';
       
       await productService.toggleProductStatus(productId, newStatus);
       
       // Update local state after successful API call
       setProducts(prev => prev.map(p => 
-        p.id === productId 
+        p._id === productId 
           ? { ...p, status: newStatus }
           : p
       ));
@@ -199,7 +199,7 @@ const ManageProducts = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
           <motion.div
-            key={product.id}
+            key={product._id || product.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden hover:bg-white/15 transition"
@@ -219,7 +219,7 @@ const ManageProducts = () => {
               )}
               <div className="absolute top-4 right-4">
                 <button
-                  onClick={() => toggleProductStatus(product.id)}
+                  onClick={() => toggleProductStatus(product._id || product.id)}
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     product.status === 'Active'
                       ? 'bg-green-500/20 text-green-400'
@@ -262,7 +262,7 @@ const ManageProducts = () => {
                   <FiEdit2 className="w-4 h-4 mx-auto" />
                 </button>
                 <button
-                  onClick={() => handleDeleteProduct(product.id)}
+                  onClick={() => handleDeleteProduct(product._id || product.id)}
                   className="flex-1 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition text-center"
                   title="Delete"
                 >
