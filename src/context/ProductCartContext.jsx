@@ -15,6 +15,7 @@ export function ProductCartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
   // Load cart on mount
@@ -355,6 +356,11 @@ export function ProductCartProvider({ children }) {
   const delivery = items.length ? (subtotal > 100 ? 0 : 10) : 0;
   const total = subtotal + delivery;
 
+  // Cart open/close functions
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+  const toggleCart = () => setIsCartOpen(prev => !prev);
+
   const value = {
     items,
     loading,
@@ -368,7 +374,11 @@ export function ProductCartProvider({ children }) {
     subtotal,
     delivery,
     total,
-    loadCart
+    loadCart,
+    isCartOpen,
+    openCart,
+    closeCart,
+    toggleCart
   };
 
   return (

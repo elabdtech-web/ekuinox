@@ -6,9 +6,9 @@ export default function HeroSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rotationProgress, setRotationProgress] = useState(0);
   const [timeOfDay, setTimeOfDay] = useState(50);
-  const [hovered, setHovered] = useState(false);
+  const [hoveredBtn, setHoveredBtn] = useState(false);
 
-  // Rotation animation for globe
+  // Rotation animation for globe - only when playing
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
@@ -33,32 +33,32 @@ export default function HeroSection() {
           
         </div>
 
-        <div className="w-full  flex overflow-hidden justify-center">
+        <div className="w-full flex overflow-hidden justify-center relative">
+          {/* Globe is always visible, isPlaying controls rotation */}
           <GlobeEarth
-            className=" "
-            hoverActive={hovered}
-            hoverView={{ lat: 20, lng: -60, altitude: 1.6 }}
+            className=""
             isPlaying={isPlaying}
             timeOfDay={timeOfDay}
           />
         </div>
       </div>
 
-      {/* Smooth expanding section */}
-      <div className="px-2  w-full max-w-4xl mx-auto absolute bottom-4 z-50 text-center">
+      {/* Smooth expanding button section */}
+      <div className="px-2 w-full max-w-4xl mx-auto absolute bottom-4 z-50 text-center">
         <div
-          className={`mx-auto rounded-full border  text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${hovered ? "w-full max-w-3xl py-1.5 px-4" : "w-[160px] py-3 px-6"
-            }`}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          className={`mx-auto rounded-full border text-white/70 font-medium cursor-pointer overflow-hidden transition-all duration-700 ease-in-out ${
+            hoveredBtn ? "w-full max-w-3xl py-1.5 px-4" : "w-[160px] py-3 px-6"
+          }`}
+          onMouseEnter={() => setHoveredBtn(true)}
+          onMouseLeave={() => setHoveredBtn(false)}
         >
-          {!hovered ? (
+          {!hoveredBtn ? (
             <span className="inline-block transition-opacity duration-500">
               Hover Here
             </span>
           ) : (
             <div className="flex items-center justify-between gap-4 transition-all duration-700 ease-in-out">
-              {/* Play / Pause Button */}
+              
               <div className="flex items-center gap-3 min-w-[160px]">
                 <div className="text-sm text-white/60">1 year ago</div>
                 <button
@@ -85,7 +85,7 @@ export default function HeroSection() {
                 </button>
               </div>
 
-              {/* Timeline Bar */}
+              
               <div className="flex-1 px-4">
                 <div className="relative h-2 overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,#0b1320,#0b1320)]" />
@@ -97,7 +97,6 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              {/* Right-side buttons */}
               <div className="flex items-center gap-3">
                 <div className="text-xs md:text-sm font-medium bg-[#111827] text-white/80 rounded-full py-2 px-3">
                   1 year Ahead

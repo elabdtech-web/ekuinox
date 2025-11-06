@@ -8,11 +8,11 @@ import { useProductCart } from "../../context/ProductCartContext";
 // Page-level loader removed; global splash handles initial loading
 
 
-const ProductDetail = ({ product }) => {
+const ProductDetail = ({ product, loading = false }) => {
   // Use product directly since it's now a single product object
   const productData = product;
 
-  const { addItem } = useProductCart();
+  const { addItem, openCart } = useProductCart();
 
   const [size, setSize] = useState("40mm");
   const [edition, setEdition] = useState("");
@@ -54,15 +54,13 @@ const ProductDetail = ({ product }) => {
     setIndex((i) => (i - 1 + activeGallery.length) % activeGallery.length);
   const next = () => setIndex((i) => (i + 1) % activeGallery.length);
 
-  // No in-page loader; allow content or fallback sections to handle state
-
-  // Show message if no product data
-  if (!productData) {
+  // Show loader while loading or when no product provided (replaces previous "No product found" block)
+  if (loading || !productData) {
     return (
       <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
           <div className="flex items-center justify-center h-96">
-            <div className="text-white text-2xl">No product found</div>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-t-2 border-[#5695F5]"></div>
           </div>
         </div>
       </section>
@@ -243,6 +241,8 @@ const ProductDetail = ({ product }) => {
                         color: color,
                         edition: edition
                       });
+                      // Open cart after adding item
+                      openCart();
                     } catch (error) {
                       console.error('Error adding to cart:', error);
                     }

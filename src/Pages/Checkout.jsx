@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductCart } from "../context/ProductCartContext";
+import { toast } from "react-toastify";
 
 const Checkout = () => {
   const { items, total, loading, checkout } = useProductCart();
@@ -36,14 +37,21 @@ const Checkout = () => {
 
   const validate = () => {
     const e = {};
-    if (!form.firstName.trim()) e.firstName = "Required";
-    if (!form.lastName.trim()) e.lastName = "Required";
-    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Valid email required";
-    if (!form.phone.trim()) e.phone = "Required";
-    if (!form.address.trim()) e.address = "Required";
-    if (!form.city.trim()) e.city = "Required";
-    if (!form.state.trim()) e.state = "Required";
-    if (!form.zip.trim()) e.zip = "Required";
+    if (!form.firstName.trim()) e.firstName = "First name is required.";
+    if (!form.lastName.trim()) e.lastName = "Last name is required.";
+    if (!form.email.trim()) e.email = "Email address is required.";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Please enter a valid email address (e.g. name@example.com).";
+    if (!form.phone.trim()) e.phone = "Phone number is required. Include country code if applicable.";
+    if (!form.address.trim()) e.address = "Street address is required.";
+    if (!form.city.trim()) e.city = "City is required.";
+    if (!form.state.trim()) e.state = "State / Province is required.";
+    if (!form.zip.trim()) e.zip = "ZIP / Postal code is required.";
+
+    // optional: example of cross-field validation (not required but helpful)
+    if (form.country === "United States" && form.zip && !/^\d{5}(-\d{4})?$/.test(form.zip)) {
+      e.zip = "Please enter a valid US ZIP code (e.g. 12345 or 12345-6789).";
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -71,10 +79,22 @@ const Checkout = () => {
         total,
       };
       const res = await checkout(checkoutData);
-      alert(`Order placed successfully${res?.data?.orderId ? ` (#${res.data.orderId})` : ""}`);
+      toast.success(`Order placed successfully)`, {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        pauseOnHover: true,
+        draggable: true,
+      });
       navigate("/");
     } catch (err) {
-      alert(err?.message || "Checkout failed");
+      toast.error(err?.message || "Checkout failed", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -293,21 +313,6 @@ const Checkout = () => {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    Country
-                  </label>
-                  <select
-                    value={form.country}
-                    onChange={(e) => set('country', e.target.value)}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:border-[#5695F5] focus:ring-2 focus:ring-[#5695F5]/20 transition"
-                  >
-                    <option value="United States" className="bg-[#061428]">United States</option>
-                    <option value="Canada" className="bg-[#061428]">Canada</option>
-                    <option value="United Kingdom" className="bg-[#061428]">United Kingdom</option>
-                    <option value="Australia" className="bg-[#061428]">Australia</option>
-                  </select>
-                </div>
               </div>
             </div>
 

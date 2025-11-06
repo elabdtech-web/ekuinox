@@ -55,10 +55,29 @@ export const AuthProvider = ({ children }) => {
       return { success: true, message: 'Login successful', data: response };
     } catch (error) {
       setLoading(false);
-      console.error('Login error:', error);
+      console.error('❌ AuthContext login error:', {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+        fullError: error
+      });
+      
+      // Provide more specific error messages based on status
+      let userMessage = error.message || 'Login failed. Please check your credentials and try again.';
+      
+      if (error.status === 401) {
+        userMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.status === 404) {
+        userMessage = 'Login service not found. Please contact support.';
+      } else if (error.status >= 500) {
+        userMessage = 'Server error. Please try again later.';
+      }
+      
       return { 
         success: false, 
-        message: error.message || 'Login failed. Please check your credentials and try again.' 
+        message: userMessage,
+        status: error.status,
+        originalError: error.message
       };
     }
   };
