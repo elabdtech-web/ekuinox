@@ -4,160 +4,161 @@ import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import { MdWbSunny, MdRefresh } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { BsMoonStarsFill } from "react-icons/bs";
+import { toast } from 'react-toastify';
 import { useCityCart } from "../context/CityCartContext";
+import { useAuth } from "../context/AuthContext";
 import AddCityModal from "../components/AddCityModal";
 import cityService from "../services/cityService";
 
 export default function MyCities() {
   const { savedCities = [], setSavedCities } = useCityCart();
+  const { isAuthenticated } = useAuth();
   const [query, setQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [refreshingIds, setRefreshingIds] = useState(new Set());
 
-  // Load cities from backend API on mount
+  const [error, setError] = useState("");
+
+  // Load cities from backend API on mount - only when authenticated
   useEffect(() => {
     const loadInitialCities = async () => {
+      if (!isAuthenticated) {
+        // Clear cities when not authenticated
+        setSavedCities && setSavedCities([]);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError("");
         const cities = await cityService.fetchCities();
-        console.log('Loaded cities from API:', cities);
-        setSavedCities && setSavedCities(cities);
+        console.log("Loaded cities from API:", cities);
+        // Only show cities that were actually added by the user
+        const userCities = Array.isArray(cities) ? cities : [];
+        setSavedCities && setSavedCities(userCities);
       } catch (error) {
-        console.error('Failed to load cities:', error);
+        console.error("Failed to load cities:", error);
+
+        // Handle authentication errors
+        if (error.message.includes("401")) {
+          setError("Please log in to view your cities.");
+          setSavedCities && setSavedCities([]);
+        } else {
+          setError("Failed to load cities. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
     };
-    
-    loadInitialCities();
-  }, [setSavedCities]);
 
-  const loadCities = async () => {
-    try {
-      setLoading(true);
-      const cities = await cityService.fetchCities();
-      console.log('Loaded cities from API:', cities);
-      setSavedCities && setSavedCities(cities);
-    } catch (error) {
-      console.error('Failed to load cities:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadInitialCities();
+  }, [setSavedCities, isAuthenticated]);
+
+
 
   const handleAddCity = async (cityName) => {
     try {
       const trimmedName = cityName.trim();
       if (!trimmedName || trimmedName.length < 2) {
-        alert('Please enter a valid city name.');
-        return;
+        throw new Error("Please enter a valid city name.");
       }
-      
-      setIsAdding(true); // Show adding loader AFTER validation
-      console.log('🔄 Starting to add city:', trimmedName, '- isAdding set to true');
-      
-      // Add city to backend first
+
+      setIsAdding(true);
+      console.log("🔄 Starting to add city:", trimmedName);
+
+      // Add city to backend (returns the formatted city response)
       const newCity = await cityService.createCity(trimmedName);
-      console.log('✅ New city created:', newCity);
-      
-      // Immediately add to local state (optimistic update) - NO PAGE RELOAD NEEDED
-      setSavedCities && setSavedCities(prev => {
-        // Check if city already exists to avoid duplicates
-        const exists = prev.some(city => 
-          city._id === newCity._id || 
-          (city.name?.toLowerCase() === newCity.name?.toLowerCase() && city.country === newCity.country)
-        );
-        if (exists) {
-          console.log('City already exists, not adding duplicate');
-          return prev;
-        }
-        const newList = [newCity, ...prev];
-        console.log(`City added to list! Total cities: ${newList.length}`);
-        return newList;
-      });
-      
-      // Wait a moment to show the loader, then close modal
-      setTimeout(() => {
-        setIsAddOpen(false);
-        console.log(`✅ ${newCity.name} added successfully and visible in list!`);
-      }, 800); // 800ms delay to show the loader
-      
-      // Optional: Sync with backend to ensure consistency (you can remove this if you want)
-      // await loadCities();
-      
+      console.log("✅ New city created:", newCity);
+
+      // Add to local state immediately (optimistic update)
+      setSavedCities &&
+        setSavedCities((prev) => {
+          // Check if city already exists to avoid duplicates
+          const exists = prev.some(
+            (city) =>
+              city._id === newCity._id ||
+              (city.name?.toLowerCase() === newCity.name?.toLowerCase() &&
+                city.country === newCity.country)
+          );
+          if (exists) {
+            console.log("City already exists, not adding duplicate");
+            return prev;
+          }
+          const newList = [newCity, ...prev];
+          console.log(`City added to list! Total cities: ${newList.length}`);
+          return newList;
+        });
+
+      // Show success and close modal immediately
+      toast.success(`🎉 ${newCity.name} added to your collection!`);
+      setIsAddOpen(false);
+      console.log(`✅ ${newCity.name} added successfully!`);
     } catch (error) {
-      console.error('Failed to add city:', error);
-      
-      // Better error handling based on common issues
-      let errorMessage = 'Failed to add city.';
-      
-      if (error.message.includes('401') || error.message.includes('Authentication required')) {
-        errorMessage = '🔒 Please log in to add cities. You need to be authenticated to perform this action.';
-      } else if (error.message.includes('404')) {
-        errorMessage = `"${cityName}" is not a valid city name or could not be found. Please check the spelling and try again.`;
-      } else if (error.message.includes('400')) {
-        errorMessage = `Invalid city name format. Please enter a valid city name like "Tokyo" or "New York".`;
-      } else if (error.message.includes('500')) {
-        errorMessage = 'Server error occurred. Please try again later.';
-      } else if (error.message.includes('Network')) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
-      } else {
-        errorMessage = `Error: ${error.message || 'Please check the city name spelling and try again.'}`;
-      }
-      
-      alert(errorMessage);
+      console.error("Failed to add city:", error);
+      // Re-throw to be handled by AddCityModal
+      throw error;
     } finally {
-      console.log('🔄 Finished adding city - isAdding set to false');
-      setIsAdding(false); // Stop adding loader
+      setIsAdding(false);
     }
   };
 
   const handleDeleteCity = async (cityId) => {
-    try {
-      await cityService.deleteCity(cityId);
-      // Remove from local state
-      setSavedCities && setSavedCities(prev => prev.filter(city => city._id !== cityId));
-    } catch (error) {
-      console.error('Failed to delete city:', error);
-      
-      let errorMessage = 'Failed to delete city. Please try again.';
-      if (error.message.includes('401') || error.message.includes('Authentication required')) {
-        errorMessage = '🔒 Please log in to delete cities. You need to be authenticated to perform this action.';
+    // Use toast for confirmation instead of window.confirm
+    const cityToDelete = savedCities.find(city => city._id === cityId);
+    const cityName = cityToDelete?.name || "this city";
+    
+    // Show confirmation toast
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p className="mb-3">Are you sure you want to delete <strong>{cityName}</strong>?</p>
+          <div className="flex gap-2">
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+              onClick={async () => {
+                closeToast();
+                try {
+                  await cityService.deleteCity(cityId);
+                  // Remove from local state
+                  setSavedCities &&
+                    setSavedCities((prev) => prev.filter((city) => city._id !== cityId));
+                  toast.success(`${cityName} deleted successfully! 🗑️`);
+                } catch (error) {
+                  console.error("Failed to delete city:", error);
+
+                  let errorMessage = "Failed to delete city. Please try again.";
+                  if (error.message.includes("401")) {
+                    errorMessage = "Please log in to delete cities.";
+                  } else if (error.message.includes("404")) {
+                    errorMessage = "City not found or you don't have permission to delete it.";
+                  }
+
+                  toast.error(errorMessage);
+                }
+              }}
+            >
+              Delete
+            </button>
+            <button
+              className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+              onClick={closeToast}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-right",
+        autoClose: false,
+        closeButton: false,
+        draggable: false
       }
-      
-      alert(errorMessage);
-    }
+    );
   };
 
-  const handleRefreshCity = async (cityId) => {
-    try {
-      setRefreshingIds(prev => new Set(prev).add(cityId));
-      const updatedCity = await cityService.refreshCity(cityId);
-      console.log('Refreshed city:', updatedCity);
-      
-      // Update city in local state
-      setSavedCities && setSavedCities(prev => 
-        prev.map(city => city._id === cityId ? updatedCity : city)
-      );
-    } catch (error) {
-      console.error('Failed to refresh city:', error);
-      
-      let errorMessage = 'Failed to refresh city weather. Please try again.';
-      if (error.message.includes('401') || error.message.includes('Authentication required')) {
-        errorMessage = '🔒 Please log in to refresh cities. You need to be authenticated to perform this action.';
-      }
-      
-      alert(errorMessage);
-    } finally {
-      setRefreshingIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(cityId);
-        return newSet;
-      });
-    }
-  };
+
 
   const cities = useMemo(() => {
     if (!Array.isArray(savedCities)) return [];
@@ -175,101 +176,47 @@ export default function MyCities() {
     const tempStr = formatTemperature(temperature);
     const weatherMap = {
       clear: "Clear",
-      clouds: "Cloudy", 
+      clouds: "Cloudy",
       rain: "Rainy",
       snow: "Snowy",
       sunny: "Sunny",
-      unknown: "Unknown"
+      smoke: "Smoky",
+      haze: "Hazy",
+      unknown: "Unknown",
     };
     const weatherStr = weatherMap[weather] || weather || "Unknown";
     return `${tempStr} ${weatherStr}`;
   };
 
-  // Extract country code from backend response
-  const getCountryCode = (city) => {
-    console.log(`Extracting country code for ${city.name}:`, {
-      flagImg: city.flagImg,
-      externalId: city.externalId,
-      id: city.id
-    });
-    
-    // Extract from flagImg URL (https://flagcdn.com/w320/jp.png -> JP)
-    if (city.flagImg) {
-      const match = city.flagImg.match(/\/([a-z]{2})\.png$/i);
-      if (match) return match[1].toUpperCase();
-    }
-    
-    // Extract from externalId (jp-tokyo -> JP)
-    if (city.externalId && typeof city.externalId === 'string') {
-      const parts = city.externalId.split('-');
-      if (parts.length >= 2 && parts[0].length === 2) {
-        return parts[0].toUpperCase();
-      }
-    }
-    
-    // Extract from id field (jp_tokyo -> JP)
-    if (city.id && typeof city.id === 'string') {
-      const parts = city.id.split('_');
-      if (parts.length >= 2 && parts[0].length === 2) {
-        return parts[0].toUpperCase();
-      }
-    }
-    
-    return null;
-  };
-
-  // Enhanced flag display with country-flag-icons
+  // Get flag image with fallback
   const getFlagComponent = (city) => {
-    const countryCode = getCountryCode(city);
-    
     if (city.flagImg) {
       return (
         <div className="relative">
-          <img 
+          <img
             src={city.flagImg}
-            alt={`${city.name} flag`} 
-            className="w-8 h-6 object-cover rounded-sm border border-white/20 shadow-sm" 
+            alt={`${city.country || city.name} flag`}
+            className="w-8 h-6 object-cover rounded-sm border border-white/20 shadow-sm"
             onError={(e) => {
-              console.log(`Flag failed to load for ${city.name}:`, e.target.src);
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'flex';
+              console.log(
+                `Flag failed to load for ${city.name}:`,
+                e.target.src
+              );
+              e.target.style.display = "none";
+              e.target.nextElementSibling.style.display = "flex";
             }}
           />
-          <div 
-            className="w-8 h-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-sm border border-white/20 flex items-center justify-center text-xs font-medium text-white/80" 
-            style={{ display: 'none' }}
+          <div
+            className="w-8 h-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-sm border border-white/20 flex items-center justify-center text-xs font-medium text-white/80"
+            style={{ display: "none" }}
           >
-            {countryCode || '🏳️'}
+            🏳️
           </div>
         </div>
       );
     }
-    
-    // Fallback flag using country-flag-icons CDN
-    if (countryCode) {
-      const flagUrl = `https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`;
-      return (
-        <div className="relative">
-          <img 
-            src={flagUrl}
-            alt={`${city.name} flag`} 
-            className="w-8 h-6 object-cover rounded-sm border border-white/20 shadow-sm" 
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'flex';
-            }}
-          />
-          <div 
-            className="w-8 h-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-sm border border-white/20 flex items-center justify-center text-xs font-medium text-white/80" 
-            style={{ display: 'none' }}
-          >
-            {countryCode}
-          </div>
-        </div>
-      );
-    }
-    
-    // Ultimate fallback
+
+    // Fallback flag
     return (
       <div className="w-8 h-6 bg-white/10 rounded-sm flex items-center justify-center text-xs text-white/60 border border-white/20">
         🏳️
@@ -280,7 +227,7 @@ export default function MyCities() {
   // Enhanced timezone display
   const getTimezoneDisplay = (city) => {
     if (!city.timezone) return null;
-    
+
     return (
       <div className="flex items-center gap-2 mt-1">
         <FaClock className="text-blue-400 text-xs" />
@@ -296,12 +243,21 @@ export default function MyCities() {
     );
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="absolute min-w-sm rounded-b-2xl bg-[#293A5180] backdrop-blur-xl border border-white/10 shadow-2xl p-8 text-center text-white">
+        <div className="text-4xl mb-2">🔒</div>
+        <div className="text-lg font-semibold mb-2">Please login to add cities</div>
+        <div className="text-white/60">You must be logged in to view or add your cities.</div>
+      </div>
+    );
+  }
   if (loading && cities.length === 0) {
     return (
       <div className="absolute min-w-sm rounded-b-2xl bg-[#293A5180] backdrop-blur-xl border border-white/10 shadow-2xl p-8 text-center text-white">
         <div className="flex items-center justify-center gap-2">
           <MdRefresh className="animate-spin text-xl" />
-          <span>Loading cities...</span>
+          <span>Loading your cities...</span>
         </div>
       </div>
     );
@@ -313,13 +269,6 @@ export default function MyCities() {
         <div className="flex gap-3 mt-3 justify-between">
           <div className="text-white font-semibold text-lg mb-2">My Cities</div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={loadCities}
-              disabled={loading}
-              className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-3 py-1 rounded-full shadow-md transition-colors"
-            >
-              <MdRefresh className={loading ? "animate-spin" : ""} />
-            </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -333,7 +282,7 @@ export default function MyCities() {
               ) : (
                 <FiPlus />
               )}
-              <span className="text-sm">{isAdding ? 'Adding...' : 'Add'}</span>
+              <span className="text-sm">{isAdding ? "Adding..." : "Add"}</span>
             </button>
           </div>
         </div>
@@ -343,10 +292,20 @@ export default function MyCities() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search city..."
+            placeholder="Search your cities..."
             className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
           />
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-400/20">
+            <div className="text-sm text-red-300 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Cities List */}
@@ -360,38 +319,52 @@ export default function MyCities() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-blue-200 font-semibold text-lg">Adding your city...</span>
+                <span className="text-blue-200 font-semibold text-lg">
+                  Adding your city...
+                </span>
               </div>
-              <div className="text-sm text-blue-200/80">🚀 This will appear here instantly once added!</div>
-              <div className="text-xs text-purple-200/60 mt-1">No page reload needed ✨</div>
+              <div className="text-sm text-blue-200/80">
+                🚀 This will appear here instantly once added!
+              </div>
+              <div className="text-xs text-purple-200/60 mt-1">
+                No page reload needed ✨
+              </div>
             </div>
           </div>
         )}
 
-        {cities.length === 0 && !isAdding ? (
+        {cities.length === 0 && !isAdding && !error ? (
           <div className="text-center text-white/60 py-8">
             <div className="text-4xl mb-2">🌍</div>
-            <div>No cities added yet. Click "Add" to get started!</div>
+            <div>No cities added yet.</div>
+            <div className="text-sm mt-2 text-white/40">
+              Click "Add" to start building your city collection!
+            </div>
           </div>
         ) : (
           cities.map((city) => (
-            <div key={city._id} className="relative rounded-xl bg-white/7 p-4 shadow-inner border border-white/6 flex items-start gap-4 hover:bg-white/10 transition-colors">
+            <div
+              key={city._id}
+              className="relative rounded-xl bg-white/7 p-4 shadow-inner border border-white/6 flex items-start gap-4 hover:bg-white/10 transition-colors"
+            >
               <div className="flex-shrink-0">
                 <div className="flex gap-3 items-start mb-3">
-                  {/* Enhanced Flag Display */}
+                  {/* Flag Display */}
                   {getFlagComponent(city)}
-                  
+
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium text-lg">{city.name}</span>
-                      {getCountryCode(city) && (
+                      <span className="text-white font-medium text-lg">
+                        {city.name}
+                      </span>
+                      {city.country && (
                         <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-400/30 font-medium">
-                          {getCountryCode(city)}
+                          {city.country}
                         </span>
                       )}
                     </div>
-                    
-                    {/* Enhanced Timezone Display */}
+
+                    {/* Timezone Display */}
                     {getTimezoneDisplay(city)}
                   </div>
                 </div>
@@ -405,7 +378,9 @@ export default function MyCities() {
 
                 <div className="mt-2 text-xs text-white/60 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-white/80">{city.country || "Unknown"}</span>
+                    <span className="text-white/80">
+                      {city.country || "Unknown Country"}
+                    </span>
                   </div>
                   {city.date && (
                     <div className="flex items-center gap-2">
@@ -417,6 +392,12 @@ export default function MyCities() {
                       {formatWeather(city.weather, city.temperature)}
                     </span>
                   </div>
+                  {/* Coordinates display */}
+                  {city.lat && city.lng && (
+                    <div className="text-xs text-white/40">
+                      {city.lat.toFixed(2)}°, {city.lng.toFixed(2)}°
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -432,20 +413,6 @@ export default function MyCities() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRefreshCity(city._id);
-                    }}
-                    disabled={refreshingIds.has(city._id)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 disabled:opacity-50 transition-all duration-200"
-                    title="Refresh weather data"
-                  >
-                    <MdRefresh 
-                      size={20} 
-                      className={`text-blue-400 ${refreshingIds.has(city._id) ? 'animate-spin' : ''}`} 
-                    />
-                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -473,6 +440,3 @@ export default function MyCities() {
     </div>
   );
 }
-
-
-

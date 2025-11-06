@@ -12,7 +12,6 @@ import { useAuth } from "../context/AuthContext";
 const Navbar = () => {
   const [isSticky, setIsSticky] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isCitiesOpen, setIsCitiesOpen] = useState(false);
@@ -20,7 +19,7 @@ const Navbar = () => {
   const [citiesBox, setCitiesBox] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false); // + mobile menu state
 
-  const { items } = useProductCart();
+  const { items, isCartOpen, openCart, closeCart } = useProductCart();
   const { isAuthenticated, user, logout } = useAuth();
   const cartRef = useRef(null);
   const settingsRef = useRef(null);
@@ -196,7 +195,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 aria-label="cart"
-                onClick={() => setIsCartOpen(true)}
+                onClick={openCart}
                 className="hover:opacity-80 flex transition"
               >
                 <PiShoppingBag size={24} />
@@ -369,7 +368,7 @@ const Navbar = () => {
         </nav>
       </div>
 
-      <Cart open={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <Cart open={isCartOpen} onClose={closeCart} />
     </header>
   );
 };

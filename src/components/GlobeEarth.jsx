@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { DateTime } from "luxon";
 import SunCalc from "suncalc";
 import { useCityCart } from "../context/CityCartContext";
+import { useAuth } from "../context/AuthContext";
 import tz_lookup from "tz-lookup";
 import cityService from "../services/cityService";
 
@@ -61,6 +62,7 @@ export default function GlobeEarth({
   
   // Use cities from your backend API instead of static data
   const { savedCities = [] } = useCityCart();
+  const { isAuthenticated } = useAuth();
   const [cities, setCities] = useState([]);
   const [hoverCity, setHoverCity] = useState(null);
   const [nightMode, setNightMode] = useState(false);
@@ -70,39 +72,11 @@ export default function GlobeEarth({
   const [isLoading, setIsLoading] = useState(true);
   const [loadingCities, setLoadingCities] = useState(true);
 
-  // Load cities from your backend API
+  // Initialize globe immediately (without waiting for cities)
   useEffect(() => {
-    const loadCities = async () => {
-      try {
-        setLoadingCities(true);
-        
-        // First try to use cities from context
-        if (savedCities && savedCities.length > 0) {
-          console.log('Using cities from context:', savedCities.length);
-          setCities(determineDayOrNight(savedCities));
-        } else {
-          // Fallback: fetch from API
-          console.log('Fetching cities from API...');
-          const apiCities = await cityService.fetchCities();
-          console.log('Loaded cities from API:', apiCities.length);
-          setCities(determineDayOrNight(apiCities));
-        }
-      } catch (error) {
-        console.error('Failed to load cities:', error);
-        setCities([]); // Set empty array on error
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-
-    loadCities();
-  }, [savedCities]);
-
-  // Initialize globe when cities are loaded
-  useEffect(() => {
-    if (loadingCities || !containerRef.current) return;
+    if (!containerRef.current) return;
     
-    console.log('Initializing globe with cities:', cities.length);
+    console.log('Initializing globe immediately...');
     
     const globe = Globe();
     globe.globeImageUrl(
@@ -116,8 +90,8 @@ export default function GlobeEarth({
     );
     globe.showAtmosphere(false);
     
-    // Set cities data with proper coordinates
-    globe.pointsData(cities);
+    // Initialize with empty cities data (will be populated later)
+    globe.pointsData([]);
     globe.pointLat((d) => {
       console.log(`City ${d.name}: lat=${d.lat}`);
       return d.lat || 0;
@@ -149,8 +123,14 @@ export default function GlobeEarth({
     const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.85;
     globe.pointOfView({ lat: 0, lng: 0, altitude }, 800);
     
-    globe(containerRef.current);
-    const mountNode = containerRef.current;
+    // Set proper dimensions from container
+    const container = containerRef.current;
+    const width = container.offsetWidth || 400;
+    const height = container.offsetHeight || 400;
+    console.log(`Globe initialized with size: ${width}x${height}`);
+    
+    globe.width(width).height(height);
+    globe(container);
     globeRef.current = globe;
 
     const controls = globe.controls();
@@ -161,13 +141,64 @@ export default function GlobeEarth({
     }
 
     return () => {
-      if (mountNode && mountNode.firstChild) {
-        mountNode.removeChild(mountNode.firstChild);
+      if (container && container.firstChild) {
+        container.removeChild(container.firstChild);
       }
     };
+  }, []);
+
+  // Load cities from your backend API after globe is initialized
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setLoadingCities(true);
+        
+        // If user is not authenticated, show empty globe
+        if (!isAuthenticated) {
+          console.log('User not authenticated - showing globe without cities');
+          setCities([]);
+          setLoadingCities(false);
+          return;
+        }
+        
+        // First try to use cities from context
+        if (savedCities && savedCities.length > 0) {
+          console.log('Using cities from context:', savedCities.length);
+          setCities(determineDayOrNight(savedCities));
+        } else {
+          // Fallback: fetch from API
+          console.log('Fetching cities from API...');
+          const apiCities = await cityService.fetchCities();
+          console.log('Loaded cities from API:', apiCities.length);
+          setCities(determineDayOrNight(apiCities));
+        }
+      } catch (error) {
+        console.error('Failed to load cities:', error);
+        setCities([]); // Set empty array on error
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    // Start loading cities after a short delay to ensure globe renders first
+    const timer = setTimeout(loadCities, 100);
+    return () => clearTimeout(timer);
+  }, [savedCities, isAuthenticated]);
+
+  // Update globe with cities data when cities are loaded
+  useEffect(() => {
+    if (!globeRef.current || loadingCities) return;
+    
+    const globe = globeRef.current;
+    console.log('Updating globe with cities:', cities.length);
+    
+    // Update cities data
+    globe.pointsData(cities);
   }, [cities, loadingCities]);
 
   useEffect(() => {
+
+
     if (!globeRef.current) return;
     const controls = globeRef.current.controls();
     if (controls) {
@@ -320,35 +351,12 @@ export default function GlobeEarth({
     return `${tempStr} ${weatherStr}`;
   };
 
-  // Show loading state while cities are being loaded
-  if (loadingCities) {
-    return (
-      <div className={`relative globe-earth-wrapper ${className} flex items-center justify-center h-96`}>
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-          <div>Loading your cities...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show message if no cities are added
-  if (cities.length === 0) {
-    return (
-      <div className={`relative globe-earth-wrapper ${className} flex items-center justify-center h-96`}>
-        <div className="text-white text-center">
-          <div className="text-4xl mb-4">🌍</div>
-          <div className="text-lg mb-2">No cities added yet</div>
-          <div className="text-white/60">Add some cities to see them on the globe!</div>
-        </div>
-      </div>
-    );
-  }
+  // Globe always renders now - no blocking returns
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
       <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        <div ref={containerRef} className="" />
+        <div ref={containerRef} className="w-full h-96 min-h-[400px]" />
       </div>
 
       {/* Cities count indicator */}

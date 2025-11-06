@@ -153,7 +153,7 @@ const LuxuryProducts = ({ products, loading }) => {
                                 ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
                                 : '/Luxury1.png',
                             });
-                            alert('Product added to cart successfully!');
+                          
                           } catch (error) {
                             console.error('Error adding to cart:', error);
                             alert('Failed to add product to cart. Please try again.');

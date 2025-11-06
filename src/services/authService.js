@@ -11,10 +11,30 @@ const getAuthHeaders = () => {
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    // If JSON parsing fails, try to get text
+    try {
+      const text = await response.text();
+      data = { message: text || 'Unable to parse response' };
+    } catch {
+      data = { message: 'Unable to parse response' };
+    }
+  }
   
   if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      data: data
+    });
+    const error = new Error(data.message || 'API request failed');
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
   
   return data;
@@ -49,19 +69,31 @@ export const authService = {
 
   // Login user
   login: async (credentials) => {
-      console.log('authService login called with:', credentials);
+    console.log('🔐 authService login called with:', {
+      email: credentials.email,
+      password: credentials.password ? '[REDACTED]' : 'MISSING',
+      passwordLength: credentials.password?.length || 0
+    });
+    console.log('🌐 Login endpoint:', AUTH_ENDPOINTS.LOGIN);
+    
     try {
+      const requestBody = JSON.stringify(credentials);
+      console.log('📤 Request body:', requestBody);
+      
       const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(credentials),
+        body: requestBody,
       });
+      
+      console.log('📥 Response status:', response.status, response.statusText);
+      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+      
       const data = await handleResponse(response);
 
-      console.log('Login response received');
-      console.log('Login response data:', data);
+      console.log('✅ Login successful, response data:', data);
 
       // Store token in localStorage
       if (data.token) {
