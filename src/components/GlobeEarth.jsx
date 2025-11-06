@@ -21,7 +21,7 @@ function determineDayOrNight(cityList = []) {
         timezone: city.timezone || tz,
         isDST: dt.isInDST || false,
       };
-    } catch (e) {
+    } catch {
       return {
         ...city,
         isDay: true,

@@ -1,95 +1,8 @@
-
-
-
-// import React, { useState } from "react";
-
-// export default function AddCityModal({ onClose, onConfirm }) {
-//   const [cityName, setCityName] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const trimmedName = cityName.trim();
-    
-//     if (!trimmedName) {
-//       alert('Please enter a city name');
-//       return;
-//     }
-
-//     try {
-//       setIsLoading(true);
-//       await onConfirm(trimmedName);
-//     } catch (error) {
-//       console.error('Error adding city:', error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center">
-//       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-//       <div className="relative w-full max-w-md mx-4 rounded-2xl bg-[#1e2a3a] border border-white/10 text-white shadow-2xl p-5">
-//         <div className="flex items-center justify-between mb-3">
-//           <div className="text-lg font-semibold">Add City</div>
-//           <button onClick={onClose} className="text-white/70 hover:text-white">
-//             ✕
-//           </button>
-//         </div>
-
-//         <form onSubmit={handleSubmit}>
-//           <div>
-//             <label className="text-sm text-white/70">City name</label>
-//             <input
-//               type="text"
-//               className="mt-1 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500"
-//               placeholder="Type a city name (e.g., Tokyo, London, Dubai)"
-//               value={cityName}
-//               onChange={(e) => setCityName(e.target.value)}
-//               disabled={isLoading}
-//               autoFocus
-//             />
-//           </div>
-
-//           <div className="mt-4 text-xs text-white/60">
-//             The system will automatically fetch weather, time, coordinates, and country information for the city.
-//           </div>
-
-//           <div className="mt-4 flex items-center justify-end gap-2">
-//             <button
-//               type="button"
-//               onClick={onClose}
-//               className="px-3 py-1 rounded-full border border-white/10 hover:bg-white/5"
-//               disabled={isLoading}
-//             >
-//               Cancel
-//             </button>
-//             <button
-//               type="submit"
-//               disabled={!cityName.trim() || isLoading}
-//               className={`px-4 py-1 rounded-full ${
-//                 cityName.trim() && !isLoading
-//                   ? "bg-sky-500 hover:bg-sky-600"
-//                   : "bg-white/10 cursor-not-allowed"
-//               }`}
-//             >
-//               {isLoading ? "Adding..." : "Add City"}
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 import React, { useState } from "react";
 import { MdLocationCity } from "react-icons/md";
 
-export default function AddCityModal({ onClose, onConfirm }) {
+export default function AddCityModal({ onClose, onConfirm, isLoading = false }) {
   const [cityName, setCityName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const validateCityName = (name) => {
@@ -141,14 +54,11 @@ export default function AddCityModal({ onClose, onConfirm }) {
     }
 
     try {
-      setIsLoading(true);
       await onConfirm(trimmedName);
       // Modal will be closed by parent component on success
     } catch (error) {
       console.error('Error adding city:', error);
       setError('Failed to add city. Please check the spelling and try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
