@@ -31,7 +31,7 @@ const StoryNowSection = () => {
               visible: { opacity: 1, x: 0 },
             }}
             transition={{ duration: 1 }}
-            className="text-lg md:text-xl text-white opacity-40 leading-relaxed"
+            className="text-lg md:text-xl text-white opacity-40 leading-relaxed text-justify"
           >
             Today, Ekuinox stands at the forefront of innovation, bringing
             together passionate minds to solve real-world challenges. Our team

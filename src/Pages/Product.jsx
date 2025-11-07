@@ -113,7 +113,7 @@ const Product = () => {
     <MainLayout>
       <ProductDetail product={displayProduct} loading={loading} />
       <FeaturesSection features={displayProduct?.features || []} loading={loading} />
-      <LuxuryProducts products={allProducts} />
+      <LuxuryProducts products={allProducts} loading={loading} />
       <HeroFeatures />
     </MainLayout>
   );

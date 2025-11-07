@@ -6,9 +6,7 @@ import featuresData from "../../data/featuresData.json";
 
 const { heroImage, heroTitle } = featuresData;
 
-const FeaturesSection = ({ features }) => {
-
-  // No in-page loader
+const FeaturesSection = ({ features, loading }) => {
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13]">
@@ -35,7 +33,12 @@ const FeaturesSection = ({ features }) => {
 
       {/* features grid */}
       <div className="max-w-[1440px] mx-auto px-6 py-6 lg:px-0">
-        {(!features || features.length === 0) ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-t-2 border-[#5695F5]"></div>
+            <h2 className="mt-6 text-2xl font-semibold text-white">Features</h2>
+          </div>
+        ) : (!features || features.length === 0) ? (
           <div className="text-center py-12">
             <p className="text-white/60 text-lg">No features available</p>
           </div>

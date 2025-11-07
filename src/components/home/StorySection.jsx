@@ -36,12 +36,11 @@ export default function StorySection() {
               viewport={{ once: true }}
             >
               Our Short
-              <br />
-              Story
+              <span className="block">Story</span>
             </motion.h2>
 
             <motion.p
-              className="mt-6 text-slate-300"
+              className="mt-6 text-slate-300 text-justify"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -57,7 +56,7 @@ export default function StorySection() {
             </motion.p>
 
             <motion.p
-              className="mt-4 text-slate-300"
+              className="mt-4 text-slate-300 text-justify"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}

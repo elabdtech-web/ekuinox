@@ -1,4 +1,5 @@
 import React from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { PiShoppingBag } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
@@ -14,52 +15,11 @@ const parsePrice = (p) => {
 
 const LuxuryProducts = ({ products, loading }) => {
 
-
   const { addItem } = useProductCart();
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = React.useState(false);
 
   const closeCart = () => setIsCartOpen(false);
-
-
-
-  if (loading) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-[#070B13]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5695F5] mx-auto"></div>
-          <p className="text-white mt-4">Loading luxury products...</p>
-        </div>
-      </div>
-    );
-  }
-
-
-  // Filter out any string IDs and only show valid product objects
-  const validProducts = (products || []).filter(item => typeof item === 'object' && item !== null);
-
-  if (validProducts.length === 0) {
-    return (
-      <section className="w-full min-h-screen relative bg-[#070B13] py-12">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-0">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="flex justify-center"
-          >
-            <h2 className="text-3xl md:text-4xl mb-8 lg:text-5xl font-semibold text-white">
-              Luxury Timepieces
-            </h2>
-          </motion.div>
-          <div className="text-center py-12">
-            <p className="text-white/60 text-lg">No luxury products available</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
@@ -77,27 +37,47 @@ const LuxuryProducts = ({ products, loading }) => {
           </h2>
         </motion.div>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 mt-16">
-          {validProducts.map((item, index) => {
-            // Handle both full product objects and product IDs
-            const productData = typeof item === 'string' ? null : item;
-            const priceNum = parsePrice(productData?.price);
+        {/* Cards Grid with Loading */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 mt-16">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-t-2 border-[#5695F5]"></div>
+            <h2 className="mt-6 text-2xl font-semibold text-white">Loading luxury products...</h2>
+          </div>
+        ) : (
+          <>
+            {/* Filter out any string IDs and only show valid product objects */}
+            {(() => {
+              const validProducts = (products || []).filter(item => typeof item === 'object' && item !== null);
+              
+              if (validProducts.length === 0) {
+                return (
+                  <div className="text-center py-12 mt-16">
+                    <p className="text-white/60 text-lg">No luxury products available</p>
+                  </div>
+                );
+              }
 
-            return (
-              <motion.div
-                key={productData?._id || productData?.id || item || index}
-                initial={{ opacity: 0, y: 80 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.8,
-                  delay: index * 0.2,
-                  ease: "easeOut",
-                }}
-                viewport={{ once: true, amount: 0.2 }}
-                className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 cursor-pointer flex flex-col items-center min-h-[380px]"
-                onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
-                disabled={!productData}
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 mt-16">
+                  {validProducts.map((item, index) => {
+                    // Handle both full product objects and product IDs
+                    const productData = typeof item === 'string' ? null : item;
+                    const priceNum = parsePrice(productData?.price);
+
+                    return (
+                      <motion.div
+                        key={productData?._id || productData?.id || item || index}
+                        initial={{ opacity: 0, y: 80 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.8,
+                          delay: index * 0.2,
+                          ease: "easeOut",
+                        }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 cursor-pointer flex flex-col items-center min-h-[380px]"
+                        onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
+                        disabled={!productData}
               >
                 {/* Animated image container */}
                 <motion.div
@@ -182,9 +162,12 @@ const LuxuryProducts = ({ products, loading }) => {
             );
           })}
         </div>
+      );
+    })()}
+  </>
+)}
       </div>
-            <Cart open={isCartOpen} onClose={closeCart} />
-      
+      <Cart open={isCartOpen} onClose={closeCart} />
     </section>
   );
 };

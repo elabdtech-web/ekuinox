@@ -15,7 +15,7 @@ export default function StoryStartedSection() {
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
             We’re just getting <span className="text-[#5695F5]">started</span>
           </h2>
-          <p className="text-lg md:text-xl text-white/60 leading-relaxed">
+          <p className="text-lg md:text-xl text-white/60 leading-relaxed text-justify">
             At Ekuinox, our journey is only beginning. We are committed to
             pushing boundaries, exploring new ideas, and building a future where
             innovation and collaboration thrive. With every milestone, we grow

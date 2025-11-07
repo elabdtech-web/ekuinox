@@ -24,7 +24,7 @@ export default function StoryTeamSection() {
           </motion.h2>
 
           <motion.p
-            className="text-sm sm:text-base md:text-lg text-white/70 mb-6 md:mb-8"
+            className="text-sm sm:text-base md:text-lg text-white/70 mb-6 md:mb-8 text-justify"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}

@@ -90,7 +90,7 @@ export default function StoryTimelineSection() {
                   <div className="text-4xl font-semibold text-[#6ea9ff] mb-2">
                     {item.year}
                   </div>
-                  <div className="text-lg text-white/80">{item.desc}</div>
+                  <div className="text-lg text-white/80 text-justify">{item.desc}</div>
                 </div>
               </div>
             </div>
