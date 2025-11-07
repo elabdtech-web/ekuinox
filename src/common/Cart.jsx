@@ -5,6 +5,7 @@ import { FiX } from "react-icons/fi";
 import { useProductCart } from "../context/ProductCartContext";
 // import CheckoutForm from "../components/CheckoutForm";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Cart({ open, onClose }) {
   const { items, inc, dec, remove, subtotal, delivery, total, loading, error, clearCart } = useProductCart();
@@ -62,7 +63,7 @@ export default function Cart({ open, onClose }) {
                       await clearCart();
                     } catch (error) {
                       console.error('Error clearing cart:', error);
-                      alert('Failed to clear cart. Please try again.');
+                      toast.error('Failed to clear cart. Please try again.');
                     }
                   }
                 }}

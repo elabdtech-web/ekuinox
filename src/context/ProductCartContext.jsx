@@ -19,57 +19,58 @@ export function ProductCartProvider({ children }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
+  // ------------------------------
   // Load cart on mount
+  // ------------------------------
   useEffect(() => {
     loadCart();
   }, []);
 
-  // Sync local cart to server when user logs in
+  // ------------------------------
+  // Sync local guest cart to server on login
+  // ------------------------------
   useEffect(() => {
     if (isAuthenticated) {
       const syncLocalCartToServer = async () => {
         try {
-          const localCart = localStorage.getItem('guestCart');
+          const localCart = localStorage.getItem("guestCart");
           if (!localCart) return;
 
           const parsedCart = JSON.parse(localCart);
           if (parsedCart.length === 0) return;
 
-          // Add each item from local cart to server cart
           for (const item of parsedCart) {
             try {
               const cartItemData = cartService.formatCartItem(item);
-
               await cartService.addToCart(cartItemData);
-
             } catch (error) {
-              console.error('Failed to sync item to server:', item, error);
+              console.error("Failed to sync item to server:", item, error);
             }
           }
 
-          // Clear local cart after successful sync
-          localStorage.removeItem('guestCart');
-
-          // Reload cart from server
+          localStorage.removeItem("guestCart");
           await loadCart();
         } catch (error) {
-          console.error('Failed to sync local cart to server:', error);
+          console.error("Failed to sync local cart to server:", error);
         }
       };
-
       syncLocalCartToServer();
     }
   }, [isAuthenticated]);
 
+  // ------------------------------
+  // Load cart (from local or server)
+  // ------------------------------
   const loadCart = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
+
+      // GUEST CART
       if (!token) {
-        // Load from localStorage for guest users
-        const localCart = localStorage.getItem('guestCart');
+        const localCart = localStorage.getItem("guestCart");
         if (localCart) {
           const parsedCart = JSON.parse(localCart);
           setItems(parsedCart);
@@ -77,123 +78,133 @@ export function ProductCartProvider({ children }) {
         return;
       }
 
-      // Load from API if authenticated
+      // AUTH CART (API)
       const cartData = await cartService.getCart();
-      console.log('Raw cart data from API:', cartData);
+      console.log("Raw cart data from API:", cartData);
 
-      // Normalize to an array of items regardless of envelope shape
       let cartItems = [];
       if (Array.isArray(cartData)) {
         cartItems = cartData;
-      } else if (cartData && typeof cartData === 'object') {
-        if (Array.isArray(cartData.items)) {
-          cartItems = cartData.items;
-        } else if (Array.isArray(cartData.data?.items)) {
-          cartItems = cartData.data.items;
-        } else if (Array.isArray(cartData.cart?.items)) {
-          cartItems = cartData.cart.items;
-        } else if (Array.isArray(cartData.data)) {
-          cartItems = cartData.data;
-        } else if (Array.isArray(cartData.products)) {
-          cartItems = cartData.products;
-        } else {
-          console.warn('Cart data does not contain an items array. Using empty list. Shape:', cartData);
-          cartItems = [];
-        }
+      } else if (cartData && typeof cartData === "object") {
+        cartItems =
+          cartData.items ||
+          cartData.data?.items ||
+          cartData.cart?.items ||
+          cartData.data ||
+          cartData.products ||
+          [];
       }
 
-      // Transform API data to match our format
-      const transformedItems = cartItems.map(item => ({
-        id: item._id || item.id, // cart item id
+      // Normalize/transform items
+      const transformedItems = cartItems.map((item) => ({
+        id: item._id || item.id,
         productId: item.productId?._id || item.productId || item.product?.id,
         name: item.name || item.product?.name,
-        price: typeof item.price === 'number' ? `$${item.price}` : (item.price || '$0.00'),
-        priceNum: typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^0-9.]/g, '') || 0),
-        img: item.image || item.img || item.product?.image || item.product?.img,
+        price:
+          typeof item.price === "number" ? `$${item.price}` : item.price || "$0.00",
+        priceNum:
+          typeof item.price === "number"
+            ? item.price
+            : parseFloat(String(item.price).replace(/[^0-9.]/g, "") || 0),
+        img: item.colors?.[0]?.thumb || item.img || item.product?.image || item.product?.img,
         qty: item.quantity || item.qty || 1,
         size: item.size,
         color: item.color,
-        edition: item.edition
+        edition: item.edition,
       }));
 
-      // Fetch images for items that don't have them
-      const itemsWithoutImg = transformedItems.filter(item => !item.img && item.productId);
-      if (itemsWithoutImg.length > 0) {
+      // Try fetching missing images
+      const itemsWithoutImg = transformedItems.filter((i) => !i.img && i.productId);
+      if (itemsWithoutImg.length) {
         try {
-          const productPromises = itemsWithoutImg.map(async (item) => {
-            try {
-              // Assuming there's a productService to fetch product details
-              const product = await productService.getProduct(item.productId);
-              return { id: item.id, img: product?.image || product?.img };
-            } catch (error) {
-              console.error(`Failed to fetch product ${item.productId}:`, error);
-              return { id: item.id, img: null };
-            }
-          });
-          const productResults = await Promise.all(productPromises);
-          productResults.forEach(result => {
-            if (result.img) {
-              const item = transformedItems.find(i => i.id === result.id);
-              if (item) item.img = result.img;
+          const results = await Promise.all(
+            itemsWithoutImg.map(async (it) => {
+              try {
+                const prod = await productService.getProduct(it.productId);
+                return { id: it.id, img: prod?.image || prod?.img };
+              } catch {
+                return { id: it.id, img: null };
+              }
+            })
+          );
+          results.forEach((r) => {
+            if (r.img) {
+              const item = transformedItems.find((i) => i.id === r.id);
+              if (item) item.img = r.img;
             }
           });
         } catch (error) {
-          console.error('Failed to fetch product images:', error);
+          console.error("Failed to fetch product images:", error);
         }
       }
 
-      setItems(transformedItems);
+      // ✅ Merge with local items to preserve local fields (color, size, edition)
+      setItems((prev) =>
+        transformedItems.map((newItem) => {
+          const existing =
+            prev.find(
+              (p) =>
+                p.productId === newItem.productId ||
+                p.id === newItem.id
+            ) || {};
+          return { ...existing, ...newItem };
+        })
+      );
     } catch (error) {
-      console.error('Failed to load cart:', error);
+      console.error("Failed to load cart:", error);
       setError(error.message);
-      // Keep local cart if API fails - don't clear existing items
     } finally {
       setLoading(false);
     }
   };
 
+  // ------------------------------
+  // Add item to cart
+  // ------------------------------
   const addItem = async (product) => {
-    console.log('Adding item to cart:', product);
+    console.log("Adding item to cart:", product);
     try {
       setError(null);
+      const token = localStorage.getItem("token");
 
-      // Check if user is authenticated
-      const token = localStorage.getItem('token');
+      // GUEST MODE
       if (!token) {
-        // Fallback to local state and localStorage if not authenticated
         setItems((prev) => {
-          const existing = prev.find((p) => p.id === product._id);
+          const existing = prev.find((p) => p.id === product._id || p.id === product.id);
           let newItems;
           if (existing) {
             newItems = prev.map((p) =>
-              p.id === product._id ? { ...p, qty: p.qty + 1 } : p
+              p.id === (product._id || product.id)
+                ? { ...p, qty: p.qty + 1 }
+                : p
             );
           } else {
-            newItems = [...prev, {
-              ...product,
-              qty: product.qty ?? 1,
-              priceNum: parseFloat(String(product.price).replace(/[^0-9.]/g, '') || 0)
-            }];
+            newItems = [
+              ...prev,
+              {
+                ...product,
+                qty: product.qty ?? 1,
+                priceNum: parseFloat(
+                  String(product.price).replace(/[^0-9.]/g, "") || 0
+                ),
+              },
+            ];
           }
-          // Save to localStorage
-          localStorage.setItem('guestCart', JSON.stringify(newItems));
+          localStorage.setItem("guestCart", JSON.stringify(newItems));
           return newItems;
         });
         return;
       }
 
-      console.log('items before API add:', items);
-      // Use API if authenticated
+      // AUTH MODE (API)
       const cartItemData = cartService.formatCartItem(product);
       await cartService.addToCart(cartItemData);
-
-      // Reload cart to get updated data
       await loadCart();
     } catch (error) {
-      console.error('Failed to add item to cart:', error);
+      console.error("Failed to add item to cart:", error);
       setError(error.message);
 
-      // Fallback to local state on API error
+      // Fallback local
       setItems((prev) => {
         const existing = prev.find((p) => p.id === product.id);
         let newItems;
@@ -202,183 +213,136 @@ export function ProductCartProvider({ children }) {
             p.id === product.id ? { ...p, qty: p.qty + 1 } : p
           );
         } else {
-          newItems = [...prev, {
-            ...product,
-            qty: product.qty ?? 1,
-            priceNum: parseFloat(String(product.price).replace(/[^0-9.]/g, '') || 0)
-          }];
+          newItems = [
+            ...prev,
+            {
+              ...product,
+              qty: product.qty ?? 1,
+              priceNum: parseFloat(
+                String(product.price).replace(/[^0-9.]/g, "") || 0
+              ),
+            },
+          ];
         }
-        // Save to localStorage
-        localStorage.setItem('guestCart', JSON.stringify(newItems));
+        localStorage.setItem("guestCart", JSON.stringify(newItems));
         return newItems;
       });
     }
   };
 
+  // ------------------------------
+  // Remove, Inc, Dec, Clear, Checkout
+  // ------------------------------
   const remove = async (id) => {
     try {
       setError(null);
-
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        // Fallback to local state and localStorage
         setItems((prev) => {
           const newItems = prev.filter((p) => p.id !== id);
-          localStorage.setItem('guestCart', JSON.stringify(newItems));
+          localStorage.setItem("guestCart", JSON.stringify(newItems));
           return newItems;
         });
         return;
       }
-
-      // Use API if authenticated
       await cartService.removeFromCart(id);
-
-      // Reload cart
       await loadCart();
     } catch (error) {
-      console.error('Failed to remove item from cart:', error);
+      console.error("Failed to remove item from cart:", error);
       setError(error.message);
-
-      // Fallback to local state
-      setItems((prev) => {
-        const newItems = prev.filter((p) => p.id !== id);
-        localStorage.setItem('guestCart', JSON.stringify(newItems));
-        return newItems;
-      });
     }
   };
 
   const inc = async (id) => {
     try {
       setError(null);
-
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        // Fallback to local state and localStorage
         setItems((prev) => {
-          const newItems = prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p));
-          localStorage.setItem('guestCart', JSON.stringify(newItems));
+          const newItems = prev.map((p) =>
+            p.id === id ? { ...p, qty: p.qty + 1 } : p
+          );
+          localStorage.setItem("guestCart", JSON.stringify(newItems));
           return newItems;
         });
         return;
       }
-
-      // Find current item
-      const currentItem = items.find(item => item.id === id);
-      if (!currentItem) return;
-
-      // Use API if authenticated
-      await cartService.updateCartItem(id, { quantity: currentItem.qty + 1 });
-
-      // Reload cart
+      const current = items.find((i) => i.id === id);
+      if (!current) return;
+      await cartService.updateCartItem(id, { quantity: current.qty + 1 });
       await loadCart();
     } catch (error) {
-      console.error('Failed to increment item quantity:', error);
+      console.error("Failed to increment item:", error);
       setError(error.message);
-
-      // Fallback to local state
-      setItems((prev) => {
-        const newItems = prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p));
-        localStorage.setItem('guestCart', JSON.stringify(newItems));
-        return newItems;
-      });
     }
   };
 
   const dec = async (id) => {
     try {
       setError(null);
-
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        // Fallback to local state and localStorage
         setItems((prev) => {
-          const newItems = prev.map((p) => (p.id === id ? { ...p, qty: Math.max(1, p.qty - 1) } : p));
-          localStorage.setItem('guestCart', JSON.stringify(newItems));
+          const newItems = prev.map((p) =>
+            p.id === id ? { ...p, qty: Math.max(1, p.qty - 1) } : p
+          );
+          localStorage.setItem("guestCart", JSON.stringify(newItems));
           return newItems;
         });
         return;
       }
-
-      // Find current item
-      const currentItem = items.find(item => item.id === id);
-      if (!currentItem || currentItem.qty <= 1) return;
-
-      // Use API if authenticated
-      await cartService.updateCartItem(id, { quantity: currentItem.qty - 1 });
-
-      // Reload cart
+      const current = items.find((i) => i.id === id);
+      if (!current || current.qty <= 1) return;
+      await cartService.updateCartItem(id, { quantity: current.qty - 1 });
       await loadCart();
     } catch (error) {
-      console.error('Failed to decrement item quantity:', error);
+      console.error("Failed to decrement item:", error);
       setError(error.message);
-
-      // Fallback to local state
-      setItems((prev) => {
-        const newItems = prev.map((p) => (p.id === id ? { ...p, qty: Math.max(1, p.qty - 1) } : p));
-        localStorage.setItem('guestCart', JSON.stringify(newItems));
-        return newItems;
-      });
     }
   };
 
   const clearCart = async () => {
     try {
       setError(null);
-
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        // Fallback to local state and localStorage
         setItems([]);
-        localStorage.removeItem('guestCart');
+        localStorage.removeItem("guestCart");
         return;
       }
-
-      // Use API if authenticated
       await cartService.clearCart();
-
-      // Reload cart
       await loadCart();
     } catch (error) {
-      console.error('Failed to clear cart:', error);
+      console.error("Failed to clear cart:", error);
       setError(error.message);
-
-      // Fallback to local state
-      setItems([]);
-      localStorage.removeItem('guestCart');
     }
   };
 
   const checkout = async (checkoutData = {}) => {
     try {
       setError(null);
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Please login to checkout');
-      }
-
-      // Use API for checkout
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please login to checkout");
       const result = await cartService.checkoutCart(checkoutData);
-
-      // Clear cart after successful checkout
       setItems([]);
-
       return result;
     } catch (error) {
-      console.error('Checkout failed:', error);
+      console.error("Checkout failed:", error);
       setError(error.message);
       throw error;
     }
   };
 
+  // ------------------------------
+  // Totals & UI controls
+  // ------------------------------
   const subtotal = useMemo(
     () =>
       items.reduce(
-        (s, it) =>
-          s +
+        (sum, it) =>
+          sum +
           Number(it.priceNum ?? String(it.price).replace(/[^0-9.]/g, "")) *
-            (it.qty ?? 1),
+          (it.qty ?? 1),
         0
       ),
     [items]
@@ -387,10 +351,9 @@ export function ProductCartProvider({ children }) {
   const delivery = items.length ? (subtotal > 100 ? 0 : 10) : 0;
   const total = subtotal + delivery;
 
-  // Cart open/close functions
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
-  const toggleCart = () => setIsCartOpen(prev => !prev);
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
 
   const value = {
     items,
@@ -409,7 +372,7 @@ export function ProductCartProvider({ children }) {
     isCartOpen,
     openCart,
     closeCart,
-    toggleCart
+    toggleCart,
   };
 
   return (
