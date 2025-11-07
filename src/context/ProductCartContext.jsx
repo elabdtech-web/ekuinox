@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { cartService } from "../services/cartService";
 import { useAuth } from "./AuthContext";
+import { productService } from "../services/productService";
 
 const ProductCartContext = createContext(undefined);
 
@@ -38,7 +39,9 @@ export function ProductCartProvider({ children }) {
           for (const item of parsedCart) {
             try {
               const cartItemData = cartService.formatCartItem(item);
+
               await cartService.addToCart(cartItemData);
+
             } catch (error) {
               console.error('Failed to sync item to server:', item, error);
             }
@@ -105,13 +108,39 @@ export function ProductCartProvider({ children }) {
         productId: item.productId?._id || item.productId || item.product?.id,
         name: item.name || item.product?.name,
         price: typeof item.price === 'number' ? `$${item.price}` : (item.price || '$0.00'),
-        priceNum: typeof item.price === 'number' ? item.price : parseFloat(item.price || 0),
+        priceNum: typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^0-9.]/g, '') || 0),
         img: item.image || item.img || item.product?.image || item.product?.img,
         qty: item.quantity || item.qty || 1,
         size: item.size,
         color: item.color,
         edition: item.edition
       }));
+
+      // Fetch images for items that don't have them
+      const itemsWithoutImg = transformedItems.filter(item => !item.img && item.productId);
+      if (itemsWithoutImg.length > 0) {
+        try {
+          const productPromises = itemsWithoutImg.map(async (item) => {
+            try {
+              // Assuming there's a productService to fetch product details
+              const product = await productService.getProduct(item.productId);
+              return { id: item.id, img: product?.image || product?.img };
+            } catch (error) {
+              console.error(`Failed to fetch product ${item.productId}:`, error);
+              return { id: item.id, img: null };
+            }
+          });
+          const productResults = await Promise.all(productPromises);
+          productResults.forEach(result => {
+            if (result.img) {
+              const item = transformedItems.find(i => i.id === result.id);
+              if (item) item.img = result.img;
+            }
+          });
+        } catch (error) {
+          console.error('Failed to fetch product images:', error);
+        }
+      }
 
       setItems(transformedItems);
     } catch (error) {
@@ -124,6 +153,7 @@ export function ProductCartProvider({ children }) {
   };
 
   const addItem = async (product) => {
+    console.log('Adding item to cart:', product);
     try {
       setError(null);
 
@@ -132,11 +162,11 @@ export function ProductCartProvider({ children }) {
       if (!token) {
         // Fallback to local state and localStorage if not authenticated
         setItems((prev) => {
-          const existing = prev.find((p) => p.id === product.id);
+          const existing = prev.find((p) => p.id === product._id);
           let newItems;
           if (existing) {
             newItems = prev.map((p) =>
-              p.id === product.id ? { ...p, qty: p.qty + 1 } : p
+              p.id === product._id ? { ...p, qty: p.qty + 1 } : p
             );
           } else {
             newItems = [...prev, {
@@ -152,6 +182,7 @@ export function ProductCartProvider({ children }) {
         return;
       }
 
+      console.log('items before API add:', items);
       // Use API if authenticated
       const cartItemData = cartService.formatCartItem(product);
       await cartService.addToCart(cartItemData);

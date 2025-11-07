@@ -4,6 +4,7 @@ import { FiArrowLeft, FiTrash2, FiPlus } from 'react-icons/fi';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { productService } from '../../services/productService';
+import { toast } from 'react-toastify';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -111,10 +112,14 @@ const AddProduct = () => {
   };
 
   const addColor = () => {
-    if (newColor.id && newColor.thumb && newColor.alt) {
+    if (newColor.thumb && newColor.alt) {
       setFormData(prev => ({
         ...prev,
-        colors: [...prev.colors, { ...newColor, gallery: newColor.gallery.filter(g => g.trim()) }]
+        colors: [...prev.colors, {
+          ...newColor,
+          id: `color_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          gallery: newColor.gallery.filter(g => g.trim())
+        }]
       }));
       setNewColor({
         id: '',
@@ -252,9 +257,6 @@ const AddProduct = () => {
     } else {
       // Validate each color
       formData.colors.forEach((color, index) => {
-        if (!color.id.trim()) {
-          errors[`color_${index}_id`] = `Color ID is required for color ${index + 1}`;
-        }
         if (!color.alt.trim()) {
           errors[`color_${index}_alt`] = `Color name is required for color ${index + 1}`;
         }
@@ -341,7 +343,7 @@ const AddProduct = () => {
         stock: Number(formData.stock),
         category: formData.category || 'Watch',
         colors: formData.colors
-          .filter(c => c.id && c.alt && c.thumb) // remove incomplete ones
+          .filter(c => c.alt && c.thumb) // remove incomplete ones
           .map(c => ({
             id: c.id.trim(),
             alt: c.alt.trim(),
@@ -371,10 +373,10 @@ const AddProduct = () => {
 
       if (isEditMode && editingProduct) {
         await productService.updateProduct(editingProduct._id, payload);
-        alert('Product updated successfully!');
+        toast.success('Product updated successfully!');
       } else {
         await productService.createProduct(payload);
-        alert('Product added successfully!');
+        toast.success('Product added successfully!');
       }
 
       navigate('/admin/products');
@@ -385,9 +387,9 @@ const AddProduct = () => {
       // show validation errors from backend
       if (error.response?.data?.errors) {
         console.table(error.response.data.errors);
-        alert('Validation failed. Please check your form fields.');
+        toast.error('Validation failed. Please check your form fields.');
       } else {
-        alert('Unexpected error. Please try again.');
+        toast.error('Unexpected error. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -671,7 +673,6 @@ const AddProduct = () => {
                       <span className="text-white/60 text-xs font-mono">{color.hexColor || '#000000'}</span>
                     </div>
                     <img src={color.thumb} alt={color.alt} className="w-full h-20 object-cover rounded" />
-                    <p className="text-white/60 text-xs mt-1">ID: {color.id}</p>
                   </div>
                 ))}
               </div>

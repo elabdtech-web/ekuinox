@@ -10,6 +10,7 @@ export default function Cart({ open, onClose }) {
   const { items, inc, dec, remove, subtotal, delivery, total, loading, error, clearCart } = useProductCart();
   const navigate = useNavigate();
 
+  console.log('Cart items:', items);
   function currency(n) {
     return `$${Number(n || 0).toLocaleString(undefined, {
       minimumFractionDigits: 2,

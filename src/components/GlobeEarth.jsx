@@ -356,7 +356,7 @@ export default function GlobeEarth({
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
       <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        <div ref={containerRef} className="w-full h-96 min-h-[400px]" />
+        <div ref={containerRef} className="w-full h-full min-h-screen" />
       </div>
 
       {/* Cities count indicator */}

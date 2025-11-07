@@ -41,12 +41,6 @@ const AdminLayout = () => {
       active: location.pathname === '/admin/products'
     },
     { 
-      icon: FiGlobe, 
-      label: 'Countries', 
-      path: '/admin/countries',
-      active: location.pathname === '/admin/countries'
-    },
-    { 
       icon: FiMap, 
       label: 'Cities', 
       path: '/admin/cities',

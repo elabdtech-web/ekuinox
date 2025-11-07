@@ -147,17 +147,7 @@ export default function AddCityModal({
             </div>
           )}
 
-          <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-400/20">
-            <div className="text-xs text-blue-300 mb-1 font-medium">
-              ✨ Auto-complete features:
-            </div>
-            <div className="text-xs text-white/70 space-y-1">
-              <div>🌦️ Weather conditions & temperature</div>
-              <div>🕒 Local time & timezone (with DST)</div>
-              <div>🏳️ Country flag & coordinates</div>
-              <div>🌅 Day/night status</div>
-            </div>
-          </div>
+        
 
           <div className="mt-5 flex items-center justify-end gap-3">
             <button

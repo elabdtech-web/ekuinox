@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 class CityService {
   // Helper method to get auth headers
@@ -15,12 +15,42 @@ class CityService {
     return headers;
   }
 
-  async fetchCities() {
+  async getAllCities() {
     try {
+      console.log('Fetching all cities from API');
+      console.log('Using API_BASE_URL:', API_BASE_URL,'/cities');
       const response = await fetch(`${API_BASE_URL}/cities`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
       });
+
+      console.log('Get all cities response status:', response.status);
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in to view cities.');
+        }
+        throw new Error(`HTTP ${response.status}: Failed to fetch cities`);
+      }
+
+      const cities = await response.json();
+      console.log('Fetched all cities:-----', cities);
+      return Array.isArray(cities) ? cities : [];
+    } catch (error) {
+      console.error('Error fetching all cities:', error);
+      throw error;
+    } 
+   }
+
+  async fetchCities(userId ) {
+    try {
+      console.log('Fetching cities for userId:000', userId);
+      const url =  `${API_BASE_URL}/cities/user/${userId}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      console.log('Fetch cities response status:', response);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -29,9 +59,12 @@ class CityService {
         throw new Error(`HTTP ${response.status}: Failed to fetch cities`);
       }
       
-      const cities = await response.json();
+      const payload = await response.json();
+      // If using user endpoint, payload has { success, count, data }
+      // If general endpoint, payload is array
+      const cities = userId ? (Array.isArray(payload.data) ? payload.data : []) : (Array.isArray(payload) ? payload : []);
       console.log('Fetched cities:', cities);
-      return Array.isArray(cities) ? cities : [];
+      return cities;
     } catch (error) {
       console.error('Error fetching cities:', error);
       throw error;
@@ -73,6 +106,7 @@ class CityService {
   }
 
   async deleteCity(cityId) {
+    console.log('Deleting city with ID:', cityId);
     try {
       const response = await fetch(`${API_BASE_URL}/cities/${cityId}`, {
         method: 'DELETE',

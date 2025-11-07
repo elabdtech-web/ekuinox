@@ -36,7 +36,7 @@ export default function HeroSection() {
         <div className="w-full flex overflow-hidden justify-center relative">
           {/* Globe is always visible, isPlaying controls rotation */}
           <GlobeEarth
-            className=""
+            className="w-full"
             isPlaying={isPlaying}
             timeOfDay={timeOfDay}
           />

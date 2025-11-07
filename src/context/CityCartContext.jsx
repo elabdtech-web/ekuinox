@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import cityService from "../services/cityService";
+import { useAuth } from "./AuthContext";
 
 const CityCartContext = createContext(undefined);
 
@@ -14,8 +15,9 @@ export const useCityCart = () => {
 export function CityCartProvider({ children }) {
   const [savedCities, setSavedCities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
-  // Load cities from backend on mount, fall back to local JSON
+  // Load cities from backend on mount
   useEffect(() => {
     let cancelled = false;
     
@@ -24,19 +26,16 @@ export function CityCartProvider({ children }) {
       
       setIsLoading(true);
       try {
-        // Try backend first
-        const cities = await cityService.fetchCities();
+        // Load from backend only
+        const cities = await cityService.fetchCities(user?.id);
         if (!cancelled && Array.isArray(cities)) {
           setSavedCities(cities);
         }
-      } catch {
-        // Fall back to local seed data
-        try {
-          const mod = await import("../data/mycityData.json");
-          const data = Array.isArray(mod.default) ? mod.default : mod;
-          if (!cancelled && Array.isArray(data)) setSavedCities(data);
-        } catch {
-          // ignore fallback errors
+      } catch (error) {
+        console.error("Failed to load cities from API:", error);
+        // Do not fall back to dummy data, keep empty
+        if (!cancelled) {
+          setSavedCities([]);
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -47,7 +46,7 @@ export function CityCartProvider({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [savedCities.length]);
+  }, [savedCities.length, user?.id]);
 
   const addCity = async (city) => {
     if (!city || !city.name) {

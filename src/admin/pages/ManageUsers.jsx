@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiUser, FiMail, FiCalendar } from 'react-icons/fi';
+import { userService } from '../../services/userService';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -7,53 +8,22 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Demo data
-  const demoUsers = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      role: 'User',
-      status: 'Active',
-      joinDate: '2024-01-15',
-      avatar: null
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      role: 'User',
-      status: 'Active',
-      joinDate: '2024-02-20',
-      avatar: null
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      email: 'mike.johnson@example.com',
-      role: 'User',
-      status: 'Inactive',
-      joinDate: '2024-03-10',
-      avatar: null
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      email: 'sarah.wilson@example.com',
-      role: 'User',
-      status: 'Active',
-      joinDate: '2024-04-05',
-      avatar: null
-    }
-  ];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setUsers(demoUsers);
-      setFilteredUsers(demoUsers);
-      setLoading(false);
-    }, 1000);
+    const fetchUsers = async () => {
+      try {
+        const response = await userService.getUsers();
+        const userList = Array.isArray(response) ? response : response.data || [];
+
+        setUsers(userList);
+        setFilteredUsers(userList);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        // Keep empty or show error
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -68,18 +38,38 @@ const ManageUsers = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(prev => prev.filter(u => u.id !== userId));
+      try {
+        await userService.deleteUser(userId);
+        setUsers(prev => prev.filter(u => u._id !== userId));
+        setFilteredUsers(prev => prev.filter(u => u._id !== userId));
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+        alert('Failed to delete user');
+      }
     }
   };
 
-  const toggleUserStatus = (userId) => {
-    setUsers(prev => prev.map(u => 
-      u.id === userId 
-        ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' }
-        : u
-    ));
+  const toggleUserStatus = async (userId) => {
+    try {
+      const user = users.find(u => u._id === userId);
+      const newStatus = user.status === 'Active' ? 'Inactive' : 'Active';
+      await userService.toggleUserStatus(userId, newStatus);
+      setUsers(prev => prev.map(u => 
+        u._id === userId
+          ? { ...u, status: newStatus }
+          : u
+      ));
+      setFilteredUsers(prev => prev.map(u =>
+        u._id === userId
+          ? { ...u, status: newStatus }
+          : u
+      ));
+    } catch (error) {
+      console.error('Failed to toggle user status:', error);
+      alert('Failed to update user status');
+    }
   };
 
   const getInitials = (name) => {
@@ -188,12 +178,12 @@ const ManageUsers = () => {
                 <th className="text-left py-4 px-6 text-white font-semibold">Email</th>
                 <th className="text-left py-4 px-6 text-white font-semibold">Status</th>
                 <th className="text-left py-4 px-6 text-white font-semibold">Join Date</th>
-                <th className="text-left py-4 px-6 text-white font-semibold">Actions</th>
+                {/* <th className="text-left py-4 px-6 text-white font-semibold">Actions</th> */}
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b border-white/10 hover:bg-white/5 transition">
+                <tr key={user._id} className="border-b border-white/10 hover:bg-white/5 transition">
                   <td className="py-4 px-6">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-[#5695F5] rounded-full flex items-center justify-center">
@@ -203,7 +193,7 @@ const ManageUsers = () => {
                       </div>
                       <div>
                         <p className="text-white font-medium">{user.name}</p>
-                        <p className="text-white/60 text-sm">{user.role}</p>
+                        <p className="text-white/60 text-sm">{user.role || 'User'}</p>
                       </div>
                     </div>
                   </td>
@@ -215,33 +205,33 @@ const ManageUsers = () => {
                   </td>
                   <td className="py-4 px-6">
                     <button
-                      onClick={() => toggleUserStatus(user.id)}
+                      onClick={() => toggleUserStatus(user._id)}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
                         user.status === 'Active'
                           ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
                           : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                       } transition`}
                     >
-                      {user.status}
+                      {user.status || 'Active'}
                     </button>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-white/80">{formatDate(user.joinDate)}</span>
+                    <span className="text-white/80">{formatDate(user.createdAt || user.joinDate)}</span>
                   </td>
-                  <td className="py-4 px-6">
+                  {/* <td className="py-4 px-6">
                     <div className="flex items-center space-x-2">
                       <button className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition" title="Edit">
                         <FiEdit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
+                        onClick={() => handleDeleteUser(user._id)}
                         className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition"
                         title="Delete"
                       >
                         <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

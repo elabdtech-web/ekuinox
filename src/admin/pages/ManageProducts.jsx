@@ -4,6 +4,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiPackage, FiEye, FiDollarSign } f
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { productService } from '../../services/productService';
+import { toast } from 'react-toastify';
 
 const ManageProducts = () => {
   const navigate = useNavigate();
@@ -63,18 +64,52 @@ const ManageProducts = () => {
     setShowPreviewModal(true);
   };
 
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await productService.deleteProduct(productId);
-        // Remove from local state after successful API call
-        setProducts(prev => prev.filter(p => p._id !== productId));
-        alert('Product deleted successfully!');
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Failed to delete product. Please try again.');
+  const handleDeleteProduct = (product) => {
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p className="mb-3">
+            Are you sure you want to delete <strong>{product.name}</strong>?
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+              onClick={async () => {
+                closeToast();
+                try {
+                  await productService.deleteProduct(product._id);
+                  setProducts((prev) =>
+                    prev.filter((p) => p._id !== product._id)
+                  );
+                  toast.success(`${product.name} deleted successfully! 🗑️`);
+                } catch (err) {
+                  console.error("Failed to delete product:", err);
+                  let msg = "Failed to delete product. Please try again.";
+                  if (err.message && err.message.includes("401")) msg = "Please log in to delete products.";
+                  else if (err.message && err.message.includes("404"))
+                    msg = "Product not found or you don't have permission to delete it.";
+                  toast.error(msg);
+                }
+              }}
+            >
+              Delete
+            </button>
+            <button
+              className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+              onClick={closeToast}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-right",
+        autoClose: false,
+        closeButton: false,
+        draggable: false,
       }
-    }
+    );
   };
 
   const toggleProductStatus = async (productId) => {
@@ -90,11 +125,10 @@ const ManageProducts = () => {
           ? { ...p, status: newStatus }
           : p
       ));
-      
-      alert(`Product status updated to ${newStatus}!`);
+      toast.success('Product status updated successfully!');
     } catch (error) {
       console.error('Error updating product status:', error);
-      alert('Failed to update product status. Please try again.');
+      toast.error('Failed to update product status. Please try again.');
     }
   };
 
@@ -262,7 +296,7 @@ const ManageProducts = () => {
                   <FiEdit2 className="w-4 h-4 mx-auto" />
                 </button>
                 <button
-                  onClick={() => handleDeleteProduct(product._id || product.id)}
+                  onClick={() => handleDeleteProduct(product)}
                   className="flex-1 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition text-center"
                   title="Delete"
                 >

@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
   // Development API URL (your local backend)
-  DEV_API_URL: 'http://localhost:5000/api',
+  DEV_API_URL: 'http://localhost:5001/api',
   
   // Production API URL (update this when you deploy your backend)
   PROD_API_URL: 'https://your-backend-domain.com/api',
@@ -68,6 +68,14 @@ export const CART_ENDPOINTS = {
   REMOVE_ITEM: `${API_BASE_URL}/cart/items`,
   CLEAR_CART: `${API_BASE_URL}/cart`,
   CHECKOUT: `${API_BASE_URL}/cart/checkout`
+};
+
+export const USER_ENDPOINTS = {
+  GET_ALL: `${API_BASE_URL}/users`,
+  GET_BY_ID: `${API_BASE_URL}/users`,
+  UPDATE: `${API_BASE_URL}/users`,
+  DELETE: `${API_BASE_URL}/users`,
+  TOGGLE_STATUS: `${API_BASE_URL}/users`
 };
 
 export default API_CONFIG;

@@ -139,6 +139,7 @@ export const cartService = {
     return {
       productId: itemData.productId || itemData.id || itemData._id,
       quantity: itemData.qty || itemData.quantity || 1,
+      image: itemData.img || itemData.image, // Include image
       // Optional options
       size: itemData.size,
       color: itemData.color,

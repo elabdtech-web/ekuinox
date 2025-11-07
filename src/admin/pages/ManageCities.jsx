@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiMap } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import cityService from '../../services/cityService';
 
 const ManageCities = () => {
   const [cities, setCities] = useState([]);
@@ -14,7 +16,7 @@ const ManageCities = () => {
   });
 
   // Demo data - replace with actual API calls
-  const demoCities = [
+  const demoCities = useMemo(() => [
     { label: "Algiers", value: "1" },
     { label: "Annaba", value: "2" },
     { label: "Batna", value: "3" },
@@ -25,16 +27,39 @@ const ManageCities = () => {
     { label: "El Oued", value: "8" },
     { label: "Ghardaia", value: "9" },
     { label: "Jijel", value: "10" }
-  ];
+  ], []);
 
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
+  const loadCities = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await cityService.getAllCities();
+      console.log('Load cities response:', response.data);
+      const citiesData = response.data || response.cities || response || [];
+
+      // Transform API data to match component format if needed
+      const formattedCities = citiesData.map(city => ({
+        id: city._id ,
+        label: city.label || city.name || city.city,
+        value: city.value || city.id || city._id,
+        country: city.country || 'Unknown'
+      }));
+
+      setCities(formattedCities);
+      setFilteredCities(formattedCities);
+    } catch (error) {
+      console.error('Error loading cities:', error);
+      toast.error('Failed to load cities. Please try again.');
+  // Fallback to demo data
       setCities(demoCities);
       setFilteredCities(demoCities);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  }, [demoCities]);
+
+  useEffect(() => {
+    loadCities();
+  }, [loadCities]);
 
   useEffect(() => {
     const filtered = cities.filter(city =>
@@ -53,44 +78,93 @@ const ManageCities = () => {
     setShowAddModal(true);
   };
 
-  const handleEditCity = (city) => {
-    setFormData({
-      label: city.label,
-      value: city.value
-    });
-    setEditingCity(city);
-    setShowAddModal(true);
-  };
+  // const handleEditCity = (city) => {
+  //   setFormData({
 
-  const handleDeleteCity = (cityValue) => {
-    if (window.confirm('Are you sure you want to delete this city?')) {
-      setCities(prev => prev.filter(c => c.value !== cityValue));
-    }
-  };
+  //     label: city.label,
+  //     value: city.value
+  //   });
+  //   setEditingCity(city);
+  //   setShowAddModal(true);
+  // };
 
-  const handleSubmit = (e) => {
+  // const handleDeleteCity = (city) => {
+  //   console.log('Deleting city with ID:', city.id);
+  //   toast(
+  //     ({ closeToast }) => (
+  //       <div>
+  //         <p className="mb-3">
+  //           Are you sure you want to delete <strong>{city.label}</strong>?
+  //         </p>
+  //         <div className="flex gap-2">
+  //           <button
+  //             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+  //             onClick={async () => {
+  //               closeToast();
+  //               try {
+  //                 await cityService.deleteCity(city.id);
+  //                 toast.success(`${city.label} deleted successfully! 🗑️`);
+  //                 // Reload cities from API
+  //                 await loadCities();
+  //               } catch (err) {
+  //                 console.error("Failed to delete city:", err);
+  //                 let msg = "Failed to delete city. Please try again.";
+  //                 if (err.message && err.message.includes("401")) msg = "Please log in to delete cities.";
+  //                 else if (err.message && err.message.includes("404"))
+  //                   msg = "City not found or you don't have permission to delete it.";
+  //                 toast.error(msg);
+  //               }
+  //             }}
+  //           >
+  //             Delete
+  //           </button>
+  //           <button
+  //             className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+  //             onClick={closeToast}
+  //           >
+  //             Cancel
+  //           </button>
+  //         </div>
+  //       </div>
+  //     ),
+  //     {
+  //       position: "top-right",
+  //       autoClose: false,
+  //       closeButton: false,
+  //       draggable: false,
+  //     }
+  //   );
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (editingCity) {
+    try {
+      if (editingCity) {
       // Update existing city
-      setCities(prev => prev.map(c => 
-        c.value === editingCity.value 
-          ? { ...formData }
-          : c
-      ));
-    } else {
-      // Add new city
-      const newValue = (Math.max(...cities.map(c => parseInt(c.value))) + 1).toString();
-      const newCity = {
-        label: formData.label,
-        value: formData.value || newValue
-      };
-      setCities(prev => [...prev, newCity]);
+        await cityService.updateCity(editingCity.value, {
+          label: formData.label,
+          value: formData.value || editingCity.value
+        });
+        toast.success('City updated successfully!');
+      } else {
+        // Add new city
+        await cityService.addCity({
+          label: formData.label,
+          value: formData.value
+        });
+        toast.success('City added successfully!');
+      }
+
+      // Reload cities from API
+      await loadCities();
+      setShowAddModal(false);
+      setFormData({ label: '', value: '' });
+      setEditingCity(null);
+    } catch (error) {
+      console.error('Error saving city:', error);
+      toast.error('Failed to save city. Please try again.');
     }
-    
-    setShowAddModal(false);
-    setFormData({ label: '', value: '' });
-    setEditingCity(null);
   };
 
   if (loading) {
@@ -154,10 +228,10 @@ const ManageCities = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-medium">{city.label}</h3>
-                  <p className="text-white/60 text-sm">ID: {city.value}</p>
+                  <p className="text-white/60 text-sm">Country: {city.country}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-1">
+              {/* <div className="flex items-center space-x-1">
                 <button
                   onClick={() => handleEditCity(city)}
                   className="p-1.5 text-blue-400 hover:bg-blue-500/20 rounded-lg transition"
@@ -166,13 +240,13 @@ const ManageCities = () => {
                   <FiEdit2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleDeleteCity(city.value)}
+                  onClick={() => handleDeleteCity(city)}
                   className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition"
                   title="Delete"
                 >
                   <FiTrash2 className="w-4 h-4" />
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         ))}

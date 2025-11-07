@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { PiShoppingBag } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { useProductCart } from "../../context/ProductCartContext";
+import Cart from "../../common/Cart";
 
 const parsePrice = (p) => {
   if (!p) return 0;
@@ -13,10 +14,14 @@ const parsePrice = (p) => {
 
 const LuxuryProducts = ({ products, loading }) => {
 
-  console.log('LuxuryProducts received products:', products);
 
   const { addItem } = useProductCart();
   const navigate = useNavigate();
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
+
+  const closeCart = () => setIsCartOpen(false);
+
+
 
   if (loading) {
     return (
@@ -166,25 +171,7 @@ const LuxuryProducts = ({ products, loading }) => {
                     </button>
                     <button
                       className="h-10 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
-                      onClick={async () => {
-                        if (productData) {
-                          try {
-                            await addItem({
-                              id: productData._id || productData.id,
-                              name: productData.name,
-                              price: productData.price,
-                              priceNum,
-                              img: productData.images && Array.isArray(productData.images)
-                                ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                                : '/Luxury1.png',
-                            });
-                            alert('Product added to cart successfully!');
-                          } catch (error) {
-                            console.error('Error adding to cart:', error);
-                            alert('Failed to add product to cart. Please try again.');
-                          }
-                        }
-                      }}
+                      onClick={() => setIsCartOpen(true)}
                       disabled={!productData}
                     >
                       <PiShoppingBag size={20} className="text-white" />
@@ -196,6 +183,8 @@ const LuxuryProducts = ({ products, loading }) => {
           })}
         </div>
       </div>
+            <Cart open={isCartOpen} onClose={closeCart} />
+      
     </section>
   );
 };
