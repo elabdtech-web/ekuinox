@@ -107,32 +107,9 @@ const Loader = ({ onComplete }) => {
           </div>
         </div>
 
-        {/* Website taglines with slide-in animation */}
-        <div className="space-y-2 mb-6">
-          <div className="text-white/80 text-lg font-light tracking-wide animate-slideInLeft">
-            🕐 Track Time Across the Globe
-          </div>
-          <div className="text-white/70 text-base animate-slideInLeft" style={{ animationDelay: '0.5s' }}>
-            🌤️ Real-time Weather Updates
-          </div>
-          <div className="text-white/60 text-sm animate-slideInLeft" style={{ animationDelay: '1s' }}>
-            🌍 Your Personal World Clock
-          </div>
-        </div>
-
+        
         {/* Animated progress bar with real progress */}
-        <div className="w-64 mx-auto mb-4">
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-400 rounded-full transition-all duration-100 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          {/* Progress percentage */}
-          <div className="text-white/50 text-xs mt-2 font-mono">
-            {Math.round(progress)}% Complete
-          </div>
-        </div>
+        
 
         {/* Loading dots */}
         <div className="flex justify-center space-x-2 mb-4">
