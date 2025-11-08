@@ -6,7 +6,6 @@ import SunCalc from "suncalc";
 import { useCityCart } from "../context/CityCartContext";
 import { useAuth } from "../context/AuthContext";
 import tz_lookup from "tz-lookup";
-import cityService from "../services/cityService";
 
 // --- ADDED: determine day/night for cities ---
 function determineDayOrNight(cityList = []) {
@@ -62,7 +61,7 @@ export default function GlobeEarth({
   
   // Use cities from your backend API instead of static data
   const { savedCities = [] } = useCityCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [cities, setCities] = useState([]);
   const [hoverCity, setHoverCity] = useState(null);
   const [nightMode, setNightMode] = useState(false);
@@ -154,23 +153,24 @@ export default function GlobeEarth({
         setLoadingCities(true);
         
         // If user is not authenticated, show empty globe
-        if (!isAuthenticated) {
-          console.log('User not authenticated - showing globe without cities');
+        if (!isAuthenticated || !user) {
+          console.log('User not authenticated or user data not available - showing globe without cities');
           setCities([]);
           setLoadingCities(false);
           return;
         }
         
-        // First try to use cities from context
+        // Get user ID for logging
+        const userId = user.id || user._id;
+        console.log('Loading cities for authenticated user:', userId);
+        
+        // Always prioritize cities from context (which loads from API)
         if (savedCities && savedCities.length > 0) {
-          console.log('Using cities from context:', savedCities.length);
+          console.log('Using cities from context for user', userId, ':', savedCities.length);
           setCities(determineDayOrNight(savedCities));
         } else {
-          // Fallback: fetch from API
-          console.log('Fetching cities from API...');
-          const apiCities = await cityService.fetchCities();
-          console.log('Loaded cities from API:', apiCities.length);
-          setCities(determineDayOrNight(apiCities));
+          console.log('No cities in context for user', userId, ', showing empty globe');
+          setCities([]);
         }
       } catch (error) {
         console.error('Failed to load cities:', error);
@@ -180,10 +180,26 @@ export default function GlobeEarth({
       }
     };
 
-    // Start loading cities after a short delay to ensure globe renders first
+    // Clear cities first when user changes, then load
+    console.log('Globe: User or savedCities changed. User:', user?.id || user?._id, 'Cities count:', savedCities?.length || 0);
+    setCities([]); // Clear immediately when user changes
+    
+    // Start loading cities after a short delay to ensure clean state
     const timer = setTimeout(loadCities, 100);
     return () => clearTimeout(timer);
-  }, [savedCities, isAuthenticated]);
+  }, [savedCities, isAuthenticated, user]);
+
+  // Update cities display when savedCities changes (for immediate updates when adding/removing)
+  useEffect(() => {
+    if (!isAuthenticated || !user || !savedCities) {
+      setCities([]);
+      return;
+    }
+    
+    // Always process savedCities through determineDayOrNight for immediate display
+    console.log('Updating cities display due to savedCities change:', savedCities.length);
+    setCities(determineDayOrNight(savedCities));
+  }, [savedCities, isAuthenticated, user]);
 
   // Update globe with cities data when cities are loaded
   useEffect(() => {

@@ -17,18 +17,26 @@ export function CityCartProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
-  // Load cities from backend on mount
+  // Load cities from backend on mount or when user changes
   useEffect(() => {
     let cancelled = false;
     
     const loadCities = async () => {
-      if (savedCities.length > 0) return; // Already loaded
+      // Check if user is available and has an ID
+      if (!user || (!user.id && !user._id)) {
+        console.log('User not available or no user ID found, clearing cities');
+        setSavedCities([]);
+        return;
+      }
       
       setIsLoading(true);
       try {
         // Load from backend only
-        const cities = await cityService.fetchCities(user?.id);
+        const userId = user.id || user._id;
+        console.log('Loading cities for user ID:', userId);
+        const cities = await cityService.fetchCities(userId);
         if (!cancelled && Array.isArray(cities)) {
+          console.log('Loaded cities for user:', userId, 'Count:', cities.length);
           setSavedCities(cities);
         }
       } catch (error) {
@@ -42,11 +50,16 @@ export function CityCartProvider({ children }) {
       }
     };
 
+    // Clear cities first when user changes, then load new user's cities
+    const currentUserId = user?.id || user?._id;
+    console.log('CityCartContext: User changed or component mounted. User ID:', currentUserId);
+    setSavedCities([]); // Clear previous user's cities immediately
     loadCities();
+    
     return () => {
       cancelled = true;
     };
-  }, [savedCities.length, user?.id]);
+  }, [user]); // Only depend on user, not savedCities.length
 
   const addCity = async (city) => {
     if (!city || !city.name) {
@@ -71,7 +84,9 @@ export function CityCartProvider({ children }) {
 
     try {
       // Create via API
+      console.log('Creating city via API:', city.name);
       const createdCity = await cityService.createCity(city.name);
+      console.log('City created successfully:', createdCity);
       
       // Add to local state with computed display data
       const cityWithDisplay = {
@@ -80,7 +95,11 @@ export function CityCartProvider({ children }) {
         addedAt: new Date().toISOString()
       };
       
-      setSavedCities(prev => [...prev, cityWithDisplay]);
+      setSavedCities(prev => {
+        const newCities = [...prev, cityWithDisplay];
+        console.log('Updated cities in context. Before:', prev.length, 'After:', newCities.length);
+        return newCities;
+      });
     } catch (error) {
       console.error("Failed to create city via API, adding locally:", error);
       // Fallback: add to local state only
@@ -97,22 +116,27 @@ export function CityCartProvider({ children }) {
         (typeof cityIdOrName === "string" && c.name === cityIdOrName)
       );
 
+      console.log('Removing city:', cityIdOrName, 'Found city:', cityToRemove);
+
       if (cityToRemove && (cityToRemove._id || cityToRemove.id)) {
         await cityService.deleteCity(cityToRemove._id || cityToRemove.id);
+        console.log('City deleted from API successfully');
       }
     } catch (error) {
       console.error("Failed to delete city via API:", error);
       // Continue with local removal even if API fails
     }
 
-    // Remove from local state (using _id from your backend)
+    // Remove from local state (using _id from your backend) - always execute this
     setSavedCities((prev) => {
-      return prev.filter((c) => {
+      const newCities = prev.filter((c) => {
         if (typeof cityIdOrName === "string") {
           return c._id !== cityIdOrName && c.id !== cityIdOrName && c.name !== cityIdOrName;
         }
         return true;
       });
+      console.log('Updated cities in state. Before:', prev.length, 'After:', newCities.length);
+      return newCities;
     });
   };
 

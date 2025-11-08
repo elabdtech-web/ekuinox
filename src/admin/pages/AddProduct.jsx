@@ -382,13 +382,36 @@ const AddProduct = () => {
       navigate('/admin/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      console.log('Final payload before error:', error);
 
-      // show validation errors from backend
-      if (error.response?.data?.errors) {
-        console.table(error.response.data.errors);
-        toast.error('Validation failed. Please check your form fields.');
+      // try to extract server validation info
+      const serverMsg = error?.response?.data?.message || error?.message || '';
+      const serverErrors = error?.response?.data?.errors || null;
+
+      // Prepare a new errors object merging with existing validationErrors
+      const newErrors = { ...validationErrors };
+
+      // If backend returned structured errors (map), copy them
+      if (serverErrors && typeof serverErrors === 'object' && Object.keys(serverErrors).length) {
+        for (const key of Object.keys(serverErrors)) {
+          // serverErrors[key] could be string or object { msg }
+          newErrors[key] = serverErrors[key].msg || serverErrors[key] || String(serverErrors[key]);
+        }
+      }
+
+      // Detect duplicate key / unique constraint errors and map to SKU
+      if (/duplicate/i.test(serverMsg) || /E11000/i.test(serverMsg) || /Duplicate field value/i.test(serverMsg)) {
+        newErrors.sku = newErrors.sku || 'SKU already exists. Please choose a unique SKU.';
+      }
+
+      // If we have any validation errors from server/local, show them inline
+      if (Object.keys(newErrors).length > 0) {
+        setValidationErrors(newErrors);
+        // scroll to first error field
+        const firstKey = Object.keys(newErrors)[0];
+        const el = document.getElementById(firstKey);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
+        // fallback toast for unexpected errors
         toast.error('Unexpected error. Please try again.');
       }
     } finally {
@@ -803,8 +826,6 @@ const AddProduct = () => {
             </div>
 
 
-
-           
 
             {/* Features Management */}
             <div className="space-y-6">

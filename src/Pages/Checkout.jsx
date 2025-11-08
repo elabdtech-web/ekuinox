@@ -393,7 +393,15 @@ const Checkout = () => {
                 {items.map(it => (
                   <div key={it.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <img src={it.img} alt={it.name} className="w-14 h-16 object-contain rounded-md bg-white/10" />
+                      <img 
+                        src={it.img || '/Luxury1.png'} 
+                        alt={it.name} 
+                        className="w-14 h-16 object-contain rounded-md bg-white/10"
+                        onError={(e) => {
+                          console.log('Checkout image failed to load:', it.img, 'for item:', it.name);
+                          e.target.src = '/Luxury1.png';
+                        }}
+                      />
                       <div className="min-w-0">
                         <div className="truncate">{it.name}</div>
                         <div className="text-white/60 text-xs">Qty: {it.qty}{it.size?`, ${it.size}`:''}{it.color?`, ${it.color}`:''}</div>

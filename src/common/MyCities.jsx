@@ -8,10 +8,9 @@ import { toast } from "react-toastify";
 import { useCityCart } from "../context/CityCartContext";
 import { useAuth } from "../context/AuthContext";
 import AddCityModal from "../components/AddCityModal";
-import cityService from "../services/cityService";
 
 export default function MyCities() {
-  const { savedCities = [], setSavedCities, isLoading: contextLoading } = useCityCart();
+  const { savedCities = [], setSavedCities, removeCity, addCity, isLoading: contextLoading } = useCityCart();
   const auth = useAuth();
   const isAuthenticated = auth.isAuthenticated;
 
@@ -29,20 +28,11 @@ export default function MyCities() {
       }
 
       setIsAdding(true);
-      const newCity = await cityService.createCity(trimmedName);
+      
+      // Use the context's addCity function instead of duplicating logic
+      await addCity({ name: trimmedName });
 
-      setSavedCities?.((prev) => {
-        const exists = prev.some(
-          (city) =>
-            city._id === newCity._id ||
-            (city.name?.toLowerCase() === newCity.name?.toLowerCase() &&
-              city.country === newCity.country)
-        );
-        if (exists) return prev;
-        return [newCity, ...prev];
-      });
-
-      toast.success(`🎉 ${newCity.name} added to your collection!`);
+      toast.success(`🎉 ${trimmedName} added to your collection!`);
       setIsAddOpen(false);
     } catch (err) {
       console.error("Failed to add city:", err);
@@ -50,7 +40,7 @@ export default function MyCities() {
     } finally {
       setIsAdding(false);
     }
-  }, [setSavedCities]);
+  }, [addCity]);
 
   // 🧠 Delete City (memoized)
   const handleDeleteCity = useCallback(
@@ -70,10 +60,8 @@ export default function MyCities() {
                 onClick={async () => {
                   closeToast();
                   try {
-                    await cityService.deleteCity(cityId);
-                    setSavedCities?.((prev) =>
-                      prev.filter((city) => city._id !== cityId)
-                    );
+                    // Use the context's removeCity function instead of duplicating logic
+                    await removeCity(cityId);
                     toast.success(`${cityName} deleted successfully! 🗑️`);
                   } catch (err) {
                     console.error("Failed to delete city:", err);
@@ -104,7 +92,7 @@ export default function MyCities() {
         }
       );
     },
-    [savedCities, setSavedCities]
+    [savedCities, removeCity]
   );
 
   // 🔍 Filter cities (memoized)

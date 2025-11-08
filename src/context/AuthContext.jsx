@@ -45,10 +45,17 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       
+      // Clear any existing user state first
+      setUser(null);
+      setIsAuthenticated(false);
+      
       const response = await authService.login({ email, password });
       
       // Set user data from API response
-      setUser(response.data || response.user);
+      const userData = response.data || response.user;
+      console.log('Login successful for user:', userData?.id || userData?._id, userData?.email);
+      
+      setUser(userData);
       setIsAuthenticated(true);
       setLoading(false);
       
@@ -69,6 +76,8 @@ export const AuthProvider = ({ children }) => {
         userMessage = 'Invalid email or password. Please check your credentials and try again.';
       } else if (error.status === 404) {
         userMessage = 'Login service not found. Please contact support.';
+      } else if (error.status === 429) {
+        userMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
       } else if (error.status >= 500) {
         userMessage = 'Server error. Please try again later.';
       }
@@ -90,8 +99,10 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       // Clear local state regardless of API response
+      console.log('Logging out user:', user?.email);
       setUser(null);
       setIsAuthenticated(false);
+      setLoading(false);
     }
   };
 

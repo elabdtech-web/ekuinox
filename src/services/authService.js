@@ -31,6 +31,13 @@ const handleResponse = async (response) => {
       url: response.url,
       data: data
     });
+    
+    // Special handling for rate limiting
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || '60';
+      data.message = `Too many requests. Please wait ${retryAfter} seconds before trying again.`;
+    }
+    
     const error = new Error(data.message || 'API request failed');
     error.status = response.status;
     error.data = data;

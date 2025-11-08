@@ -96,10 +96,14 @@ const LuxuryProducts = ({ products, loading }) => {
                       src={
                         productData?.images && Array.isArray(productData.images)
                           ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                          : '/Luxury1.png'
+                          : (productData?.img || '/Luxury1.png')
                       }
                       alt={productData?.name || 'Luxury Watch'}
                       className="h-full w-auto object-contain drop-shadow-2xl"
+                      onError={(e) => {
+                        console.log('Luxury product image failed to load:', e.target.src, 'for product:', productData?.name);
+                        e.target.src = '/Luxury1.png';
+                      }}
                     />
                   </div>
                 </motion.div>
@@ -129,6 +133,10 @@ const LuxuryProducts = ({ products, loading }) => {
                       onClick={async () => {
                         if (productData) {
                           try {
+                            console.log('Product data for cart:', productData);
+                            console.log('Product images:', productData.images);
+                            console.log('Product img:', productData.img);
+                            
                             await addItem({
                               id: productData._id || productData.id,
                               name: productData.name,
@@ -136,7 +144,7 @@ const LuxuryProducts = ({ products, loading }) => {
                               priceNum,
                               img: productData.images && Array.isArray(productData.images)
                                 ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                                : '/Luxury1.png',
+                                : (productData.img || '/Luxury1.png'),
                             });
                           
                           } catch (error) {

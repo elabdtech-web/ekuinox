@@ -12,6 +12,7 @@ export default function Cart({ open, onClose }) {
   const navigate = useNavigate();
 
   console.log('Cart items:', items);
+  console.log('Cart items images:', items.map(item => ({ name: item.name, img: item.img })));
   function currency(n) {
     return `$${Number(n || 0).toLocaleString(undefined, {
       minimumFractionDigits: 2,
@@ -27,6 +28,49 @@ export default function Cart({ open, onClose }) {
 
   // Don't render anything if cart is closed
   if (!open) return null;
+
+  const confirmClearCart = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div className="p-2">
+          <div className="text-white font-semibold mb-1">Clear cart?</div>
+          <div className="text-white/80 text-sm mb-3">This will remove all items from your cart.</div>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                try {
+                  await clearCart();
+                  toast.success('Cart cleared', { position: 'top-right' });
+                } catch {
+                  toast.error('Failed to clear cart. Please try again.', { position: 'top-right' });
+                } finally {
+                  closeToast();
+                }
+              }}
+              className="px-3 py-1 text-xs bg-red-500/20 text-red-400 rounded-full hover:bg-red-500/30 transition disabled:opacity-50"
+              disabled={loading}
+            >
+              Yes, clear
+            </button>
+            <button
+              onClick={closeToast}
+              className="px-3 py-1 text-xs bg-white/12 text-white rounded-full hover:bg-white/20 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        hideProgressBar: true,
+        position: 'top-right', // top-right as requested
+        className: 'bg-[#1b2433] border border-white/10 rounded-xl',
+      }
+    );
+  };
 
   return createPortal(
     <>
@@ -57,16 +101,7 @@ export default function Cart({ open, onClose }) {
           <div className="flex items-center gap-2">
             {items.length > 0 && (
               <button
-                onClick={async () => {
-                  if (window.confirm('Are you sure you want to clear your cart?')) {
-                    try {
-                      await clearCart();
-                    } catch (error) {
-                      console.error('Error clearing cart:', error);
-                      toast.error('Failed to clear cart. Please try again.');
-                    }
-                  }
-                }}
+                onClick={confirmClearCart} // replaced window.confirm with toast confirm
                 className="px-3 py-1 text-xs bg-red-500/20 text-red-400 rounded-full hover:bg-red-500/30 transition"
                 disabled={loading}
               >
@@ -126,9 +161,13 @@ export default function Cart({ open, onClose }) {
               {/* Image */}
               <div className="absolute left-5 -top-4 w-[120px] h-[160px] pointer-events-none select-none">
                 <img
-                  src={it.img}
+                  src={it.img || '/Luxury1.png'}
                   alt={it.name}
                   className="h-full w-auto object-contain drop-shadow-2xl"
+                  onError={(e) => {
+                    console.log('Image failed to load:', it.img, 'for item:', it.name);
+                    e.target.src = '/Luxury1.png';
+                  }}
                 />
               </div>
 

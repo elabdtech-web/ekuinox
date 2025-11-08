@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,6 +6,9 @@ const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [lastAttempt, setLastAttempt] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const submitButtonRef = useRef(null);
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -23,22 +26,54 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent rapid submissions (rate limiting)
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastAttempt;
+    const minInterval = attemptCount > 2 ? 5000 : 1000; // 5 seconds after 3 attempts, 1 second otherwise
+    
+    if (timeSinceLastAttempt < minInterval) {
+      const waitTime = Math.ceil((minInterval - timeSinceLastAttempt) / 1000);
+      setError(`Please wait ${waitTime} seconds before trying again.`);
+      return;
+    }
+    
+    // Disable submit button to prevent double clicks
+    if (submitButtonRef.current) {
+      submitButtonRef.current.disabled = true;
+    }
     setLoading(true);
     setError('');
+    setLastAttempt(now);
+    setAttemptCount(prev => prev + 1);
 
     if (!credentials.email || !credentials.password) {
       setError('Please fill in all fields');
       setLoading(false);
+      if (submitButtonRef.current) {
+        submitButtonRef.current.disabled = false;
+      }
       return;
     }
 
-    const result = await login(credentials.email, credentials.password);
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.message);
+    try {
+      const result = await login(credentials.email, credentials.password);
+      if (result.success) {
+        // Reset attempt count on successful login
+        setAttemptCount(0);
+        navigate(from, { replace: true });
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      console.error('Login submission error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+      if (submitButtonRef.current) {
+        submitButtonRef.current.disabled = false;
+      }
     }
-    setLoading(false);
   };
 
   return (
@@ -55,8 +90,18 @@ const Login = () => {
           <h2 className="text-2xl font-semibold text-white mb-6 text-center">Sign In</h2>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg mb-6">
+            <div className={`border px-4 py-3 rounded-lg mb-6 ${
+              error.includes('wait') || error.includes('Too many') 
+                ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-200' 
+                : 'bg-red-500/20 border-red-500/30 text-red-200'
+            }`}>
               {error}
+            </div>
+          )}
+
+          {attemptCount > 2 && (
+            <div className="bg-blue-500/20 border border-blue-500/30 text-blue-200 px-4 py-3 rounded-lg mb-6 text-sm">
+              ⚡ Frequent login attempts detected. Please wait between attempts to avoid rate limiting.
             </div>
           )}
 
@@ -94,6 +139,7 @@ const Login = () => {
             </div>
 
             <button
+              ref={submitButtonRef}
               type="submit"
               disabled={loading}
               className="w-full bg-[#5695F5] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
