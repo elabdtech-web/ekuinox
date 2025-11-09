@@ -181,6 +181,30 @@ export default function Cart({ open, onClose }) {
                     <p className="text-[#7fb2ff] font-semibold text-[18px] md:text-[20px]">
                       {it.price}
                     </p>
+
+                    {/* Display color options if available */}
+                    {it.colors && it.colors.length > 0 && (
+                      <div className="flex gap-1 mt-1">
+                        {it.colors.slice(0, 3).map((color, idx) => (
+                          <div
+                            key={color.id || idx}
+                            className="group relative"
+                            title={color.alt}
+                          >
+                            <img
+                              src={color.thumb}
+                              alt={color.alt}
+                              className="w-6 h-6 rounded border border-white/20 object-cover"
+                            />
+                          </div>
+                        ))}
+                        {it.colors.length > 3 && (
+                          <span className="text-white/60 text-xs self-center">
+                            +{it.colors.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Qty pill */}

@@ -19,6 +19,7 @@ const LuxuryProducts = ({ products, loading }) => {
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = React.useState(false);
 
+  console.log("LuxuryProducts received products:", products);
   const closeCart = () => setIsCartOpen(false);
 
   return (
@@ -48,7 +49,7 @@ const LuxuryProducts = ({ products, loading }) => {
             {/* Filter out any string IDs and only show valid product objects */}
             {(() => {
               const validProducts = (products || []).filter(item => typeof item === 'object' && item !== null);
-              
+
               if (validProducts.length === 0) {
                 return (
                   <div className="text-center py-12 mt-16">
@@ -78,102 +79,95 @@ const LuxuryProducts = ({ products, loading }) => {
                         className="relative bg-[#181C24] rounded-2xl border border-white/6 shadow-[0_10px_30px_rgba(2,6,23,0.6)] p-6 cursor-pointer flex flex-col items-center min-h-[380px]"
                         onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
                         disabled={!productData}
-              >
-                {/* Animated image container */}
-                <motion.div
-                  initial={{ opacity: 0, y: -50, scale: 0.9 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.8,
-                    delay: index * 0.25,
-                    ease: "easeOut",
-                  }}
-                  viewport={{ once: true }}
-                  className="w-full flex justify-center mb-2"
-                >
-                  <div className="h-[180px] w-[150px] absolute -top-12 rounded-xl flex items-center justify-center z-20">
-                    <img
-                      src={
-                        productData?.images && Array.isArray(productData.images)
-                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                          : (productData?.img || '/Luxury1.png')
-                      }
-                      alt={productData?.name || 'Luxury Watch'}
-                      className="h-full w-auto object-contain drop-shadow-2xl"
-                      onError={(e) => {
-                        console.log('Luxury product image failed to load:', e.target.src, 'for product:', productData?.name);
-                        e.target.src = '/Luxury1.png';
-                      }}
-                    />
-                  </div>
-                </motion.div>
+                      >
+                        {/* Animated image container */}
+                        <motion.div
+                          initial={{ opacity: 0, y: -50, scale: 0.9 }}
+                          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{
+                            duration: 0.8,
+                            delay: index * 0.25,
+                            ease: "easeOut",
+                          }}
+                          viewport={{ once: true }}
+                          className="w-full flex justify-center mb-2"
+                        >
+                          <div className="h-[180px] w-[150px] absolute -top-12 rounded-xl flex items-center justify-center z-20">
+                            <img
+                              src={
+                                productData?.colors && Array.isArray(productData.colors) && productData.colors.length > 0
+                                  ? (productData.colors[0]?.thumb || '/Luxury1.png')
+                                  : '/Luxury1.png'
+                              }
+                              alt={productData?.name || 'Luxury Watch'}
+                              className="h-full w-auto object-contain drop-shadow-2xl"
+                            />
+                          </div>
+                        </motion.div>
 
-                {/* Card body */}
-                <div className="w-full flex flex-col items-center text-center mt-28 z-10">
-                  <h3 className="text-white text-lg md:text-xl font-medium mb-2">
-                    {productData?.name || 'Luxury Watch'}
-                  </h3>
-                  <p className="text-blue-400 text-2xl md:text-3xl font-semibold mt-1">
-                    ${productData?.price || '0.00'}
-                  </p>
-                </div>
+                        {/* Card body */}
+                        <div className="w-full flex flex-col items-center text-center mt-28 z-10">
+                          <h3 className="text-white text-lg md:text-xl font-medium mb-2">
+                            {productData?.name || 'Luxury Watch'}
+                          </h3>
+                          <p className="text-blue-400 text-2xl md:text-3xl font-semibold mt-1">
+                            ${productData?.price || '0.00'}
+                          </p>
+                        </div>
 
-                {/* Buttons */}
-                <div className="w-full mt-auto flex flex-col gap-2">
-                  {/* <button
-                    className="px-4 py-2 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
-                    onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
-                    disabled={!productData}
-                  >
-                    View Details
-                  </button> */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      className="px-6 h-10 py-2 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
-                      onClick={async () => {
-                        if (productData) {
-                          try {
-                            console.log('Product data for cart:', productData);
-                            console.log('Product images:', productData.images);
-                            console.log('Product img:', productData.img);
-                            
-                            await addItem({
-                              id: productData._id || productData.id,
-                              name: productData.name,
-                              price: productData.price,
-                              priceNum,
-                              img: productData.images && Array.isArray(productData.images)
-                                ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/Luxury1.png')
-                                : (productData.img || '/Luxury1.png'),
-                            });
-                          
-                          } catch (error) {
-                            console.error('Error adding to cart:', error);
-                            alert('Failed to add product to cart. Please try again.');
-                          }
-                        }
-                      }}
-                      disabled={!productData}
-                    >
-                      Buy Now
-                    </button>
-                    <button
-                      className="h-10 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
-                      onClick={() => setIsCartOpen(true)}
-                      disabled={!productData}
-                    >
-                      <PiShoppingBag size={20} className="text-white" />
-                    </button>
-                  </div>
+                        {/* Buttons */}
+                        <div className="w-full mt-auto flex flex-col gap-2">
+                          {/* <button
+                            className="px-4 py-2 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
+                            onClick={() => navigate(`/product?id=${productData._id || productData.id}`)}
+                            disabled={!productData}
+                          >
+                            View Details
+                          </button> */}
+                          <div className="flex items-center gap-3">
+                            <button
+                              className="px-6 h-10 py-2 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50 text-sm"
+                              onClick={async () => {
+                                if (productData) {
+                                  try {
+                                    await addItem({
+                                      id: productData._id || productData.id,
+                                      name: productData.name,
+                                      price: productData.price,
+                                      priceNum,
+                                      img: productData?.colors && Array.isArray(productData.colors) && productData.colors.length > 0
+                                        ? productData.colors[0]?.thumb
+                                        : '/Luxury1.png',
+                                      colors: productData.colors // Include colors data
+                                    });
+
+                                  } catch (error) {
+                                    console.error('Error adding to cart:', error);
+                                    alert('Failed to add product to cart. Please try again.');
+                                  }
+                                }
+                              }}
+                              disabled={!productData}
+                            >
+                              Buy Now
+                            </button>
+                            <button
+                              className="h-10 w-1/3 border border-white/8 rounded-full bg-[#0b1218] flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                              onClick={() => setIsCartOpen(true)}
+                              disabled={!productData}
+                            >
+                              <PiShoppingBag size={20} className="text-white" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      );
-    })()}
-  </>
-)}
+              );
+            })()}
+          </>
+        )}
       </div>
       <Cart open={isCartOpen} onClose={closeCart} />
     </section>
@@ -181,8 +175,3 @@ const LuxuryProducts = ({ products, loading }) => {
 };
 
 export default LuxuryProducts;
-
-
-
-
-

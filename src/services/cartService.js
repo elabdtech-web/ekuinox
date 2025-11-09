@@ -136,10 +136,13 @@ export const cartService = {
 
   // Format cart item data for API
   formatCartItem: (itemData) => {
+    console.log('Formatting cart item for API:', itemData);
+
     return {
       productId: itemData.productId || itemData.id || itemData._id,
       quantity: itemData.qty || itemData.quantity || 1,
-      image: itemData.colors?.[0]?.thumb || itemData.img || itemData.image, // Include image from colors
+      image: itemData.colors?.[0]?.thumb || itemData.img || itemData.image,
+      colors: itemData.colors || [], // Include full colors array
       // Optional options
       size: itemData.size,
       color: itemData.color,

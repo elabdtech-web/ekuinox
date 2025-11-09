@@ -96,22 +96,39 @@ export function ProductCartProvider({ children }) {
       }
 
       // Normalize/transform items
-      const transformedItems = cartItems.map((item) => ({
-        id: item._id || item.id,
-        productId: item.productId?._id || item.productId || item.product?.id,
-        name: item.name || item.product?.name,
-        price:
-          typeof item.price === "number" ? `$${item.price}` : item.price || "$0.00",
-        priceNum:
-          typeof item.price === "number"
-            ? item.price
-            : parseFloat(String(item.price).replace(/[^0-9.]/g, "") || 0),
-        img: item.colors?.[0]?.thumb || item.img || item.product?.image || item.product?.img,
-        qty: item.quantity || item.qty || 1,
-        size: item.size,
-        color: item.color,
-        edition: item.edition,
-      }));
+      const transformedItems = cartItems.map((item) => {
+        console.log('Transforming cart item:', item);
+        console.log('Item colors:', item.colors);
+        console.log('Item product:', item.product);
+
+        // Get image from colors array or fallback to other sources
+        const imageUrl = item.colors?.[0]?.thumb ||
+          item.product?.colors?.[0]?.thumb ||
+          item.img ||
+          item.image ||
+          item.product?.image ||
+          item.product?.img;
+
+        console.log('Final image URL:', imageUrl);
+
+        return {
+          id: item._id || item.id,
+          productId: item.productId?._id || item.productId || item.product?.id,
+          name: item.name || item.product?.name,
+          price:
+            typeof item.price === "number" ? `$${item.price}` : item.price || "$0.00",
+          priceNum:
+            typeof item.price === "number"
+              ? item.price
+              : parseFloat(String(item.price).replace(/[^0-9.]/g, "") || 0),
+          img: imageUrl,
+          colors: item.colors || item.product?.colors || [],
+          qty: item.quantity || item.qty || 1,
+          size: item.size,
+          color: item.color,
+          edition: item.edition,
+        };
+      });
 
       // Try fetching missing images
       const itemsWithoutImg = transformedItems.filter((i) => !i.img && i.productId);
@@ -183,6 +200,9 @@ export function ProductCartProvider({ children }) {
               ...prev,
               {
                 ...product,
+                id: product._id || product.id,
+                img: product.colors?.[0]?.thumb || product.img || product.image,
+                colors: product.colors || [],
                 qty: product.qty ?? 1,
                 priceNum: parseFloat(
                   String(product.price).replace(/[^0-9.]/g, "") || 0
@@ -217,6 +237,9 @@ export function ProductCartProvider({ children }) {
             ...prev,
             {
               ...product,
+              id: product._id || product.id,
+              img: product.colors?.[0]?.thumb || product.img || product.image,
+              colors: product.colors || [],
               qty: product.qty ?? 1,
               priceNum: parseFloat(
                 String(product.price).replace(/[^0-9.]/g, "") || 0
