@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from "react";
 import { cartService } from "../services/cartService";
 import { useAuth } from "./AuthContext";
 import { productService } from "../services/productService";
@@ -18,6 +19,7 @@ export function ProductCartProvider({ children }) {
   const [error, setError] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { isAuthenticated } = useAuth();
+  const prevAuthRef = useRef(isAuthenticated);
 
   // ------------------------------
   // Load cart on mount
@@ -56,6 +58,24 @@ export function ProductCartProvider({ children }) {
       };
       syncLocalCartToServer();
     }
+  }, [isAuthenticated]);
+
+  // ------------------------------
+  // Clear local cart on logout (detect transition from true -> false)
+  // ------------------------------
+  useEffect(() => {
+    const wasAuth = prevAuthRef.current;
+    if (wasAuth && !isAuthenticated) {
+      try {
+        // Close cart UI, clear in-memory items, and remove any guest cart persisted locally
+        setIsCartOpen(false);
+        setItems([]);
+        localStorage.removeItem("guestCart");
+      } catch (e) {
+        console.warn("Failed to clear guest cart on logout:", e);
+      }
+    }
+    prevAuthRef.current = isAuthenticated;
   }, [isAuthenticated]);
 
   // ------------------------------

@@ -38,18 +38,18 @@ const ManageUsers = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await userService.deleteUser(userId);
-        setUsers(prev => prev.filter(u => u._id !== userId));
-        setFilteredUsers(prev => prev.filter(u => u._id !== userId));
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-        alert('Failed to delete user');
-      }
-    }
-  };
+  // const handleDeleteUser = async (userId) => {
+  //   if (window.confirm('Are you sure you want to delete this user?')) {
+  //     try {
+  //       await userService.deleteUser(userId);
+  //       setUsers(prev => prev.filter(u => u._id !== userId));
+  //       setFilteredUsers(prev => prev.filter(u => u._id !== userId));
+  //     } catch (error) {
+  //       console.error('Failed to delete user:', error);
+  //       alert('Failed to delete user');
+  //     }
+  //   }
+  // };
 
   const toggleUserStatus = async (userId) => {
     try {

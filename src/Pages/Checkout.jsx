@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useProductCart } from "../context/ProductCartContext";
 import { toast } from "react-toastify";
 import { Country, State, City } from "country-state-city";
-import { FaChevronDown } from "react-icons/fa";
+import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
 const Checkout = () => {
   const { items, total, loading } = useProductCart();
@@ -24,12 +25,9 @@ const Checkout = () => {
   });
   const [errors, setErrors] = useState({});
 
-  // Country-State-City dropdowns
+  // Country-State-City dropdowns (searchable)
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [useCustomCity, setUseCustomCity] = useState(false);
-  const [useCustomState, setUseCustomState] = useState(false);
 
   const countries = Country.getAllCountries();
   const states = selectedCountry ? State.getStatesOfCountry(selectedCountry.isoCode) : [];
@@ -37,54 +35,43 @@ const Checkout = () => {
     ? City.getCitiesOfState(selectedCountry.isoCode, selectedState.isoCode)
     : [];
 
+  // React-select dark theme styles
+  const selectStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: 'rgba(255,255,255,0.06)',
+      borderColor: state.isFocused ? '#5695F5' : 'rgba(255,255,255,0.3)',
+      boxShadow: state.isFocused ? '0 0 0 2px rgba(86,149,245,0.25)' : 'none',
+      ':hover': { borderColor: '#7fb2ff' },
+      minHeight: 48,
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: '#0d2740',
+      color: '#fff',
+      zIndex: 40,
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? 'rgba(86,149,245,0.35)'
+        : state.isFocused
+          ? 'rgba(255,255,255,0.12)'
+          : 'transparent',
+      color: '#fff',
+      ':active': { backgroundColor: 'rgba(86,149,245,0.5)' },
+    }),
+    singleValue: (base) => ({ ...base, color: '#fff' }),
+    input: (base) => ({ ...base, color: '#fff' }),
+    placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.6)' }),
+    dropdownIndicator: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
+    indicatorSeparator: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.2)' }),
+    clearIndicator: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
+  };
+
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-  const handleCountryChange = (e) => {
-    const countryCode = e.target.value;
-    const country = countries.find(c => c.isoCode === countryCode);
-    setSelectedCountry(country);
-    setSelectedState(null);
-    setSelectedCity(null);
-    setUseCustomState(false);
-    setUseCustomCity(false);
-    set('country', country ? country.name : '');
-    set('state', '');
-    set('city', '');
-    clearFieldError('country');
-  };
-
-  const handleStateChange = (e) => {
-    const value = e.target.value;
-    if (value === 'custom') {
-      setUseCustomState(true);
-      setSelectedState(null);
-      set('state', '');
-    } else {
-      const state = states.find(s => s.isoCode === value);
-      setSelectedState(state);
-      setUseCustomState(false);
-      set('state', state ? state.name : '');
-      clearFieldError('state');
-    }
-    setSelectedCity(null);
-    setUseCustomCity(false);
-    set('city', '');
-  };
-
-  const handleCityChange = (e) => {
-    const value = e.target.value;
-    if (value === 'custom') {
-      setUseCustomCity(true);
-      setSelectedCity(null);
-      set('city', '');
-    } else {
-      const city = cities.find(c => c.name === value);
-      setSelectedCity(city);
-      setUseCustomCity(false);
-      set('city', value);
-      clearFieldError('city');
-    }
-  };
+  // Handlers now inline within react-select onChange callbacks
 
   const clearFieldError = (fieldName) => {
     if (errors[fieldName]) {
@@ -292,159 +279,87 @@ const Checkout = () => {
                 )}
               </div>
 
-              {/* Country Dropdown */}
+              {/* Country (Searchable) */}
               <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">
-                  Country *
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCountry?.isoCode || ''}
-                    onChange={handleCountryChange}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.country
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
-                      }`}
-                  >
-                    <option value="" className="bg-[#0d2740] text-white/70">
-                      Select a country
-                    </option>
-                    {countries.map((country) => (
-                      <option
-                        key={country.isoCode}
-                        value={country.isoCode}
-                        className="bg-[#0d2740] text-white"
-                      >
-                        {country.flag} {country.name}
-                      </option>
-                    ))}
-                  </select>
-                  <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
-                </div>
-                {errors.country && (
-                  <p className="text-red-400 text-sm mt-1">{errors.country}</p>
-                )}
+                <label className="block text-white/80 text-sm font-medium mb-2">Country *</label>
+                <Select
+                  instanceId="country-select"
+                  styles={selectStyles}
+                  isSearchable
+                  placeholder="Select a country"
+                  value={selectedCountry ? { value: selectedCountry.isoCode, label: `${selectedCountry.flag} ${selectedCountry.name}` } : null}
+                  onChange={(opt) => {
+                    const country = countries.find(c => c.isoCode === opt?.value);
+                    setSelectedCountry(country || null);
+                    setSelectedState(null);
+                    set('country', country ? country.name : '');
+                    set('state', '');
+                    set('city', '');
+                    clearFieldError('country');
+                  }}
+                  options={countries.map(c => ({ value: c.isoCode, label: `${c.flag} ${c.name}` }))}
+                />
+                {errors.country && <p className="text-red-400 text-sm mt-1">{errors.country}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* State/Province Dropdown or Input */}
+                {/* State/Province (Searchable + Creatable) */}
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    State/Province *
-                  </label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">State/Province *</label>
                   {!selectedCountry ? (
-                    <input
-                      type="text"
-                      disabled
-                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed"
-                      placeholder="Select country first"
-                    />
-                  ) : useCustomState || states.length === 0 ? (
-                    <input
-                      type="text"
-                      value={form.state}
-                      onChange={(e) => {
-                        set('state', e.target.value);
+                    <input disabled className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed" placeholder="Select country first" />
+                  ) : (
+                    <CreatableSelect
+                      instanceId="state-select"
+                      styles={selectStyles}
+                      isClearable
+                      isSearchable
+                      placeholder={states.length ? "Select or type a state" : "Type a state/province"}
+                      value={form.state ? { value: form.state, label: form.state } : null}
+                      onChange={(opt) => {
+                        if (!opt) {
+                          setSelectedState(null);
+                          set('state', '');
+                          set('city', '');
+                          return;
+                        }
+                        const st = states.find(s => s.isoCode === opt.value || s.name === opt.label);
+                        setSelectedState(st || null);
+                        set('state', opt.label);
+                        set('city', '');
                         clearFieldError('state');
                       }}
-                      className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.state
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
-                      }`}
-                        placeholder="Enter state/province"
+                        options={states.map(s => ({ value: s.isoCode, label: s.name }))}
                       />
-                  ) : (
-                    <div className="relative">
-                      <select
-                        value={selectedState?.isoCode || ''}
-                        onChange={handleStateChange}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.state
-                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
-                          }`}
-                      >
-                        <option value="" className="bg-[#0d2740] text-white/70">
-                          Select a state/province
-                        </option>
-                        {states.map((state) => (
-                          <option
-                            key={state.isoCode}
-                            value={state.isoCode}
-                            className="bg-[#0d2740] text-white"
-                          >
-                            {state.name}
-                          </option>
-                        ))}
-                        <option value="custom" className="bg-[#0d2740] text-white/70 italic">
-                          + Enter custom state
-                        </option>
-                      </select>
-                      <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
-                    </div>
                   )}
-                  {errors.state && (
-                    <p className="text-red-400 text-sm mt-1">{errors.state}</p>
-                  )}
+                  {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
                 </div>
 
-                {/* City Dropdown or Input */}
+                {/* City (Searchable + Creatable) */}
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    City *
-                  </label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">City *</label>
                   {!selectedCountry ? (
-                    <input
-                      type="text"
-                      disabled
-                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed"
-                      placeholder="Select country first"
-                    />
-                  ) : useCustomCity || cities.length === 0 ? (
-                    <input
-                      type="text"
-                      value={form.city}
-                      onChange={(e) => {
-                        set('city', e.target.value);
+                    <input disabled className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed" placeholder="Select country first" />
+                  ) : (
+                    <CreatableSelect
+                      instanceId="city-select"
+                      styles={selectStyles}
+                      isClearable
+                      isSearchable
+                      placeholder={cities.length ? "Select or type a city" : "Type a city"}
+                      value={form.city ? { value: form.city, label: form.city } : null}
+                      onChange={(opt) => {
+                        if (!opt) {
+                          set('city', '');
+                          return;
+                        }
+                        set('city', opt.label);
                         clearFieldError('city');
                       }}
-                      className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.city
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
-                        }`}
-                      placeholder="Enter city"
-                    />
-                  ) : (
-                    <div className="relative">
-                      <select
-                        value={form.city}
-                        onChange={handleCityChange}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.city
-                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
-                          }`}
-                      >
-                        <option value="" className="bg-[#0d2740] text-white/70">
-                          Select a city
-                        </option>
-                        {cities.map((city) => (
-                          <option
-                            key={city.name}
-                            value={city.name}
-                            className="bg-[#0d2740] text-white"
-                          >
-                            {city.name}
-                          </option>
-                        ))}
-                        <option value="custom" className="bg-[#0d2740] text-white/70 italic">
-                          + Enter custom city
-                        </option>
-                      </select>
-                      <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
-                    </div>
+                        options={cities.map(c => ({ value: c.name, label: c.name }))}
+                      />
                   )}
-                  {errors.city && (
-                    <p className="text-red-400 text-sm mt-1">{errors.city}</p>
-                  )}
+                  {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
                 </div>
               </div>
 

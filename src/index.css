@@ -43,13 +43,13 @@
 .hero-waves .wave {
   position: absolute;
   border-radius: 50%;
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   /* inner glow (inset) + outer glow (outset) */
    box-shadow:
     inset 0 60px 20px rgba(15, 28, 52, 0.85),   /* deep inner glow on left */
     inset 0 -20px 60px rgba(36, 60, 98, 0.25);  /* subtle lower inner */    
-  animation: expandRing 7.5s ease-out infinite;
+  animation: expandRing 6.5s ease-out infinite;
   
 }
 .hero-waves .wave:nth-child(2) {

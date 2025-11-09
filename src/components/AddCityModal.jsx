@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { MdLocationCity } from "react-icons/md";
 import { FaGlobeAmericas } from "react-icons/fa";
 import { Country, City } from 'country-state-city';
+import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
 export default function AddCityModal({
   onClose,
@@ -9,10 +11,8 @@ export default function AddCityModal({
   isLoading = false,
 }) {
   const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
   const [cityName, setCityName] = useState("");
   const [error, setError] = useState("");
-  const [useCustomCity, setUseCustomCity] = useState(false);
 
   // Get all countries
   const allCountries = Country.getAllCountries();
@@ -24,27 +24,20 @@ export default function AddCityModal({
 
   // Handle country change
   const handleCountryChange = (e) => {
-    const countryCode = e.target.value;
+    const countryCode = e?.value || '';
     setSelectedCountry(countryCode);
-    setSelectedCity("");
     setCityName("");
     setError("");
   };
 
   // Handle city change
-  const handleCityChange = (e) => {
-    const cityValue = e.target.value;
-    if (cityValue === "custom") {
-      setUseCustomCity(true);
-      setSelectedCity("");
+  const handleCityChange = (opt) => {
+    if (!opt) {
       setCityName("");
-    } else {
-      setUseCustomCity(false);
-      setSelectedCity(cityValue);
-      // Find the city name from the cities list
-      const city = citiesOfCountry.find(c => c.name === cityValue);
-      setCityName(city ? city.name : cityValue);
+      setError("");
+      return;
     }
+    setCityName(opt.label);
     setError("");
   };
 
@@ -145,9 +138,9 @@ export default function AddCityModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-start mt-20 justify-center">
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 "
         onClick={onClose}
       />
       <div className="relative w-full max-w-md mx-4 rounded-2xl bg-gradient-to-br from-[#1e2a3a] to-[#2a3b4f] border border-white/10 text-white shadow-2xl p-6">
@@ -165,34 +158,43 @@ export default function AddCityModal({
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Country Dropdown */}
+          {/* Country Dropdown (Searchable) */}
           <div className="mb-4">
             <label className="text-sm text-white/70 font-medium flex items-center gap-2">
               <FaGlobeAmericas className="text-blue-400" />
               Country *
             </label>
-            <select
-              className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all appearance-none cursor-pointer"
-              value={selectedCountry}
+            <Select
+              instanceId="addcity-country"
+              isSearchable
+              isClearable
+              placeholder="Select a country..."
+              value={selectedCountry ? { value: selectedCountry, label: `${(allCountries.find(c => c.isoCode === selectedCountry)?.flag) || ''} ${(allCountries.find(c => c.isoCode === selectedCountry)?.name) || ''}` } : null}
               onChange={handleCountryChange}
-              disabled={isLoading}
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 1rem center',
-                paddingRight: '3rem'
+              isDisabled={isLoading}
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  backgroundColor: 'rgba(255,255,255,0.06)',
+                  borderColor: state.isFocused ? '#5695F5' : 'rgba(255,255,255,0.2)',
+                  boxShadow: state.isFocused ? '0 0 0 2px rgba(86,149,245,0.25)' : 'none',
+                  minHeight: 44,
+                }),
+                menu: (base) => ({ ...base, backgroundColor: '#1e2a3a', color: '#fff', zIndex: 50 }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? 'rgba(86,149,245,0.35)' : state.isFocused ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  color: '#fff',
+                }),
+                singleValue: (base) => ({ ...base, color: '#fff' }),
+                input: (base) => ({ ...base, color: '#fff' }),
+                placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
               }}
-            >
-              <option value="" className="bg-[#1e2a3a]">Select a country...</option>
-              {allCountries.map((country) => (
-                <option key={country.isoCode} value={country.isoCode} className="bg-[#1e2a3a]">
-                  {country.flag} {country.name}
-                </option>
-              ))}
-            </select>
+              options={allCountries.map(c => ({ value: c.isoCode, label: `${c.flag} ${c.name}` }))}
+            />
           </div>
 
-          {/* City Dropdown or Input */}
+          {/* City Dropdown or Input (Searchable + Creatable) */}
           {selectedCountry && (
             <div>
               <label className="text-sm text-white/70 font-medium flex items-center gap-2">
@@ -200,56 +202,49 @@ export default function AddCityModal({
                 City *
               </label>
 
-              {citiesOfCountry.length > 0 ? (
-                <div className="space-y-2">
-                  <select
-                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all appearance-none cursor-pointer"
-                    value={useCustomCity ? "custom" : (selectedCity || "")}
+              <div className="mt-2">
+                {citiesOfCountry.length > 0 ? (
+                  <CreatableSelect
+                    instanceId="addcity-city"
+                    isClearable
+                    isSearchable
+                    placeholder="Select or type a city..."
+                    value={cityName ? { value: cityName, label: cityName } : null}
                     onChange={handleCityChange}
-                    disabled={isLoading}
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 1rem center',
-                      paddingRight: '3rem'
+                    isDisabled={isLoading}
+                    styles={{
+                      control: (base, state) => ({
+                        ...base,
+                        backgroundColor: 'rgba(255,255,255,0.06)',
+                        borderColor: state.isFocused ? '#5695F5' : 'rgba(255,255,255,0.2)',
+                        boxShadow: state.isFocused ? '0 0 0 2px rgba(86,149,245,0.25)' : 'none',
+                        minHeight: 44,
+                      }),
+                      menu: (base) => ({ ...base, backgroundColor: '#1e2a3a', color: '#fff', zIndex: 50 }),
+                      option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isSelected ? 'rgba(86,149,245,0.35)' : state.isFocused ? 'rgba(255,255,255,0.08)' : 'transparent',
+                        color: '#fff',
+                      }),
+                      singleValue: (base) => ({ ...base, color: '#fff' }),
+                      input: (base) => ({ ...base, color: '#fff' }),
+                      placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
                     }}
-                  >
-                    <option value="" className="bg-[#1e2a3a]">Select a city...</option>
-                    {citiesOfCountry.map((city) => (
-                      <option key={city.name} value={city.name} className="bg-[#1e2a3a]">
-                        {city.name}
-                      </option>
-                    ))}
-                    <option value="custom" className="bg-[#1e2a3a] text-blue-300">
-                      ✏️ Enter custom city name...
-                    </option>
-                  </select>
-
-                  {useCustomCity && (
-                    <input
-                      type="text"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                      placeholder="Enter city name"
-                      value={cityName}
-                      onChange={handleInputChange}
-                      disabled={isLoading}
-                      autoFocus
-                      maxLength={50}
-                    />
-                  )}
-                </div>
-              ) : (
+                    options={citiesOfCountry.map(c => ({ value: c.name, label: c.name }))}
+                  />
+                ) : (
                   <input
                     type="text"
-                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                    placeholder="Enter city name"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                    placeholder="Type a city name"
                     value={cityName}
                     onChange={handleInputChange}
                     disabled={isLoading}
                     autoFocus
                     maxLength={50}
                   />
-              )}
+                )}
+              </div>
             </div>
           )}
 
@@ -263,7 +258,7 @@ export default function AddCityModal({
             </div>
           )}
 
-        
+
 
           <div className="mt-5 flex items-center justify-end gap-3">
             <button
@@ -277,11 +272,10 @@ export default function AddCityModal({
             <button
               type="submit"
               disabled={!cityName.trim() || !selectedCountry || isLoading}
-              className={`px-6 py-2 rounded-full font-medium transition-all ${
-                cityName.trim() && selectedCountry && !isLoading
+              className={`px-6 py-2 rounded-full font-medium transition-all ${cityName.trim() && selectedCountry && !isLoading
                   ? "bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-lg"
                   : "bg-white/10 cursor-not-allowed text-white/50"
-              }`}
+                }`}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -298,8 +292,3 @@ export default function AddCityModal({
     </div>
   );
 }
-
-
-
-
-
