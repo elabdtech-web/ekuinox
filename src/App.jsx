@@ -8,6 +8,7 @@ import Home from "./Pages/Home";
 import Product from "./Pages/Product";
 import StoryPage from "./Pages/StoryPage";
 import Checkout from "./Pages/Checkout";
+import Payment from "./Pages/Payment";
 import { CityCartProvider } from "./context/CityCartContext";
 import { ProductCartProvider } from "./context/ProductCartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -52,6 +53,7 @@ const App = () => {
                   <Route path="/story" element={<StoryPage />} />
                   <Route path="/product" element={<Product />} />
                   <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/payment" element={<Payment />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
 

@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductCart } from "../context/ProductCartContext";
 import { toast } from "react-toastify";
+import { Country, State, City } from "country-state-city";
+import { FaChevronDown } from "react-icons/fa";
 
 const Checkout = () => {
-  const { items, total, loading, checkout } = useProductCart();
+  const { items, total, loading } = useProductCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -21,9 +23,68 @@ const Checkout = () => {
     notes: "",
   });
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
+
+  // Country-State-City dropdowns
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [useCustomCity, setUseCustomCity] = useState(false);
+  const [useCustomState, setUseCustomState] = useState(false);
+
+  const countries = Country.getAllCountries();
+  const states = selectedCountry ? State.getStatesOfCountry(selectedCountry.isoCode) : [];
+  const cities = selectedCountry && selectedState
+    ? City.getCitiesOfState(selectedCountry.isoCode, selectedState.isoCode)
+    : [];
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const handleCountryChange = (e) => {
+    const countryCode = e.target.value;
+    const country = countries.find(c => c.isoCode === countryCode);
+    setSelectedCountry(country);
+    setSelectedState(null);
+    setSelectedCity(null);
+    setUseCustomState(false);
+    setUseCustomCity(false);
+    set('country', country ? country.name : '');
+    set('state', '');
+    set('city', '');
+    clearFieldError('country');
+  };
+
+  const handleStateChange = (e) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setUseCustomState(true);
+      setSelectedState(null);
+      set('state', '');
+    } else {
+      const state = states.find(s => s.isoCode === value);
+      setSelectedState(state);
+      setUseCustomState(false);
+      set('state', state ? state.name : '');
+      clearFieldError('state');
+    }
+    setSelectedCity(null);
+    setUseCustomCity(false);
+    set('city', '');
+  };
+
+  const handleCityChange = (e) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setUseCustomCity(true);
+      setSelectedCity(null);
+      set('city', '');
+    } else {
+      const city = cities.find(c => c.name === value);
+      setSelectedCity(city);
+      setUseCustomCity(false);
+      set('city', value);
+      clearFieldError('city');
+    }
+  };
 
   const clearFieldError = (fieldName) => {
     if (errors[fieldName]) {
@@ -43,8 +104,9 @@ const Checkout = () => {
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Please enter a valid email address (e.g. name@example.com).";
     if (!form.phone.trim()) e.phone = "Phone number is required. Include country code if applicable.";
     if (!form.address.trim()) e.address = "Street address is required.";
-    if (!form.city.trim()) e.city = "City is required.";
+    if (!form.country.trim()) e.country = "Country is required.";
     if (!form.state.trim()) e.state = "State / Province is required.";
+    if (!form.city.trim()) e.city = "City is required.";
     if (!form.zip.trim()) e.zip = "ZIP / Postal code is required.";
 
     // optional: example of cross-field validation (not required but helpful)
@@ -56,48 +118,37 @@ const Checkout = () => {
     return Object.keys(e).length === 0;
   };
 
-  const onSubmit = async () => {
-    if (!validate()) return;
-    try {
-      setSubmitting(true);
-      const checkoutData = {
-        contactInfo: {
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone,
-        },
-        shippingAddress: {
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          zipCode: form.zip,
-          country: form.country,
-        },
-        shippingMethod: form.shippingMethod,
-        specialInstructions: form.notes,
-        total,
-      };
-      const res = await checkout(checkoutData);
-      toast.success(`Order placed successfully)`, {
+  const handleProceedToPayment = () => {
+    if (!validate()) {
+      toast.error("Please fill in all required fields", {
         position: "top-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        pauseOnHover: true,
-        draggable: true,
+        autoClose: 3000,
       });
-      navigate("/");
-    } catch (err) {
-      toast.error(err?.message || "Checkout failed", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } finally {
-      setSubmitting(false);
+      return;
     }
+
+    // Prepare checkout data to pass to payment page
+    const checkoutData = {
+      contactInfo: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+      },
+      shippingAddress: {
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        zipCode: form.zip,
+        country: form.country,
+      },
+      shippingMethod: form.shippingMethod,
+      specialInstructions: form.notes,
+      total,
+    };
+
+    // Navigate to payment page with checkout data
+    navigate("/payment", { state: { checkoutData } });
   };
 
   return (
@@ -241,50 +292,158 @@ const Checkout = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
-                    City *
-                  </label>
-                  <input
-                    id="city"
-                    type="text"
-                    value={form.city}
-                    onChange={(e) => {
-                      set('city', e.target.value);
-                      clearFieldError('city');
-                    }}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.city
+              {/* Country Dropdown */}
+              <div>
+                <label className="block text-white/80 text-sm font-medium mb-2">
+                  Country *
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedCountry?.isoCode || ''}
+                    onChange={handleCountryChange}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.country
                         ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                         : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
                       }`}
-                    placeholder="Enter city"
-                  />
-                  {errors.city && (
-                    <p className="text-red-400 text-sm mt-1">{errors.city}</p>
-                  )}
+                  >
+                    <option value="" className="bg-[#0d2740] text-white/70">
+                      Select a country
+                    </option>
+                    {countries.map((country) => (
+                      <option
+                        key={country.isoCode}
+                        value={country.isoCode}
+                        className="bg-[#0d2740] text-white"
+                      >
+                        {country.flag} {country.name}
+                      </option>
+                    ))}
+                  </select>
+                  <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
                 </div>
+                {errors.country && (
+                  <p className="text-red-400 text-sm mt-1">{errors.country}</p>
+                )}
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* State/Province Dropdown or Input */}
                 <div>
                   <label className="block text-white/80 text-sm font-medium mb-2">
                     State/Province *
                   </label>
-                  <input
-                    id="state"
-                    type="text"
-                    value={form.state}
-                    onChange={(e) => {
-                      set('state', e.target.value);
-                      clearFieldError('state');
-                    }}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.state
+                  {!selectedCountry ? (
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed"
+                      placeholder="Select country first"
+                    />
+                  ) : useCustomState || states.length === 0 ? (
+                    <input
+                      type="text"
+                      value={form.state}
+                      onChange={(e) => {
+                        set('state', e.target.value);
+                        clearFieldError('state');
+                      }}
+                      className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.state
                         ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                         : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
                       }`}
-                    placeholder="Enter state/province"
-                  />
+                        placeholder="Enter state/province"
+                      />
+                  ) : (
+                    <div className="relative">
+                      <select
+                        value={selectedState?.isoCode || ''}
+                        onChange={handleStateChange}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.state
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                          : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                          }`}
+                      >
+                        <option value="" className="bg-[#0d2740] text-white/70">
+                          Select a state/province
+                        </option>
+                        {states.map((state) => (
+                          <option
+                            key={state.isoCode}
+                            value={state.isoCode}
+                            className="bg-[#0d2740] text-white"
+                          >
+                            {state.name}
+                          </option>
+                        ))}
+                        <option value="custom" className="bg-[#0d2740] text-white/70 italic">
+                          + Enter custom state
+                        </option>
+                      </select>
+                      <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
+                    </div>
+                  )}
                   {errors.state && (
                     <p className="text-red-400 text-sm mt-1">{errors.state}</p>
+                  )}
+                </div>
+
+                {/* City Dropdown or Input */}
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    City *
+                  </label>
+                  {!selectedCountry ? (
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white/40 cursor-not-allowed"
+                      placeholder="Select country first"
+                    />
+                  ) : useCustomCity || cities.length === 0 ? (
+                    <input
+                      type="text"
+                      value={form.city}
+                      onChange={(e) => {
+                        set('city', e.target.value);
+                        clearFieldError('city');
+                      }}
+                      className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition ${errors.city
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                        }`}
+                      placeholder="Enter city"
+                    />
+                  ) : (
+                    <div className="relative">
+                      <select
+                        value={form.city}
+                        onChange={handleCityChange}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white appearance-none focus:outline-none focus:ring-2 transition cursor-pointer ${errors.city
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                          : 'border-white/30 focus:border-[#5695F5] focus:ring-[#5695F5]/20'
+                          }`}
+                      >
+                        <option value="" className="bg-[#0d2740] text-white/70">
+                          Select a city
+                        </option>
+                        {cities.map((city) => (
+                          <option
+                            key={city.name}
+                            value={city.name}
+                            className="bg-[#0d2740] text-white"
+                          >
+                            {city.name}
+                          </option>
+                        ))}
+                        <option value="custom" className="bg-[#0d2740] text-white/70 italic">
+                          + Enter custom city
+                        </option>
+                      </select>
+                      <FaChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
+                    </div>
+                  )}
+                  {errors.city && (
+                    <p className="text-red-400 text-sm mt-1">{errors.city}</p>
                   )}
                 </div>
               </div>
@@ -374,14 +533,14 @@ const Checkout = () => {
             </div>
 
             <button
-              onClick={onSubmit}
-              disabled={submitting || loading || items.length === 0}
-              className={`w-full py-4 px-6 rounded-lg transition font-semibold text-lg ${submitting || loading || items.length === 0
+              onClick={handleProceedToPayment}
+              disabled={loading || items.length === 0}
+              className={`w-full py-4 px-6 rounded-lg transition font-semibold text-lg ${loading || items.length === 0
                   ? 'bg-gray-500 cursor-not-allowed text-gray-300'
                   : 'bg-[#5695F5] hover:bg-blue-600 text-white'
                 }`}
             >
-              {submitting ? 'Placing Order...' : 'Place Order'}
+              Proceed to Payment →
             </button>
           </div>
 
