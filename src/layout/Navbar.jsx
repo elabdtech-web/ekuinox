@@ -17,7 +17,7 @@ const Navbar = () => {
   const [isCitiesOpen, setIsCitiesOpen] = useState(false);
   const [isCitiesVisible, setIsCitiesVisible] = useState(false);
   const [citiesBox, setCitiesBox] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false); // + mobile menu state
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const { items, isCartOpen, openCart, closeCart } = useProductCart();
   const { isAuthenticated, user, logout } = useAuth();
@@ -171,7 +171,7 @@ const Navbar = () => {
                     {!isAuthenticated ? (
                       <Link
                         to="/login"
-                        className="h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white flex items-center justify-center hover:bg-white/10 transition"
+                        className="h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white/80 flex items-center justify-center hover:bg-white/10 transition"
                         aria-label="Login"
                         title="Login"
                       >
@@ -179,10 +179,12 @@ const Navbar = () => {
                       </Link>
                     ) : (
                       <>
-                        <span className="text-white/80 text-sm hidden lg:inline">{user?.name || user?.email}</span>
+                        <span className="text-white/80 text-sm hidden lg:inline">
+                          {(user?.name || user?.email || '').toUpperCase()}
+                        </span>
                         <button
                           onClick={logout}
-                          className="px-3 h-10 flex items-center rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/15 transition"
+                          className="px-3 h-10 flex items-center rounded-lg bg-white/10 border border-white/20 text-white/80 hover:bg-white/15 transition"
                         >
                           Logout
                         </button>
@@ -191,7 +193,7 @@ const Navbar = () => {
                   </div>
           {/* Cart Icon (always visible) */}
           <div className="flex gap-2 items-center justify-center py-1.5" ref={cartRef}>
-            <p className="text-base  text-gray-500 hidden md:block">Cart</p>
+            <p className="text-sm  text-white/80 hidden md:block">Cart</p>
             <div className="relative">
               <button
                 aria-label="cart"
@@ -256,7 +258,7 @@ const Navbar = () => {
                 isCitiesOpen ? "rounded-b-none" : "rounded-b-xl"
               }`}
             >
-              <span className="text-sm md:text-lg tracking-wide text-white/90 flex-1 text-left">
+              <span className="text-sm md:text-lg tracking-wide text-white/80 flex-1 text-left">
                 MY CITIES
               </span>
               {isCitiesOpen ? (

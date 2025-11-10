@@ -158,13 +158,13 @@ const ProductDetail = ({ product, loading = false }) => {
               </div>
             </motion.div>
 
-            {/* Colors */}
+            {/* Colors (visible only on large screens to keep original large layout) */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.2, duration: 0.7 }}
               viewport={{ once: true }}
-              className="mt-6"
+              className="mt-6 lg:mt-6 hidden lg:block"
             >
               <div className="text-2xl text-white mb-2">Model Colors</div>
               <div className="flex flex-wrap items-center gap-3">
@@ -191,68 +191,67 @@ const ProductDetail = ({ product, loading = false }) => {
                   </motion.button>
                 ))}
               </div>
-            </motion.div>
 
-            {/* Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.6, duration: 0.7 }}
-              viewport={{ once: true }}
-              className="mt-8 flex gap-4 items-center text-xl w-full sm:w-[400px]"
-            >
-              <button
-                onClick={async () => {
-                  if (productData) {
-                    try {
-                      await addItem({
-                        id: productData._id || productData.id,
-                        name: productData.name,
-                        price: productData.price,
-                        img: productData.images && Array.isArray(productData.images)
-                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
-                          : '/watch-1.png',
-                        size: size,
-                        color: color,
-                        edition: edition
-                      });
-                    } catch (error) {
-                      console.error('Error adding to cart:', error);
-                    }
-                  }
-                }}
-                className="px-8 h-16 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
-                disabled={!productData}
+              {/* Buttons (large screens only) */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6, duration: 0.7 }}
+                viewport={{ once: true }}
+                className="mt-8 flex gap-4 items-center text-xl w-full sm:w-[400px]"
               >
-                Buy Now
-              </button>
-              <button
-                onClick={async () => {
-                  if (productData) {
-                    try {
-                      await addItem({
-                        id: productData._id || productData.id,
-                        name: productData.name,
-                        price: productData.price,
-                        img: productData.images && Array.isArray(productData.images)
-                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
-                          : '/watch-1.png',
-                        size: size,
-                        color: color,
-                        edition: edition
-                      });
-                      // Open cart after adding item
-                      openCart();
-                    } catch (error) {
-                      console.error('Error adding to cart:', error);
+                <button
+                  onClick={async () => {
+                    if (productData) {
+                      try {
+                        await addItem({
+                          id: productData._id || productData.id,
+                          name: productData.name,
+                          price: productData.price,
+                          img: productData.images && Array.isArray(productData.images)
+                            ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                            : '/watch-1.png',
+                          size,
+                          color,
+                          edition
+                        });
+                      } catch (error) {
+                        console.error('Error adding to cart:', error);
+                      }
                     }
-                  }
-                }}
-                className="h-16 w-1/3 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
-                disabled={!productData}
-              >
-                <PiShoppingBag className="w-10 h-10" />
-              </button>
+                  }}
+                  className="px-8 h-16 w-2/3 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
+                  disabled={!productData}
+                >
+                  Buy Now
+                </button>
+                <button
+                  onClick={async () => {
+                    if (productData) {
+                      try {
+                        await addItem({
+                          id: productData._id || productData.id,
+                          name: productData.name,
+                          price: productData.price,
+                          img: productData.images && Array.isArray(productData.images)
+                            ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                            : '/watch-1.png',
+                          size,
+                          color,
+                          edition
+                        });
+                        openCart();
+                      } catch (error) {
+                        console.error('Error adding to cart:', error);
+                      }
+                    }
+                  }}
+                  className="h-16 w-1/3 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                  disabled={!productData}
+                >
+                  <PiShoppingBag className="w-10 h-10" />
+                </button>
+              </motion.div>
             </motion.div>
           </motion.div>
 
@@ -297,6 +296,95 @@ const ProductDetail = ({ product, loading = false }) => {
                 className="absolute right-[100px] sm:right-[160px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"
               >
                 <IoArrowForward />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Colors + Buttons (mobile/tablet only, placed after image) */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            viewport={{ once: true }}
+            className="col-span-12 mt-4 lg:hidden"
+          >
+            <div className="text-2xl text-white mb-2">Model Colors</div>
+            <div className="flex flex-wrap items-center gap-3">
+              {(productData?.colors || []).map((c, i) => (
+                <motion.button
+                  key={c.id}
+                  onClick={() => setColor(c.id)}
+                  className={`w-24 h-24 rounded-lg p-2 bg-white/6 overflow-hidden border transition ${
+                    color === c.id
+                      ? "ring-2 ring-[#5695F5] border-white/20"
+                      : "border-white/10"
+                  }`}
+                  aria-label={c.alt}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + i * 0.15, duration: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  <img
+                    src={c.thumb}
+                    alt={c.alt}
+                    className="object-cover w-full h-full"
+                  />
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="mt-6 flex gap-4 items-center text-lg w-full">
+              <button
+                onClick={async () => {
+                  if (productData) {
+                    try {
+                      await addItem({
+                        id: productData._id || productData.id,
+                        name: productData.name,
+                        price: productData.price,
+                        img: productData.images && Array.isArray(productData.images)
+                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                          : '/watch-1.png',
+                        size,
+                        color,
+                        edition
+                      });
+                    } catch (error) {
+                      console.error('Error adding to cart:', error);
+                    }
+                  }
+                }}
+                className="px-6 h-14 flex-1 bg-[#5695F5] rounded-full text-white font-medium shadow hover:bg-blue-500 transition disabled:opacity-50"
+                disabled={!productData}
+              >
+                Buy Now
+              </button>
+              <button
+                onClick={async () => {
+                  if (productData) {
+                    try {
+                      await addItem({
+                        id: productData._id || productData.id,
+                        name: productData.name,
+                        price: productData.price,
+                        img: productData.images && Array.isArray(productData.images)
+                          ? (productData.images.find(img => img.isMain)?.url || productData.images[0]?.url || '/watch-1.png')
+                          : '/watch-1.png',
+                        size,
+                        color,
+                        edition
+                      });
+                      openCart();
+                    } catch (error) {
+                      console.error('Error adding to cart:', error);
+                    }
+                  }
+                }}
+                className="h-14 w-20 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition disabled:opacity-50"
+                disabled={!productData}
+              >
+                <PiShoppingBag className="w-8 h-8" />
               </button>
             </div>
           </motion.div>

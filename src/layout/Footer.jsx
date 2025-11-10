@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Left: Logo and tagline */}
           <div className="w-full md:w-1/4">
             <div className="text-5xl font-medium text-[#5695F5]">EKUINOX</div>
-            <div className="mt-2 text-base text-white/80 max-w-[180px]">
+            <div className="mt-2 text-lg text-white/80 max-w-[180px]">
               Crafted for those who move with time.
             </div>
           </div>
