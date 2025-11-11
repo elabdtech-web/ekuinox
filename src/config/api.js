@@ -1,9 +1,9 @@
-// API Configuration
+
 export const API_CONFIG = {
-  // Development API URL (your local backend)
+  
   DEV_API_URL: 'http://localhost:5001/api',
   
-  // Production API URL (update this when you deploy your backend)
+  
   PROD_API_URL: 'https://your-backend-domain.com/api',
   
   // Manual override - set this to force a specific URL
@@ -76,6 +76,26 @@ export const USER_ENDPOINTS = {
   UPDATE: `${API_BASE_URL}/users`,
   DELETE: `${API_BASE_URL}/users`,
   TOGGLE_STATUS: `${API_BASE_URL}/users`
+};
+
+export const PAYMENT_ENDPOINTS = {
+  CREATE_INTENT: `${API_BASE_URL}/payments/create-intent`,
+  CONFIRM: `${API_BASE_URL}/payments/confirm`
+};
+
+export const ORDER_ENDPOINTS = {
+  // User endpoints
+  GET_USER_ORDERS: `${API_BASE_URL}/orders/user`,
+  GET_ORDER_BY_ID: `${API_BASE_URL}/orders`,
+  CANCEL_ORDER: `${API_BASE_URL}/orders/cancel`,
+  REQUEST_REFUND: `${API_BASE_URL}/orders/refund/request`,
+  
+  // Admin endpoints
+  GET_ALL_ORDERS: `${API_BASE_URL}/admin/orders`,
+  UPDATE_ORDER_STATUS: `${API_BASE_URL}/admin/orders/status`,
+  GET_REFUND_REQUESTS: `${API_BASE_URL}/admin/orders/refunds`,
+  PROCESS_REFUND: `${API_BASE_URL}/admin/orders/refunds/process`,
+  GET_ORDER_ANALYTICS: `${API_BASE_URL}/admin/orders/analytics`
 };
 
 export default API_CONFIG;

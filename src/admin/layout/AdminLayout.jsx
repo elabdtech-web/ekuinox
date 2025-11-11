@@ -12,7 +12,8 @@ import {
   FiSettings,
   FiLogOut,
   FiBell,
-  FiSearch
+  FiSearch,
+  FiShoppingBag
 } from 'react-icons/fi';
 
 const AdminLayout = () => {
@@ -27,6 +28,12 @@ const AdminLayout = () => {
       label: 'Dashboard', 
       path: '/admin/dashboard',
       active: location.pathname === '/admin/dashboard'
+    },
+    { 
+      icon: FiShoppingBag, 
+      label: 'Orders', 
+      path: '/admin/orders',
+      active: location.pathname === '/admin/orders'
     },
     { 
       icon: FiUsers, 
