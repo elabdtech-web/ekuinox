@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { PiDotsSixLight, PiShoppingBag } from "react-icons/pi";
-import { FiSettings, FiMenu, FiX, FiUser } from "react-icons/fi"; // + add FiMenu, FiX, FiUser
+import { FiSettings, FiMenu, FiX, FiUser } from "react-icons/fi";
+import { FaShoppingBag } from "react-icons/fa"; // For orders icon
 import { Link, useLocation } from "react-router-dom";
 import Cart from "../common/Cart";
 import Setting from "../common/Setting";
@@ -191,6 +192,19 @@ const Navbar = () => {
                       </>
                     )}
                   </div>
+
+          {/* Orders Icon (only for authenticated users) */}
+          {isAuthenticated && (
+            <Link 
+              to="/my-orders"
+              className="hidden md:flex h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white/80 items-center justify-center hover:bg-white/10 transition"
+              aria-label="My Orders"
+              title="My Orders"
+            >
+              <FaShoppingBag size={18} />
+            </Link>
+          )}
+
           {/* Cart Icon (always visible) */}
           <div className="flex gap-2 items-center justify-center py-1.5" ref={cartRef}>
             <p className="text-sm  text-white/80 hidden md:block">Cart</p>
@@ -351,11 +365,21 @@ const Navbar = () => {
           >
             SHORT STORY
           </Link>
+          {isAuthenticated && (
+            <Link
+              to="/my-orders"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
+            >
+              <FaShoppingBag size={16} />
+              MY ORDERS
+            </Link>
+          )}
           {!isAuthenticated ? (
             <Link
               to="/login"
               onClick={() => setMobileOpen(false)}
-              className="block px-3 py-2 rounded-lg bg_white/5 border border-white/10 text-white"
+              className="block px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
             >
               LOGIN
             </Link>

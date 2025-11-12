@@ -4,8 +4,6 @@ import {
   FaSearch, 
   FaFilter, 
   FaEye, 
-  FaEdit, 
-  FaTrash, 
   FaShoppingBag, 
   FaCheckCircle, 
   FaTimes, 
@@ -13,13 +11,91 @@ import {
   FaClock,
   FaExclamationTriangle,
   FaDownload,
-  FaRefresh
+  FaSync
 } from 'react-icons/fa';
+
+// API Service for admin orders
+class AdminOrderService {
+  async makeRequest(url, options = {}) {
+    const token = localStorage.getItem('token');
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    const response = await fetch(url, config);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return data;
+  }
+
+  async getAllOrders(filters = {}) {
+    try {
+      const searchParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value !== 'all') {
+          searchParams.append(key, value);
+        }
+      });
+
+      const url = `http://localhost:5001/api/admin/orders${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      return await this.makeRequest(url);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      throw error;
+    }
+  }
+
+  async getCancellationRequests() {
+    try {
+      return await this.makeRequest('http://localhost:5001/api/admin/cancellation-requests');
+    } catch (error) {
+      console.error('Error fetching cancellation requests:', error);
+      throw error;
+    }
+  }
+
+  async processCancellation(orderId, action, adminNotes) {
+    try {
+      return await this.makeRequest(`http://localhost:5001/api/admin/orders/${orderId}/process-cancellation`, {
+        method: 'POST',
+        body: JSON.stringify({ action, adminNotes })
+      });
+    } catch (error) {
+      console.error('Error processing cancellation:', error);
+      throw error;
+    }
+  }
+
+  async updateOrderStatus(orderId, status, notes = '') {
+    try {
+      return await this.makeRequest(`http://localhost:5001/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status, notes })
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      throw error;
+    }
+  }
+}
+
+const adminOrderService = new AdminOrderService();
 
 const AdminOrders = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [cancellationRequests, setCancellationRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -27,97 +103,28 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
-  const [refundRequest, setRefundRequest] = useState(null);
-
-  // Mock data - replace with actual API calls
-  const mockOrders = [
-    {
-      id: 'ORD-001',
-      customerName: 'Hadia Asghar',
-      customerEmail: 'hadia@email.com',
-      items: [
-        { name: 'Aventis ChronoSport Watch', quantity: 1, price: 90000, image: '/Luxury1.png' }
-      ],
-      total: 90000,
-      status: 'pending',
-      paymentMethod: 'card',
-      paymentStatus: 'paid',
-      shippingAddress: {
-        address: 'house no 45 street no 9 muzammi town kufri road shakrial',
-        city: 'Barishal',
-        state: 'Baridhara',
-        country: 'Pakistan',
-        zipCode: '46600'
-      },
-      orderDate: '2025-11-10T10:30:00Z',
-      estimatedDelivery: '2025-11-15',
-      trackingNumber: 'TRK123456789',
-      refundRequest: null
-    },
-    {
-      id: 'ORD-002',
-      customerName: 'Esha Khan',
-      customerEmail: 'esha@email.com',
-      items: [
-        { name: 'Luxury City Package', quantity: 1, price: 25000, image: '/city1.jpg' }
-      ],
-      total: 25000,
-      status: 'completed',
-      paymentMethod: 'paypal',
-      paymentStatus: 'paid',
-      shippingAddress: {
-        address: '123 Main Street',
-        city: 'Karachi',
-        state: 'Sindh',
-        country: 'Pakistan',
-        zipCode: '75000'
-      },
-      orderDate: '2025-11-08T14:20:00Z',
-      estimatedDelivery: '2025-11-13',
-      trackingNumber: 'TRK987654321',
-      refundRequest: null
-    },
-    {
-      id: 'ORD-003',
-      customerName: 'Ali Hassan',
-      customerEmail: 'ali@email.com',
-      items: [
-        { name: 'Premium Watch Collection', quantity: 2, price: 45000, image: '/Luxury2.png' }
-      ],
-      total: 90000,
-      status: 'cancelled',
-      paymentMethod: 'card',
-      paymentStatus: 'refunded',
-      shippingAddress: {
-        address: '456 Oak Avenue',
-        city: 'Lahore',
-        state: 'Punjab',
-        country: 'Pakistan',
-        zipCode: '54000'
-      },
-      orderDate: '2025-11-09T16:45:00Z',
-      estimatedDelivery: '2025-11-14',
-      trackingNumber: null,
-      refundRequest: {
-        id: 'REF-001',
-        amount: 90000,
-        reason: 'Product not as described',
-        status: 'approved',
-        requestDate: '2025-11-09T18:00:00Z',
-        processedDate: '2025-11-10T09:00:00Z',
-        adminNotes: 'Full refund approved due to quality issue'
-      }
-    }
-  ];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setOrders(mockOrders);
-      setFilteredOrders(mockOrders);
-      setLoading(false);
-    }, 1000);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [ordersResponse, cancellationResponse] = await Promise.all([
+        adminOrderService.getAllOrders(),
+        adminOrderService.getCancellationRequests()
+      ]);
+      
+      setOrders(ordersResponse.data || []);
+      setCancellationRequests(cancellationResponse.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter orders based on search and filters
   useEffect(() => {
@@ -125,19 +132,20 @@ const AdminOrders = () => {
 
     // Tab filter
     if (activeTab !== 'all') {
-      if (activeTab === 'refunds') {
-        filtered = filtered.filter(order => order.refundRequest);
+      if (activeTab === 'cancellation_requests') {
+        filtered = orders.filter(order => order.status === 'cancellation_requested');
       } else {
-        filtered = filtered.filter(order => order.status === activeTab);
+        filtered = orders.filter(order => order.status === activeTab);
       }
     }
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(order => 
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customerInfo?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customerInfo?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customerInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -149,25 +157,24 @@ const AdminOrders = () => {
     // Date filter
     if (dateFilter !== 'all') {
       const now = new Date();
-      const orderDate = new Date(order.orderDate);
       
       switch (dateFilter) {
         case 'today':
           filtered = filtered.filter(order => {
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.createdAt);
             return orderDate.toDateString() === now.toDateString();
           });
           break;
         case 'week':
           filtered = filtered.filter(order => {
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.createdAt);
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             return orderDate >= weekAgo;
           });
           break;
         case 'month':
           filtered = filtered.filter(order => {
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.createdAt);
             return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
           });
           break;
@@ -180,11 +187,11 @@ const AdminOrders = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending': return <FaClock className="text-yellow-400" />;
-      case 'processing': return <FaShoppingBag className="text-blue-400" />;
-      case 'shipped': return <FaShoppingBag className="text-purple-400" />;
-      case 'completed': return <FaCheckCircle className="text-green-400" />;
-      case 'cancelled': return <FaTimes className="text-red-400" />;
-      case 'refunded': return <FaMoneyBillWave className="text-orange-400" />;
+      case 'succeeded': return <FaCheckCircle className="text-green-400" />;
+      case 'failed': return <FaTimes className="text-red-400" />;
+      case 'canceled': return <FaTimes className="text-red-400" />;
+      case 'cancellation_requested': return <FaExclamationTriangle className="text-orange-400" />;
+      case 'refunded': return <FaMoneyBillWave className="text-blue-400" />;
       default: return <FaClock className="text-gray-400" />;
     }
   };
@@ -192,58 +199,71 @@ const AdminOrders = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'processing': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'shipped': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'completed': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'refunded': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      case 'succeeded': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'failed': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'canceled': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'cancellation_requested': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      case 'refunded': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending': return 'Pending';
+      case 'succeeded': return 'Completed';
+      case 'failed': return 'Failed';
+      case 'canceled': return 'Cancelled';
+      case 'cancellation_requested': return 'Cancellation Pending';
+      case 'refunded': return 'Refunded';
+      default: return status;
     }
   };
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      // API call would go here
+      await adminOrderService.updateOrderStatus(orderId, newStatus);
       setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
+        order._id === orderId ? { ...order, status: newStatus } : order
       ));
       toast.success('Order status updated successfully');
     } catch (error) {
-      toast.error('Failed to update order status');
+      toast.error(error.message || 'Failed to update order status');
     }
   };
 
-  const handleRefundApproval = async (orderId, action, amount, adminNotes) => {
+  const handleCancellationAction = async (orderId, action, adminNotes) => {
     try {
-      // API call would go here
+      await adminOrderService.processCancellation(orderId, action, adminNotes);
+      
+      // Update local state
       setOrders(prev => prev.map(order => 
-        order.id === orderId 
+        order._id === orderId 
           ? { 
               ...order, 
-              refundRequest: {
-                ...order.refundRequest,
-                status: action,
-                processedDate: new Date().toISOString(),
-                adminNotes,
-                ...(action === 'approved' && { amount })
-              }
+              status: action === 'approve' ? 'canceled' : 'succeeded',
+              adminNotes,
+              cancellationProcessedAt: new Date().toISOString()
             } 
           : order
       ));
-      toast.success(`Refund request ${action} successfully`);
+      
+      toast.success(`Cancellation ${action}d successfully`);
       setShowRefundModal(false);
+      
+      // Refresh data
+      fetchData();
     } catch (error) {
-      toast.error('Failed to process refund request');
+      toast.error(error.message || 'Failed to process cancellation');
     }
   };
 
   const tabs = [
     { id: 'all', label: 'All Orders', count: orders.length },
     { id: 'pending', label: 'Pending', count: orders.filter(o => o.status === 'pending').length },
-    { id: 'processing', label: 'Processing', count: orders.filter(o => o.status === 'processing').length },
-    { id: 'completed', label: 'Completed', count: orders.filter(o => o.status === 'completed').length },
-    { id: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length },
-    { id: 'refunds', label: 'Refund Requests', count: orders.filter(o => o.refundRequest).length }
+    { id: 'succeeded', label: 'Completed', count: orders.filter(o => o.status === 'succeeded').length },
+    { id: 'canceled', label: 'Cancelled', count: orders.filter(o => o.status === 'canceled').length },
+    { id: 'cancellation_requested', label: 'Cancellation Requests', count: orders.filter(o => o.status === 'cancellation_requested').length }
   ];
 
   if (loading) {
@@ -263,12 +283,11 @@ const AdminOrders = () => {
           <p className="text-white/60 mt-1">Manage and track all customer orders</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition flex items-center gap-2">
-            <FaDownload className="text-sm" />
-            Export
-          </button>
-          <button className="px-4 py-2 bg-[#5695F5] rounded-lg text-white hover:bg-blue-600 transition flex items-center gap-2">
-            <FaRefresh className="text-sm" />
+          <button 
+            onClick={fetchData}
+            className="px-4 py-2 bg-[#5695F5] rounded-lg text-white hover:bg-blue-600 transition flex items-center gap-2"
+          >
+            <FaSync className="text-sm" />
             Refresh
           </button>
         </div>
@@ -322,10 +341,10 @@ const AdminOrders = () => {
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="succeeded">Completed</option>
+          <option value="failed">Failed</option>
+          <option value="canceled">Cancelled</option>
+          <option value="cancellation_requested">Cancellation Requested</option>
         </select>
 
         {/* Date Filter */}
@@ -364,45 +383,47 @@ const AdminOrders = () => {
             </thead>
             <tbody>
               {filteredOrders.map((order, index) => (
-                <tr key={order.id} className={`border-t border-white/10 ${index % 2 === 0 ? 'bg-white/5' : ''}`}>
+                <tr key={order._id} className={`border-t border-white/10 ${index % 2 === 0 ? 'bg-white/5' : ''}`}>
                   <td className="px-6 py-4">
-                    <div className="text-white font-medium">{order.id}</div>
-                    {order.trackingNumber && (
-                      <div className="text-white/60 text-sm">Track: {order.trackingNumber}</div>
+                    <div className="text-white font-medium">{order.orderId}</div>
+                    {order.stripePaymentIntentId && (
+                      <div className="text-white/60 text-sm">Stripe: {order.stripePaymentIntentId.slice(-8)}</div>
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-white font-medium">{order.customerName}</div>
-                    <div className="text-white/60 text-sm">{order.customerEmail}</div>
+                    <div className="text-white font-medium">
+                      {order.customerInfo?.firstName} {order.customerInfo?.lastName}
+                    </div>
+                    <div className="text-white/60 text-sm">{order.customerInfo?.email}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-white">
-                      {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                      {order.items?.length || 1} item{(order.items?.length || 1) > 1 ? 's' : ''}
                     </div>
                     <div className="text-white/60 text-sm">
-                      {order.items[0]?.name}
-                      {order.items.length > 1 && ` +${order.items.length - 1} more`}
+                      {order.items?.[0]?.name || 'Order Items'}
+                      {(order.items?.length || 0) > 1 && ` +${order.items.length - 1} more`}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-white font-semibold">${order.total.toLocaleString()}</div>
+                    <div className="text-white font-semibold">${order.amount?.toFixed(2)}</div>
                     <div className="text-white/60 text-sm capitalize">{order.paymentMethod}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(order.status)}`}>
                       {getStatusIcon(order.status)}
-                      <span className="capitalize">{order.status}</span>
+                      <span>{getStatusLabel(order.status)}</span>
                     </div>
-                    {order.refundRequest && (
+                    {order.cancellationReason && (
                       <div className="mt-2">
-                        <span className="text-orange-400 text-xs">Refund: {order.refundRequest.status}</span>
+                        <span className="text-white/60 text-xs">Reason: {order.cancellationReason}</span>
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 text-white/60 text-sm">
-                    {new Date(order.orderDate).toLocaleDateString()}
+                    {new Date(order.createdAt).toLocaleDateString()}
                     <br />
-                    {new Date(order.orderDate).toLocaleTimeString()}
+                    {new Date(order.createdAt).toLocaleTimeString()}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -417,31 +438,31 @@ const AdminOrders = () => {
                         <FaEye />
                       </button>
                       
-                      {order.refundRequest && order.refundRequest.status === 'pending' && (
+                      {order.status === 'cancellation_requested' && (
                         <button
                           onClick={() => {
-                            setRefundRequest(order.refundRequest);
                             setSelectedOrder(order);
                             setShowRefundModal(true);
                           }}
                           className="p-2 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 rounded-lg transition"
-                          title="Process Refund"
+                          title="Process Cancellation"
                         >
                           <FaMoneyBillWave />
                         </button>
                       )}
 
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                        className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5695F5]"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
+                      {order.status !== 'cancellation_requested' && order.status !== 'canceled' && (
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                          className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5695F5]"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="succeeded">Completed</option>
+                          <option value="failed">Failed</option>
+                          <option value="canceled">Cancelled</option>
+                        </select>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -468,20 +489,19 @@ const AdminOrders = () => {
             setSelectedOrder(null);
           }}
           onStatusUpdate={handleStatusUpdate}
+          getStatusColor={getStatusColor}
         />
       )}
 
-      {/* Refund Request Modal */}
-      {showRefundModal && refundRequest && selectedOrder && (
-        <RefundRequestModal
+      {/* Cancellation Request Modal */}
+      {showRefundModal && selectedOrder && (
+        <CancellationRequestModal
           order={selectedOrder}
-          refundRequest={refundRequest}
           onClose={() => {
             setShowRefundModal(false);
-            setRefundRequest(null);
             setSelectedOrder(null);
           }}
-          onApprove={handleRefundApproval}
+          onApprove={handleCancellationAction}
         />
       )}
     </div>
@@ -489,7 +509,7 @@ const AdminOrders = () => {
 };
 
 // Order Details Modal Component
-const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
+const OrderDetailsModal = ({ order, onClose, onStatusUpdate, getStatusColor }) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#0d2740] border border-white/20 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -512,15 +532,15 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/60">Order ID:</span>
-                    <span className="text-white font-medium">{order.id}</span>
+                    <span className="text-white font-medium">{order.orderId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Date:</span>
-                    <span className="text-white">{new Date(order.orderDate).toLocaleDateString()}</span>
+                    <span className="text-white">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Status:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${getStatusColor(order.status)}`}>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
                   </div>
@@ -528,12 +548,10 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
                     <span className="text-white/60">Payment:</span>
                     <span className="text-white capitalize">{order.paymentMethod}</span>
                   </div>
-                  {order.trackingNumber && (
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Tracking:</span>
-                      <span className="text-white">{order.trackingNumber}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Amount:</span>
+                    <span className="text-white">${order.amount?.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
 
@@ -543,12 +561,20 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/60">Name:</span>
-                    <span className="text-white">{order.customerName}</span>
+                    <span className="text-white">
+                      {order.customerInfo?.firstName} {order.customerInfo?.lastName}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Email:</span>
-                    <span className="text-white">{order.customerEmail}</span>
+                    <span className="text-white">{order.customerInfo?.email}</span>
                   </div>
+                  {order.customerInfo?.phone && (
+                    <div className="flex justify-between">
+                      <span className="text-white/60">Phone:</span>
+                      <span className="text-white">{order.customerInfo.phone}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -556,41 +582,65 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
             {/* Shipping & Items */}
             <div className="space-y-4">
               {/* Shipping Address */}
-              <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-3">Shipping Address</h3>
-                <div className="text-white/80 text-sm">
-                  <p>{order.shippingAddress.address}</p>
-                  <p>{order.shippingAddress.city}, {order.shippingAddress.state}</p>
-                  <p>{order.shippingAddress.country} {order.shippingAddress.zipCode}</p>
+              {order.shippingAddress && (
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">Shipping Address</h3>
+                  <div className="text-white/80 text-sm">
+                    <p>{order.shippingAddress.address}</p>
+                    <p>{order.shippingAddress.city}, {order.shippingAddress.state}</p>
+                    <p>{order.shippingAddress.country} {order.shippingAddress.zipCode}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Order Items */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-3">Order Items</h3>
                 <div className="space-y-3">
-                  {order.items.map((item, index) => (
+                  {order.items?.map((item, index) => (
                     <div key={index} className="flex items-center gap-3 pb-3 border-b border-white/10 last:border-b-0">
-                      <img
-                        src={item.image || '/Luxury1.png'}
-                        alt={item.name}
-                        className="w-12 h-12 object-cover rounded-lg bg-white/10"
-                      />
+                      <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
+                        <FaShoppingBag className="text-white/60" />
+                      </div>
                       <div className="flex-1">
                         <p className="text-white font-medium text-sm">{item.name}</p>
-                        <p className="text-white/60 text-xs">Qty: {item.quantity}</p>
+                        <p className="text-white/60 text-xs">Qty: {item.quantity} × ${item.price?.toFixed(2)}</p>
                       </div>
                       <p className="text-white font-semibold text-sm">
-                        ${(item.price * item.quantity).toLocaleString()}
+                        ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                       </p>
                     </div>
-                  ))}
+                  )) || (
+                    <div className="text-white/60 text-sm">No item details available</div>
+                  )}
+                  
                   <div className="flex justify-between items-center pt-3 border-t border-white/20">
                     <span className="text-white font-semibold">Total:</span>
-                    <span className="text-[#5695F5] font-bold text-lg">${order.total.toLocaleString()}</span>
+                    <span className="text-[#5695F5] font-bold text-lg">${order.amount?.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
+
+              {/* Cancellation Info */}
+              {order.status === 'cancellation_requested' && (
+                <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-orange-400 mb-3">Cancellation Request</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-white/60">Requested At:</span>
+                      <span className="text-white">
+                        {order.cancellationRequestedAt ? new Date(order.cancellationRequestedAt).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                    {order.cancellationReason && (
+                      <div className="flex justify-between">
+                        <span className="text-white/60">Reason:</span>
+                        <span className="text-white">{order.cancellationReason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -599,13 +649,13 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate }) => {
   );
 };
 
-// Refund Request Modal Component
-const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
+// Cancellation Request Modal Component
+const CancellationRequestModal = ({ order, onClose, onApprove }) => {
   const [action, setAction] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
-  const [refundAmount, setRefundAmount] = useState(refundRequest.amount || order.total);
+  const [processing, setProcessing] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!action) {
       toast.error('Please select an action');
       return;
@@ -615,7 +665,12 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
       return;
     }
     
-    onApprove(order.id, action, action === 'approved' ? refundAmount : 0, adminNotes);
+    setProcessing(true);
+    try {
+      await onApprove(order._id, action, adminNotes);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -623,7 +678,7 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
       <div className="bg-[#0d2740] border border-white/20 rounded-lg max-w-2xl w-full">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Process Refund Request</h2>
+            <h2 className="text-2xl font-bold text-white">Process Cancellation Request</h2>
             <button
               onClick={onClose}
               className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition"
@@ -633,30 +688,34 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
           </div>
 
           <div className="space-y-6">
-            {/* Refund Details */}
+            {/* Request Details */}
             <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-3">Refund Request Details</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">Cancellation Request Details</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-white/60">Order ID:</span>
-                  <span className="text-white font-medium">{order.id}</span>
+                  <span className="text-white font-medium">{order.orderId}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">Customer:</span>
-                  <span className="text-white">{order.customerName}</span>
+                  <span className="text-white">{order.customerInfo?.firstName} {order.customerInfo?.lastName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Original Amount:</span>
-                  <span className="text-white">${order.total.toLocaleString()}</span>
+                  <span className="text-white/60">Amount:</span>
+                  <span className="text-white">${order.amount?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">Request Date:</span>
-                  <span className="text-white">{new Date(refundRequest.requestDate).toLocaleDateString()}</span>
+                  <span className="text-white">
+                    {order.cancellationRequestedAt ? new Date(order.cancellationRequestedAt).toLocaleDateString() : 'N/A'}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">Reason:</span>
-                  <span className="text-white">{refundRequest.reason}</span>
-                </div>
+                {order.cancellationReason && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Reason:</span>
+                    <span className="text-white">{order.cancellationReason}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -669,17 +728,17 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
                     <input
                       type="radio"
                       name="action"
-                      value="approved"
-                      checked={action === 'approved'}
+                      value="approve"
+                      checked={action === 'approve'}
                       onChange={(e) => setAction(e.target.value)}
                       className="sr-only"
                     />
-                    <div className={`w-4 h-4 rounded-full border mr-3 ${action === 'approved' ? 'border-green-400 bg-green-400' : 'border-white/40'}`}>
-                      {action === 'approved' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>}
+                    <div className={`w-4 h-4 rounded-full border mr-3 ${action === 'approve' ? 'border-green-400 bg-green-400' : 'border-white/40'}`}>
+                      {action === 'approve' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>}
                     </div>
                     <div>
-                      <div className="text-white font-medium">Approve Refund</div>
-                      <div className="text-white/60 text-sm">Full or partial refund</div>
+                      <div className="text-white font-medium">Approve & Refund</div>
+                      <div className="text-white/60 text-sm">Cancel order and process refund</div>
                     </div>
                   </label>
                   
@@ -687,40 +746,21 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
                     <input
                       type="radio"
                       name="action"
-                      value="rejected"
-                      checked={action === 'rejected'}
+                      value="reject"
+                      checked={action === 'reject'}
                       onChange={(e) => setAction(e.target.value)}
                       className="sr-only"
                     />
-                    <div className={`w-4 h-4 rounded-full border mr-3 ${action === 'rejected' ? 'border-red-400 bg-red-400' : 'border-white/40'}`}>
-                      {action === 'rejected' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>}
+                    <div className={`w-4 h-4 rounded-full border mr-3 ${action === 'reject' ? 'border-red-400 bg-red-400' : 'border-white/40'}`}>
+                      {action === 'reject' && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>}
                     </div>
                     <div>
-                      <div className="text-white font-medium">Reject Refund</div>
-                      <div className="text-white/60 text-sm">Decline the request</div>
+                      <div className="text-white font-medium">Reject Request</div>
+                      <div className="text-white/60 text-sm">Decline cancellation</div>
                     </div>
                   </label>
                 </div>
               </div>
-
-              {/* Refund Amount (only if approved) */}
-              {action === 'approved' && (
-                <div>
-                  <label className="block text-white font-medium mb-2">Refund Amount *</label>
-                  <input
-                    type="number"
-                    value={refundAmount}
-                    onChange={(e) => setRefundAmount(Number(e.target.value))}
-                    max={order.total}
-                    min={0}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#5695F5]/50"
-                    placeholder="Enter refund amount"
-                  />
-                  <p className="text-white/60 text-sm mt-1">
-                    Maximum refundable amount: ${order.total.toLocaleString()}
-                  </p>
-                </div>
-              )}
 
               {/* Admin Notes */}
               <div>
@@ -731,30 +771,53 @@ const RefundRequestModal = ({ order, refundRequest, onClose, onApprove }) => {
                   rows={4}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#5695F5]/50 resize-none"
                   placeholder="Add notes about this decision..."
-                ></textarea>
+                />
               </div>
+
+              {action === 'approve' && (
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  <h4 className="text-blue-400 font-semibold mb-2">Refund Process</h4>
+                  <p className="text-blue-100 text-sm">
+                    Approving this request will:
+                  </p>
+                  <ul className="text-blue-100 text-sm mt-2 space-y-1 list-disc list-inside">
+                    <li>Cancel the order and mark it as "Canceled"</li>
+                    <li>Process a full refund via Stripe (${order.amount?.toFixed(2)})</li>
+                    <li>Send confirmation email to customer</li>
+                    <li>Refund will appear in 3-5 business days</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-4 border-t border-white/10">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
+                disabled={processing}
+                className="flex-1 py-3 px-4 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmit}
-                className={`flex-1 py-3 px-4 rounded-lg text-white font-medium transition ${
-                  action === 'approved' 
+                disabled={!action || processing}
+                className={`flex-1 py-3 px-4 rounded-lg text-white font-medium transition flex items-center justify-center gap-2 ${
+                  action === 'approve' 
                     ? 'bg-green-600 hover:bg-green-700' 
-                    : action === 'rejected'
+                    : action === 'reject'
                     ? 'bg-red-600 hover:bg-red-700'
                     : 'bg-gray-500 cursor-not-allowed'
-                }`}
-                disabled={!action}
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {action === 'approved' ? 'Approve Refund' : action === 'rejected' ? 'Reject Request' : 'Select Action'}
+                {processing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Processing...
+                  </>
+                ) : (
+                  action === 'approve' ? 'Approve & Refund' : action === 'reject' ? 'Reject Request' : 'Select Action'
+                )}
               </button>
             </div>
           </div>

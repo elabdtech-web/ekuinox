@@ -9,6 +9,7 @@ import Product from "./Pages/Product";
 import StoryPage from "./Pages/StoryPage";
 import Checkout from "./Pages/Checkout";
 import Payment from "./Pages/Payment";
+import MyOrders from "./Pages/MyOrders";
 import { CityCartProvider } from "./context/CityCartContext";
 import { ProductCartProvider } from "./context/ProductCartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -21,6 +22,7 @@ import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import AdminLayout from "./admin/layout/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
+import AdminOrders from "./admin/pages/AdminOrders";
 import ManageUsers from "./admin/pages/ManageUsers";
 import ManageProducts from "./admin/pages/ManageProducts";
 import AddProduct from "./admin/pages/AddProduct";
@@ -54,6 +56,11 @@ const App = () => {
                   <Route path="/product" element={<Product />} />
                   <Route path="/checkout" element={<Checkout />} />
                     <Route path="/payment" element={<Payment />} />
+                  <Route path="/my-orders" element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
 
@@ -67,6 +74,7 @@ const App = () => {
                     </ProtectedRoute>
                   }>
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="orders" element={<AdminOrders />} />
                     <Route path="users" element={<ManageUsers />} />
                     <Route path="products" element={<ManageProducts />} />
                     <Route path="add-product" element={<AddProduct />} />
