@@ -361,13 +361,54 @@ export function ProductCartProvider({ children }) {
     }
   };
 
-  const checkout = async (checkoutData = {}) => {
+  /**
+   * Perform checkout.
+   * @param {Object} checkoutData - address, contact, payment method etc.
+   * @param {Object} options - behavior modifiers
+   * @param {boolean} options.clear - whether to clear the cart locally after successful checkout (default: false)
+   * @param {boolean} options.snapshot - whether to store a snapshot of the order & items in localStorage (default: true)
+   */
+  const checkout = async (checkoutData = {}, options = {}) => {
+    const { clear = false, snapshot = true } = options;
     try {
       setError(null);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Please login to checkout");
       const result = await cartService.checkoutCart(checkoutData);
-      setItems([]);
+
+      // Persist snapshot for post-confirmation UI or order success page
+      if (snapshot) {
+        try {
+          const orderSnapshot = {
+            at: Date.now(),
+            items: items.map(i => ({
+              id: i.id,
+              name: i.name,
+              qty: i.qty,
+              priceNum: i.priceNum,
+              img: i.img,
+              size: i.size,
+              color: i.color,
+              edition: i.edition,
+            })),
+            checkout: checkoutData,
+            server: result,
+          };
+          localStorage.setItem("lastOrder", JSON.stringify(orderSnapshot));
+        } catch (e) {
+          console.warn("Failed to store order snapshot", e);
+        }
+      }
+
+      // Conditionally clear cart (default false to avoid surprising empties)
+      if (clear) {
+        setItems([]);
+        // if guest (should not happen on checkout) also remove guestCart
+        localStorage.removeItem("guestCart");
+      } else {
+        // Reload from server to reflect authoritative state without nuking local items prematurely
+        await loadCart();
+      }
       return result;
     } catch (error) {
       console.error("Checkout failed:", error);

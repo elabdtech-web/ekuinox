@@ -12,6 +12,7 @@ import { Country } from 'country-state-city';
 const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submitting, setSubmitting }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const { clearCart } = useProductCart();
   const [cardholderName, setCardholderName] = useState("");
 
   // Helper function to convert country name to ISO code
@@ -146,6 +147,12 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
         throw new Error('Failed to confirm payment on server');
       }
 
+      try {
+        // Clear cart after successful payment confirmation
+        await clearCart();
+      } catch (e) {
+        console.warn('Cart clear after card payment failed:', e);
+      }
       onSuccess();
 
     } catch (err) {
@@ -245,7 +252,7 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
 const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { checkout, items, total } = useProductCart();
+  const { checkout, items, total, clearCart } = useProductCart();
 
   // Get checkout data from navigation state
   const checkoutData = location.state?.checkoutData;
@@ -299,7 +306,14 @@ const Payment = () => {
         paymentDetails: { method: paymentMethod },
       };
 
-      await checkout(orderData);
+      // Preserve cart until user leaves or manually clears; store snapshot for success page
+      // Create order then clear cart
+      await checkout(orderData, { snapshot: true });
+      try {
+        await clearCart();
+      } catch (e) {
+        console.warn('Cart clear after non-card checkout failed:', e);
+      }
       
       handlePaymentSuccess();
     } catch (err) {

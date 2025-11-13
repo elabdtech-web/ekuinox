@@ -93,9 +93,9 @@ const MyOrders = () => {
     return order.status === 'pending' || order.status === 'requires_payment_method' || order.status === 'requires_confirmation';
   };
 
-  const canRequestCancellation = (order) => {
-    return (order.status === 'succeeded' || order.status === 'processing') && !order.cancellationRequestedAt;
-  };
+  // const canRequestCancellation = (order) => {
+  //   return (order.status === 'succeeded' || order.status === 'processing') && !order.cancellationRequestedAt;
+  // };
 
   if (loading) {
     return (
@@ -285,7 +285,7 @@ const MyOrders = () => {
                       </button>
                     )}
 
-                    {canRequestCancellation(order) && (
+                    {/* {canRequestCancellation(order) && (
                       <button
                         onClick={() => {
                           setSelectedOrder(order);
@@ -296,7 +296,7 @@ const MyOrders = () => {
                         <FaExclamationTriangle className="w-4 h-4" />
                         Request Cancellation
                       </button>
-                    )}
+                    )} */}
                   </div>
 
                   {/* Status Messages */}
