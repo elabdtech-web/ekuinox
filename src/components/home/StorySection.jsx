@@ -16,7 +16,7 @@ const Stat = ({ label, value }) => (
 export default function StorySection() {
   return (
     <section className="w-full min-h-screen bg-[#070B13] overflow-hidden">
-      <div className="px-6 lg:px-0 py-16">
+      <div className="px-6  py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-[1440px] mx-auto">
           {/* Left Text Column */}
           <motion.div

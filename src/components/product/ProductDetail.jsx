@@ -68,7 +68,7 @@ const ProductDetail = ({ product, loading = false }) => {
   }
 
   return (
-    <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
+    <section className="min-h-screen py-12 px-4 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
         <div className="grid grid-cols-12 gap-8 ">
           {/* Left column */}

@@ -24,7 +24,7 @@ const LuxuryProducts = ({ products, loading }) => {
 
   return (
     <section className="w-full min-h-screen relative bg-[#070B13] py-12">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-0 " >
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-4 " >
         {/* Heading with animation */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}

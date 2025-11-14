@@ -20,6 +20,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLogin from "./admin/pages/AdminLogin";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
+import ForgotPassword from "./Pages/ForgotPassword";
 import AdminLayout from "./admin/layout/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminOrders from "./admin/pages/AdminOrders";
@@ -63,6 +64,7 @@ const App = () => {
                   } />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
                   {/* Admin Login Route */}
                   <Route path="/admin/login" element={<AdminLogin />} />

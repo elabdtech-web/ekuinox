@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const AdminLogin = () => {
@@ -87,9 +87,14 @@ const AdminLogin = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-white/80 text-sm font-medium mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-white/80 text-sm font-medium">
+                  Password
+                </label>
+                <Link to="/forgot-password" className="text-xs text-[#7fb2ff] hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 type="password"
                 id="password"

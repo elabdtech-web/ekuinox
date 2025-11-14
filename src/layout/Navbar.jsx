@@ -9,6 +9,7 @@ import MyCities from "../common/MyCities";
 import { useProductCart } from "../context/ProductCartContext";
 import { RiShoppingBagLine } from "react-icons/ri";
 import { useAuth } from "../context/AuthContext";
+import { BiLogIn, BiLogOut } from "react-icons/bi";
 
 const Navbar = () => {
   const [isSticky, setIsSticky] = useState(false);
@@ -168,34 +169,34 @@ const Navbar = () => {
         {/* Right Section */}
         <div className="flex items-center gap-3 md:gap-4">
           {/* Auth buttons (desktop) */}
-                  <div className="hidden md:flex items-center gap-2">
-                    {!isAuthenticated ? (
-                      <Link
-                        to="/login"
-                        className="h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white/80 flex items-center justify-center hover:bg-white/10 transition"
-                        aria-label="Login"
-                        title="Login"
-                      >
-                        <FiUser size={18} />
-                      </Link>
-                    ) : (
-                      <>
-                        <span className="text-white/80 text-sm hidden lg:inline">
-                          {(user?.name || user?.email || '').toUpperCase()}
-                        </span>
-                        <button
-                          onClick={logout}
-                          className="px-3 h-10 flex items-center rounded-lg bg-white/10 border border-white/20 text-white/80 hover:bg-white/15 transition"
-                        >
-                          Logout
-                        </button>
-                      </>
-                    )}
-                  </div>
+          <div className="hidden md:flex items-center gap-2">
+            {!isAuthenticated ? (
+              <Link
+                to="/login"
+                className="h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white/80 flex items-center justify-center hover:bg-white/10 transition"
+                aria-label="Login"
+                title="Login"
+              >
+                <FiUser size={18} />
+              </Link>
+            ) : (
+              <>
+                <span className="text-white/80 text-sm hidden lg:inline">
+                  {(user?.name || user?.email || '').toUpperCase()}
+                </span>
+                <button
+                  onClick={logout}
+                  className="px-3 h-10 flex items-center rounded-lg bg-white/10 border border-white/20 text-white/80 hover:bg-white/15 transition"
+                >
+                  <BiLogOut size={16} className="inline " />
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Orders Icon (only for authenticated users) */}
           {isAuthenticated && (
-            <Link 
+            <Link
               to="/my-orders"
               className="hidden md:flex h-10 w-10 rounded-lg border border-white/10 bg-[#293A5180] text-white/80 items-center justify-center hover:bg-white/10 transition"
               aria-label="My Orders"
@@ -228,9 +229,8 @@ const Navbar = () => {
               type="button"
               aria-label="settings"
               onClick={() => setIsSettingsOpen((v) => !v)}
-              className={`h-10 w-12 rounded-xl border border-white/10 backdrop-blur-md shadow-lg shadow-black/20 flex items-center justify-center transition ${
-                isSettingsOpen ? "" : "bg-[#293A5180]  hover:bg-white/10"
-              }`}
+              className={`h-10 w-12 rounded-xl border border-white/10 backdrop-blur-md shadow-lg shadow-black/20 flex items-center justify-center transition ${isSettingsOpen ? "" : "bg-[#293A5180]  hover:bg-white/10"
+                }`}
             >
               <FiSettings
                 size={18}
@@ -240,11 +240,10 @@ const Navbar = () => {
 
             {isSettingsVisible && (
               <div
-                className={`absolute -left-2 top-14 z-[60] transition-all duration-300 ${
-                  isSettingsOpen
+                className={`absolute -left-2 top-14 z-[60] transition-all duration-300 ${isSettingsOpen
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                  }`}
                 style={{ transitionProperty: "opacity, transform" }}
               >
                 <Setting />
@@ -263,14 +262,13 @@ const Navbar = () => {
             {mobileOpen ? <FiX size={18} /> : <FiMenu size={18} />}
           </button>
 
-          {/* MY CITIES (hidden on small screens) */}
-          <div className="hidden md:inline-block relative" ref={citiesRef}>
+          {/* MY CITIES (hidden on small/medium screens, visible on large screens) */}
+          <div className="hidden xl:inline-block relative" ref={citiesRef}>
             {/* ...MY CITIES button and panel code... */}
             <button
               onClick={() => setIsCitiesOpen((v) => !v)}
-              className={`flex items-center h-12 px-4 min-w-sm rounded-t-xl bg-[#293A5180] border border-white/10 backdrop-blur-md shadow-inner transition ${
-                isCitiesOpen ? "rounded-b-none" : "rounded-b-xl"
-              }`}
+              className={`flex items-center h-12 px-4 min-w-sm rounded-t-xl bg-[#293A5180] border border-white/10 backdrop-blur-md shadow-inner transition ${isCitiesOpen ? "rounded-b-none" : "rounded-b-xl"
+                }`}
             >
               <span className="text-sm md:text-lg tracking-wide text-white/80 flex-1 text-left">
                 MY CITIES
@@ -299,34 +297,31 @@ const Navbar = () => {
             {isCitiesVisible && (
               <>
                 <div
-                  className={`fixed inset-0 z-[58] transition-opacity duration-300 ${
-                    isCitiesOpen
+                  className={`fixed inset-0 z-[58] transition-opacity duration-300 ${isCitiesOpen
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none"
-                  }`}
+                    }`}
                   onClick={() => setIsCitiesOpen(false)}
                 />
                 <div
                   ref={citiesPanelRef}
-                  className={`z-[60] transition-all duration-300 ease-out ${
-                    isCitiesOpen
+                  className={`z-[60] transition-all duration-300 ease-out ${isCitiesOpen
                       ? "opacity-100 pointer-events-auto"
                       : "opacity-0 pointer-events-none"
-                  }`}
+                    }`}
                   style={
                     citiesBox
                       ? {
-                          top: citiesBox.top + "px",
-                          right: citiesBox.right + "px",
-                          width: Math.max(290, citiesBox.width) + "px",
-                        }
+                        top: citiesBox.top + "px",
+                        right: citiesBox.right + "px",
+                        width: Math.max(290, citiesBox.width) + "px",
+                      }
                       : undefined
                   }
                 >
                   <div
-                    className={`transition-all duration-400 delay-100 ease-out overflow-hidden ${
-                      isCitiesOpen ? "opacity-100" : "max-h-0 opacity-0"
-                    }`}
+                    className={`transition-all duration-400 delay-100 ease-out overflow-hidden ${isCitiesOpen ? "opacity-100" : "max-h-0 opacity-0"
+                      }`}
                   >
                     <MyCities />
                   </div>
@@ -339,9 +334,8 @@ const Navbar = () => {
 
       {/* Mobile menu (links only) */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          mobileOpen ? "max-h-44 opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? "max-h-44 opacity-100" : "max-h-0 opacity-0"
+          }`}
       >
         <nav className="px-2 pb-3 space-y-2">
           <Link
@@ -381,14 +375,14 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
               className="block px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
             >
-              LOGIN
+              <BiLogIn size={16} className="inline mr-2" />
             </Link>
           ) : (
             <button
               onClick={() => { logout(); setMobileOpen(false); }}
               className="w-full text-left px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
             >
-              LOGOUT
+                <BiLogOut size={16} className="inline mr-2" />
             </button>
           )}
         </nav>
@@ -400,8 +394,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-
-

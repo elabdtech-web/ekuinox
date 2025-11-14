@@ -118,7 +118,7 @@ export default function MyCities() {
   const getFlagComponent = useCallback((city) => {
     if (city.flagImg) {
       return (
-        <div className="relative">
+        <div className="relative ">
           <img
             src={city.flagImg}
             alt={`${city.country || city.name} flag`}
