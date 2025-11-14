@@ -36,8 +36,7 @@ const AdminLogin = () => {
       setLoading(false);
       return;
     }
-    console.log('Submitting login for:', credentials.email);
-    console.log('Submitting login for:', credentials.password);
+
     const result = await login(credentials.email, credentials.password);
     
     if (result.success) {
@@ -111,15 +110,6 @@ const AdminLogin = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            <p className="text-yellow-200 text-sm text-center mb-2">Demo Credentials:</p>
-            <p className="text-white/80 text-xs text-center">
-              Email: admin@ekuinox.com<br />
-              Password: Admin123!
-            </p>
-          </div>
         </div>
 
         {/* Back to Main Site */}

@@ -268,9 +268,13 @@ const AdminOrders = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-[#5695F5] rounded-full animate-spin"></div>
-      </div>
+       <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-t-2 border-[#5695F5]"></div>
+          </div>
+        </div>
+      </section>
     );
   }
 
@@ -455,7 +459,7 @@ const AdminOrders = () => {
                         <select
                           value={order.status}
                           onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                          className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5695F5]"
+                          className="px-2 py-1 bg-gray-600 border border-white/20 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5695F5]"
                         >
                           <option value="pending">Pending</option>
                           <option value="succeeded">Completed</option>

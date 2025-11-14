@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { 
-  FaShoppingBag, 
-  FaEye, 
-  FaTimes, 
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import {
+  FaShoppingBag,
+  FaEye,
+  FaTimes,
   FaClock,
   FaCheckCircle,
   FaSearch,
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaCreditCard,
-  FaExclamationTriangle
-} from 'react-icons/fa';
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
-import orderService from '../services/orderService';
-import CancelOrderModal from '../components/CancelOrderModal';
+import orderService from "../services/orderService";
+import CancelOrderModal from "../components/CancelOrderModal";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -35,8 +35,8 @@ const MyOrders = () => {
       const data = await orderService.getUserOrders();
       setOrders(data.data || []);
     } catch (error) {
-      toast.error('Failed to fetch orders');
-      console.error('Fetch orders error:', error);
+      toast.error("Failed to fetch orders");
+      console.error("Fetch orders error:", error);
     } finally {
       setLoading(false);
     }
@@ -44,13 +44,10 @@ const MyOrders = () => {
 
   const handleCancelOrder = async () => {
     try {
-      // The actual cancellation is already handled by CancelOrderModal
-      // This function just needs to refresh the orders and close the modal
       await fetchOrders();
       setShowCancelModal(false);
-      // Success message is already shown by the modal
     } catch (error) {
-      toast.error(error.message || 'Failed to refresh orders');
+      toast.error(error.message || "Failed to refresh orders");
     }
   };
 
@@ -60,37 +57,58 @@ const MyOrders = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending': return <FaClock className="w-4 h-4" />;
-      case 'succeeded': return <FaCheckCircle className="w-4 h-4" />;
-      case 'failed': return <FaTimes className="w-4 h-4" />;
-      case 'canceled': return <FaTimes className="w-4 h-4" />;
-      case 'cancellation_requested': return <FaExclamationTriangle className="w-4 h-4" />;
-      case 'refunded': return <FaCheckCircle className="w-4 h-4" />;
-      default: return <FaClock className="w-4 h-4" />;
+      case "pending":
+        return <FaClock className="w-4 h-4" />;
+      case "succeeded":
+        return <FaCheckCircle className="w-4 h-4" />;
+      case "failed":
+        return <FaTimes className="w-4 h-4" />;
+      case "canceled":
+        return <FaTimes className="w-4 h-4" />;
+      case "cancellation_requested":
+        return <FaExclamationTriangle className="w-4 h-4" />;
+      case "refunded":
+        return <FaCheckCircle className="w-4 h-4" />;
+      default:
+        return <FaClock className="w-4 h-4" />;
     }
   };
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'pending': return 'Pending';
-      case 'succeeded': return 'Completed';
-      case 'failed': return 'Failed';
-      case 'canceled': return 'Cancelled';
-      case 'cancellation_requested': return 'Cancellation Pending';
-      case 'refunded': return 'Refunded';
-      default: return status;
+      case "pending":
+        return "Pending";
+      case "succeeded":
+        return "Completed";
+      case "failed":
+        return "Failed";
+      case "canceled":
+        return "Cancelled";
+      case "cancellation_requested":
+        return "Cancellation Pending";
+      case "refunded":
+        return "Refunded";
+      default:
+        return status;
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesFilter = filter === 'all' || order.status === filter;
-    const matchesSearch = order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.items?.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredOrders = orders.filter((order) => {
+    const matchesFilter = filter === "all" || order.status === filter;
+    const matchesSearch =
+      order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.items?.some((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     return matchesFilter && matchesSearch;
   });
 
   const canCancelOrder = (order) => {
-    return order.status === 'pending' || order.status === 'requires_payment_method' || order.status === 'requires_confirmation';
+    return (
+      order.status === "pending" ||
+      order.status === "requires_payment_method" ||
+      order.status === "requires_confirmation"
+    );
   };
 
   // const canRequestCancellation = (order) => {
@@ -99,12 +117,13 @@ const MyOrders = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <p className="text-white/80">Loading your orders...</p>
+      <section className="min-h-screen py-12 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-t-2 border-[#5695F5]"></div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -117,7 +136,7 @@ const MyOrders = () => {
             <FaShoppingBag className="text-blue-400 text-3xl" />
             <h1 className="text-3xl font-bold text-white">My Orders</h1>
           </div>
-          
+
           {/* Search and Filter */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative flex-1 max-w-md">
@@ -130,19 +149,26 @@ const MyOrders = () => {
                 className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="flex gap-2 overflow-x-auto">
-              {['all', 'pending', 'succeeded', 'cancellation_requested', 'canceled', 'refunded'].map((status) => (
+              {[
+                "all",
+                "pending",
+                "succeeded",
+                "cancellation_requested",
+                "canceled",
+                "refunded",
+              ].map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilter(status)}
                   className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 ${
                     filter === status
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-white/10 text-white/80 hover:bg-white/20"
                   }`}
                 >
-                  {status === 'all' ? 'All' : getStatusLabel(status)}
+                  {status === "all" ? "All" : getStatusLabel(status)}
                 </button>
               ))}
             </div>
@@ -155,23 +181,30 @@ const MyOrders = () => {
         {filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <FaShoppingBag className="mx-auto text-6xl text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No orders found</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No orders found
+            </h3>
             <p className="text-gray-400">
-              {filter === 'all' 
-                ? "You haven't placed any orders yet." 
+              {filter === "all"
+                ? "You haven't placed any orders yet."
                 : `No ${getStatusLabel(filter)} orders found.`}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             {filteredOrders.map((order) => (
-              <div key={order._id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
+              <div
+                key={order._id}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden"
+              >
                 {/* Order Header */}
                 <div className="p-6 border-b border-white/10">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="text-white">
-                        <h3 className="text-lg font-semibold">Order #{order.orderId}</h3>
+                        <h3 className="text-lg font-semibold">
+                          Order #{order.orderId}
+                        </h3>
                         <div className="flex items-center gap-4 text-sm text-gray-400 mt-1">
                           <span className="flex items-center gap-1">
                             <FaCalendarAlt className="w-3 h-3" />
@@ -180,15 +213,23 @@ const MyOrders = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getStatusColor(order.status)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getStatusColor(
+                          order.status
+                        )}`}
+                      >
                         {getStatusIcon(order.status)}
                         {getStatusLabel(order.status)}
                       </span>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-white">${order.amount.toFixed(2)}</p>
-                        <p className="text-sm text-gray-400">{order.items?.length || 1} item(s)</p>
+                        <p className="text-lg font-bold text-white">
+                          ${order.amount.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {order.items?.length || 1} item(s)
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -200,23 +241,29 @@ const MyOrders = () => {
                     {order.items?.map((item, index) => (
                       <div key={index} className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-white/10 rounded-lg overflow-hidden">
-                          <img 
-                            src={item.image || '/Luxury1.png'} 
+                          <img
+                            src={item.image || "/Luxury1.png"}
                             alt={item.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.target.src = '/Luxury1.png';
+                              e.target.src = "/Luxury1.png";
                             }}
                           />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-white">{item.name}</h4>
+                          <h4 className="font-medium text-white">
+                            {item.name}
+                          </h4>
                           <div className="text-sm text-gray-400">
-                            <span>Qty: {item.quantity} × ${item.price.toFixed(2)}</span>
+                            <span>
+                              Qty: {item.quantity} × ${item.price.toFixed(2)}
+                            </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-white">${(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-semibold text-white">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -230,9 +277,13 @@ const MyOrders = () => {
                         Shipping Address
                       </h5>
                       <p className="text-gray-300 text-sm">
-                        {order.shippingAddress.address}<br />
-                        {order.shippingAddress.city}, {order.shippingAddress.state}<br />
-                        {order.shippingAddress.country} - {order.shippingAddress.zipCode}
+                        {order.shippingAddress.address}
+                        <br />
+                        {order.shippingAddress.city},{" "}
+                        {order.shippingAddress.state}
+                        <br />
+                        {order.shippingAddress.country} -{" "}
+                        {order.shippingAddress.zipCode}
                       </p>
                     </div>
                   )}
@@ -245,33 +296,28 @@ const MyOrders = () => {
                     </h5>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-300">
-                        Payment Method: {order.paymentMethod === 'card' ? 'Credit Card' : order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1)}
+                        Payment Method:{" "}
+                        {order.paymentMethod === "card"
+                          ? "Credit Card"
+                          : order.paymentMethod.charAt(0).toUpperCase() +
+                            order.paymentMethod.slice(1)}
                       </span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        order.status === 'succeeded' 
-                          ? 'bg-green-100 text-green-800' 
-                          : order.status === 'refunded'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {order.status === 'succeeded' ? 'Paid' : order.status}
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          order.status === "succeeded"
+                            ? "bg-green-100 text-green-800"
+                            : order.status === "refunded"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {order.status === "succeeded" ? "Paid" : order.status}
                       </span>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <button
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setShowOrderDetails(true);
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                    >
-                      <FaEye className="w-4 h-4" />
-                      View Details
-                    </button>
-
                     {canCancelOrder(order) && (
                       <button
                         onClick={() => {
@@ -284,23 +330,10 @@ const MyOrders = () => {
                         Cancel Order
                       </button>
                     )}
-
-                    {/* {canRequestCancellation(order) && (
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setShowCancelModal(true);
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
-                      >
-                        <FaExclamationTriangle className="w-4 h-4" />
-                        Request Cancellation
-                      </button>
-                    )} */}
                   </div>
 
                   {/* Status Messages */}
-                  {order.status === 'canceled' && order.cancellationReason && (
+                  {order.status === "canceled" && order.cancellationReason && (
                     <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                       <p className="text-red-400 text-sm">
                         <FaExclamationTriangle className="inline w-4 h-4 mr-2" />
@@ -309,11 +342,12 @@ const MyOrders = () => {
                     </div>
                   )}
 
-                  {order.status === 'cancellation_requested' && (
+                  {order.status === "cancellation_requested" && (
                     <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
                       <p className="text-orange-400 text-sm">
                         <FaExclamationTriangle className="inline w-4 h-4 mr-2" />
-                        Cancellation request submitted. Admin will review it shortly.
+                        Cancellation request submitted. Admin will review it
+                        shortly.
                       </p>
                     </div>
                   )}
@@ -335,7 +369,8 @@ const MyOrders = () => {
             items: selectedOrder.items || [],
             orderDate: selectedOrder.createdAt,
             paymentMethod: selectedOrder.paymentMethod,
-            paymentStatus: selectedOrder.status === 'succeeded' ? 'paid' : 'pending'
+            paymentStatus:
+              selectedOrder.status === "succeeded" ? "paid" : "pending",
           }}
           onClose={() => setShowCancelModal(false)}
           onCancel={handleCancelOrder}

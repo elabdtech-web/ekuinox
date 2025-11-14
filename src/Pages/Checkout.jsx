@@ -90,7 +90,14 @@ const Checkout = () => {
     if (!form.email.trim()) e.email = "Email address is required.";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Please enter a valid email address (e.g. name@example.com).";
     if (!form.phone.trim()) e.phone = "Phone number is required. Include country code if applicable.";
-    if (!form.address.trim()) e.address = "Street address is required.";
+
+    // Address validation: require at least 8 characters
+    if (!form.address.trim()) {
+      e.address = "Street address is required.";
+    } else if (String(form.address).trim().length < 8) {
+      e.address = "Street address must be at least 8 characters.";
+    }
+
     if (!form.country.trim()) e.country = "Country is required.";
     if (!form.state.trim()) e.state = "State / Province is required.";
     if (!form.city.trim()) e.city = "City is required.";

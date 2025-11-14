@@ -53,6 +53,32 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
       return;
     }
 
+    // Basic client-side validation for checkout fields
+    const contact = checkoutData?.contactInfo || {};
+    const shipping = checkoutData?.shippingAddress || {};
+    const billing = checkoutData?.billingAddress || shipping;
+
+    if (!contact.firstName || !contact.lastName) {
+      toast.error("Please provide your full name in contact info.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
+    if (!contact.email) {
+      toast.error("Please provide a valid email in contact info.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
+
+    // <-- Updated validation: require shipping.address at least 8 characters -->
+    if (!shipping.address || String(shipping.address).trim().length < 8) {
+      toast.error("Shipping address is required and must be at least 8 characters.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
+    // -------------------------------------------------------------------
+
+    if (!shipping.city || !shipping.country) {
+      toast.error("Shipping city and country are required.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
+
     try {
       setSubmitting(true);
 
