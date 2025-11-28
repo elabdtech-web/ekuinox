@@ -34,6 +34,7 @@ export const AUTH_ENDPOINTS = {
   UPDATE_PASSWORD: `${API_BASE_URL}/auth/updatepassword`,
   LOGOUT: `${API_BASE_URL}/auth/logout`,
   FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+  VERIFY_OTP: `${API_BASE_URL}/auth/verify-otp`,
   RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`
 };
 

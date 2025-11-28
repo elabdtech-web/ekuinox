@@ -144,6 +144,21 @@ export const authService = {
     }
   },
 
+  // Verify OTP
+  verifyOtp: async (email, otp) => {
+    try {
+      const response = await fetch(AUTH_ENDPOINTS.VERIFY_OTP, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      throw error;
+    }
+  },
+
   // Reset password
   resetPassword: async ({ token, newPassword }) => {
     try {

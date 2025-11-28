@@ -29,10 +29,10 @@ const AddProduct = () => {
     editions: [],
     colors: [],
     stats: [],
-    features: [] // New field for product features
+    features: [] 
   });
 
-  // Dynamic field states
+  
   const [newSize, setNewSize] = useState('');
   const [newEdition, setNewEdition] = useState('');
   const [newColor, setNewColor] = useState({
@@ -49,11 +49,11 @@ const AddProduct = () => {
 
 
 
-  // Form validation state
+  
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load product data when in edit mode
+  
   useEffect(() => {
     if (isEditMode && editingProduct) {
       setFormData({
@@ -76,7 +76,7 @@ const AddProduct = () => {
   }, [isEditMode, editingProduct]);
 
 
-  // Helper functions for dynamic fields
+  
   const addSize = () => {
     if (newSize.trim()) {
       setFormData(prev => ({
@@ -180,7 +180,7 @@ const AddProduct = () => {
 
 
 
-  // Features management functions
+  
   const [newFeature, setNewFeature] = useState({
     title: '',
     description: '',
@@ -217,11 +217,11 @@ const AddProduct = () => {
     }));
   };
 
-  // Form validation functions
+  
   const validateForm = () => {
     const errors = {};
 
-    // Basic Information Validation
+  
     if (!formData.name.trim()) {
       errors.name = 'Product name is required';
     }
@@ -246,16 +246,16 @@ const AddProduct = () => {
       errors.stock = 'Stock quantity must be 0 or greater';
     }
 
-    // Sizes validation - at least one size required
+    
     if (formData.sizes.length === 0) {
       errors.sizes = 'At least one size is required';
     }
 
-    // Colors validation - at least one color required
+    
     if (formData.colors.length === 0) {
       errors.colors = 'At least one color is required';
     } else {
-      // Validate each color
+      
       formData.colors.forEach((color, index) => {
         if (!color.alt.trim()) {
           errors[`color_${index}_alt`] = `Color name is required for color ${index + 1}`;
@@ -268,7 +268,7 @@ const AddProduct = () => {
       });
     }
 
-    // Stats validation - if any stat is partially filled, require both fields
+    
     formData.stats.forEach((stat, index) => {
       if (stat.label.trim() && !stat.value.trim()) {
         errors[`stat_${index}_value`] = `Value is required for statistic "${stat.label}"`;
@@ -278,7 +278,7 @@ const AddProduct = () => {
       }
     });
 
-    // Features validation - if any feature is partially filled, require title and description
+    
     formData.features.forEach((feature, index) => {
       if (feature.title.trim() && !feature.description.trim()) {
         errors[`feature_${index}_description`] = `Description is required for feature "${feature.title}"`;
@@ -291,7 +291,7 @@ const AddProduct = () => {
       }
     });
 
-    // Video validation - if video title provided, URL should be valid
+    
     if (formData.videoTitle.trim() && formData.videoUrl.trim() && !isValidUrl(formData.videoUrl)) {
       errors.videoUrl = 'Please enter a valid video URL';
     }
@@ -322,9 +322,9 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form before submission
+    
     if (!validateForm()) {
-      // Scroll to first error
+      
       const firstErrorField = Object.keys(validationErrors)[0];
       if (firstErrorField) {
         const element = document.getElementById(firstErrorField);
@@ -339,16 +339,16 @@ const AddProduct = () => {
     try {
       const payload = {
         ...formData,
-        price: String(formData.price).trim(), // backend expects string
+        price: String(formData.price).trim(), 
         stock: Number(formData.stock),
         category: formData.category || 'Watch',
         colors: formData.colors
-          .filter(c => c.alt && c.thumb) // remove incomplete ones
+          .filter(c => c.alt && c.thumb) 
           .map(c => ({
             id: c.id.trim(),
             alt: c.alt.trim(),
             thumb: c.thumb.trim(),
-            hexColor: c.hexColor || '#000000', // Include hex color
+            hexColor: c.hexColor || '#000000', 
             gallery: Array.isArray(c.gallery)
               ? c.gallery.filter(Boolean)
               : []
@@ -383,7 +383,7 @@ const AddProduct = () => {
     } catch (error) {
       console.error('Error saving product:', error);
 
-      // try to extract server validation info
+  
       const serverMsg = error?.response?.data?.message || error?.message || '';
       const serverErrors = error?.response?.data?.errors || null;
 
