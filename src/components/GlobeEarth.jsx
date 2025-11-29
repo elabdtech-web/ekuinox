@@ -376,9 +376,9 @@ export default function GlobeEarth({
       </div>
 
       {/* Cities count indicator */}
-      <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+      {/* <div className="absolute top-16 left-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
         🌍 {cities.length} {cities.length === 1 ? 'city' : 'cities'}
-      </div>
+      </div> */}
 
     
 

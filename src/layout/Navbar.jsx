@@ -125,7 +125,7 @@ const Navbar = () => {
   }, [isCitiesOpen]);
 
   // Sticky navbar styles — always fixed to avoid layout jumps
-  const baseClasses = "w-full z-[90] px-6 md:px-10 text-white";
+  const baseClasses = "w-full z-[90]  px-6 md:px-10 text-white";
   const positionClass = "fixed top-0 left-0 right-0";
   const bgClass = isSticky ? "bg-[#293A5180] backdrop-blur-sm shadow-lg" : "bg-transparent";
   const transformStyle = isSticky
@@ -223,8 +223,8 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Settings (always visible) */}
-          <div className="relative" ref={settingsRef}>
+          {/* Settings (hidden on small screens) */}
+          <div className="hidden md:flex relative" ref={settingsRef}>
             <button
               type="button"
               aria-label="settings"
@@ -334,10 +334,10 @@ const Navbar = () => {
 
       {/* Mobile menu (links only) */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? "max-h-44 opacity-100" : "max-h-0 opacity-0"
+        className={`md:hidden overflow-hidden  rounded-lg bg-[#293A51] transition-all duration-300 ${mobileOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
           }`}
       >
-        <nav className="px-2 pb-3 space-y-2">
+        <nav className="px-2 py-3  space-y-2">
           <Link
             to="/"
             onClick={() => setMobileOpen(false)}
