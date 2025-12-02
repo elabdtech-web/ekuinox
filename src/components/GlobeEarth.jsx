@@ -7,14 +7,14 @@ import { useCityCart } from "../context/CityCartContext";
 import { useAuth } from "../context/AuthContext";
 import tz_lookup from "tz-lookup";
 
-// --- ADDED: determine day/night for cities ---
+
 function determineDayOrNight(cityList = []) {
   return cityList.map((city) => {
     try {
       const tz = tz_lookup(city.lat, city.lng);
       const dt = DateTime.now().setZone(tz);
       const hour = dt.hour;
-      const isDay = hour >= 6 && hour < 18; // 6:00-17:59 considered day
+      const isDay = hour >= 6 && hour < 18; 
       return {
         ...city,
         isDay,
@@ -31,12 +31,11 @@ function determineDayOrNight(cityList = []) {
     }
   });
 }
-// --- END ADDED ---
 
 function computeSubsolarPointUTC(now = DateTime.utc()) {
-  // Use SunCalc for physically accurate subsolar point
+
   const date = now.toJSDate();
-  const pos = SunCalc.getPosition(date, 0, 0); // position at equator/prime meridian
+  const pos = SunCalc.getPosition(date, 0, 0); 
   const subsolarLat = (pos.altitude * 180) / Math.PI;
   const subsolarLon = ((-pos.azimuth) * 180) / Math.PI;
   return { lat: subsolarLat, lon: subsolarLon };
@@ -58,8 +57,7 @@ export default function GlobeEarth({
 }) {
   const containerRef = useRef();
   const globeRef = useRef();
-  
-  // Use cities from your backend API instead of static data
+
   const { savedCities = [] } = useCityCart();
   const { isAuthenticated, user } = useAuth();
   const [cities, setCities] = useState([]);
@@ -71,7 +69,7 @@ export default function GlobeEarth({
   const [isLoading, setIsLoading] = useState(true);
   const [loadingCities, setLoadingCities] = useState(true);
 
-  // Initialize globe immediately (without waiting for cities)
+  
   useEffect(() => {
     if (!containerRef.current) return;
     
@@ -89,7 +87,7 @@ export default function GlobeEarth({
     );
     globe.showAtmosphere(false);
     
-    // Initialize with empty cities data (will be populated later)
+
     globe.pointsData([]);
     globe.pointLat((d) => {
       console.log(`City ${d.name}: lat=${d.lat}`);
@@ -99,17 +97,17 @@ export default function GlobeEarth({
       console.log(`City ${d.name}: lng=${d.lng}`);
       return d.lng || 0;
     });
-    globe.pointAltitude(0.002); // Slightly higher to make them more visible
-    globe.pointRadius(1.5); // Slightly larger for better visibility
+    globe.pointAltitude(0.002); 
+    globe.pointRadius(1.5); 
     globe.pointColor((d) => {
-      // Use different colors based on day/night or weather
-      if (d.isDay) return "#ffaa00"; // Golden for day
-      return "#10aaff"; // Blue for night
+    
+      if (d.isDay) return "#ffaa00"; 
+      return "#10aaff"; 
     });
     
     globe.onPointHover((d) => {
       setHoverCity(d || null);
-      // Change cursor when hovering over cities
+      
       if (d) {
         containerRef.current.style.cursor = 'pointer';
       } else {
@@ -117,12 +115,12 @@ export default function GlobeEarth({
       }
     });
     
-    // Set initial view
+    
     const screenWidth = window.innerWidth;
     const altitude = screenWidth < 768 ? 2.8 : screenWidth < 1366 ? 2.2 : 1.85;
     globe.pointOfView({ lat: 0, lng: 0, altitude }, 800);
     
-    // Set proper dimensions from container
+    
     const container = containerRef.current;
     const width = container.offsetWidth || 400;
     const height = container.offsetHeight || 400;
@@ -135,7 +133,7 @@ export default function GlobeEarth({
     const controls = globe.controls();
     if (controls) {
       controls.enableZoom = false;
-      controls.autoRotate = false; // Start with autoRotate off
+      controls.autoRotate = false; 
       controls.autoRotateSpeed = 0.5;
     }
 
@@ -146,13 +144,13 @@ export default function GlobeEarth({
     };
   }, []);
 
-  // Load cities from your backend API after globe is initialized
+  
   useEffect(() => {
     const loadCities = async () => {
       try {
         setLoadingCities(true);
         
-        // If user is not authenticated, show empty globe
+        
         if (!isAuthenticated || !user) {
           console.log('User not authenticated or user data not available - showing globe without cities');
           setCities([]);
@@ -160,11 +158,11 @@ export default function GlobeEarth({
           return;
         }
         
-        // Get user ID for logging
+        
         const userId = user.id || user._id;
         console.log('Loading cities for authenticated user:', userId);
         
-        // Always prioritize cities from context (which loads from API)
+        
         if (savedCities && savedCities.length > 0) {
           console.log('Using cities from context for user', userId, ':', savedCities.length);
           setCities(determineDayOrNight(savedCities));
@@ -174,22 +172,22 @@ export default function GlobeEarth({
         }
       } catch (error) {
         console.error('Failed to load cities:', error);
-        setCities([]); // Set empty array on error
+        setCities([]); 
       } finally {
         setLoadingCities(false);
       }
     };
 
-    // Clear cities first when user changes, then load
-    console.log('Globe: User or savedCities changed. User:', user?.id || user?._id, 'Cities count:', savedCities?.length || 0);
-    setCities([]); // Clear immediately when user changes
     
-    // Start loading cities after a short delay to ensure clean state
+    console.log('Globe: User or savedCities changed. User:', user?.id || user?._id, 'Cities count:', savedCities?.length || 0);
+    setCities([]); 
+    
+    
     const timer = setTimeout(loadCities, 100);
     return () => clearTimeout(timer);
   }, [savedCities, isAuthenticated, user]);
 
-  // Update cities display when savedCities changes (for immediate updates when adding/removing)
+  
   useEffect(() => {
     if (!isAuthenticated || !user || !savedCities) {
       setCities([]);
@@ -201,14 +199,14 @@ export default function GlobeEarth({
     setCities(determineDayOrNight(savedCities));
   }, [savedCities, isAuthenticated, user]);
 
-  // Update globe with cities data when cities are loaded
+  
   useEffect(() => {
     if (!globeRef.current || loadingCities) return;
     
     const globe = globeRef.current;
     console.log('Updating globe with cities:', cities.length);
     
-    // Update cities data
+    
     globe.pointsData(cities);
   }, [cities, loadingCities]);
 
@@ -240,7 +238,7 @@ export default function GlobeEarth({
     return () => clearInterval(t);
   }, [manualTime, isPlaying]);
 
-  // Update shader sun direction when sun position changes
+  
   useEffect(() => {
     if (!globeRef.current) return;
     const globe = globeRef.current;
@@ -287,7 +285,7 @@ export default function GlobeEarth({
       ),
     ])
       .then(([dayMap, nightMap]) => {
-        // Custom shader for day/night blending
+      
         const material = new THREE.ShaderMaterial({
           uniforms: {
             dayTexture: { value: dayMap },
@@ -333,26 +331,26 @@ export default function GlobeEarth({
 
         globe.globeMaterial(material);
 
-        // Store material reference to update sun position
+        
         if (!globe.userData) globe.userData = {};
         globe.userData.dayNightMaterial = material;
 
-        // Globe is now fully loaded
+        
         setIsLoading(false);
       })
       .catch((error) => {
         console.error("Failed to load textures:", error);
-        setIsLoading(false); // Set loading to false even on error
+        setIsLoading(false); 
       });
   }, [sunPoint, nightMode]);
 
-  // Helper function to format temperature
+  
   const formatTemperature = (temp) => {
     if (temp === null || temp === undefined) return "N/A";
     return `${Math.round(temp)}°C`;
   };
 
-  // Helper function to format weather
+  
   const formatWeather = (weather, temperature) => {
     const tempStr = formatTemperature(temperature);
     const weatherMap = {
@@ -367,7 +365,7 @@ export default function GlobeEarth({
     return `${tempStr} ${weatherStr}`;
   };
 
-  // Globe always renders now - no blocking returns
+  
 
   return (
     <div className={`relative globe-earth-wrapper ${className}`}>
@@ -382,10 +380,10 @@ export default function GlobeEarth({
 
     
 
-      {/* Hover preview card - NO ADD BUTTON */}
+    
       {hoverCity &&
         (() => {
-          // Use timezone from backend data or compute it
+          
           const timezone = hoverCity.timezone || (() => {
             try {
               const tz = tz_lookup(hoverCity.lat, hoverCity.lng);
@@ -397,7 +395,7 @@ export default function GlobeEarth({
             }
           })();
 
-          // Use time from backend or compute current time
+          
           const displayTime = hoverCity.time || (() => {
             try {
               const tz = tz_lookup(hoverCity.lat, hoverCity.lng);
@@ -407,7 +405,7 @@ export default function GlobeEarth({
             }
           })();
 
-          // Use date from backend or compute current date
+          
           const displayDate = hoverCity.date || (() => {
             try {
               const tz = tz_lookup(hoverCity.lat, hoverCity.lng);
@@ -417,24 +415,24 @@ export default function GlobeEarth({
             }
           })();
 
-          // Get flag URL
+          
           const flagUrl = hoverCity.flagImg;
 
-          // Position card near mouse with corrected offset
+          
           const offsetX = -120;
           const offsetY = -180;
           const cardWidth = 320;
-          const cardHeight = 140; // Reduced height since no button
+          const cardHeight = 140; 
           const margin = 0;
           let clampedX = mousePos.x + offsetX;
           let clampedY = mousePos.y + offsetY;
 
-          // Adjust position if card would go off-screen
+          
           if (clampedX + cardWidth > window.innerWidth - margin) {
-            clampedX = mousePos.x - cardWidth - offsetX; // Place to left
+            clampedX = mousePos.x - cardWidth - offsetX; 
           }
           if (clampedY + cardHeight > window.innerHeight - margin) {
-            clampedY = mousePos.y - cardHeight - offsetY; // Place above
+            clampedY = mousePos.y - cardHeight - offsetY; 
           }
           clampedX = Math.max(
             margin,

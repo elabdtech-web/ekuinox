@@ -19,7 +19,7 @@ export default function HeroSection() {
   }, [isPlaying]);
 
   return (
-    <section className="w-full   flex flex-col items-center min-h-screen bg-[#070B13]  justify-center relative">
+    <section className="w-full flex flex-col items-center min-h-screen bg-[#070B13] justify-center relative ">
       {/* Background & Globe */}
       <div className="w-full flex flex-col items-center  justify-center relative">
         <div

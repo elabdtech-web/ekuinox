@@ -69,8 +69,8 @@ const ProductDetail = ({ product, loading = false }) => {
 
   return (
     <section className="min-h-screen py-12 px-4 bg-gradient-to-b from-[#061428] via-[#0d2740] to-[#071026] text-white overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-0 py-16">
-        <div className="grid grid-cols-12 gap-8 ">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-6 lg:px-6 xl:px-0 py-16">
+        <div className="grid grid-cols-12 gap-0 md:gap-4 lg:gap-8">
           {/* Left column */}
           <motion.div
             initial={{ opacity: 0, x: -60 }}
