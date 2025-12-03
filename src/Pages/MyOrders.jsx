@@ -93,6 +93,27 @@ const MyOrders = () => {
     }
   };
 
+  const getStatusShortLabel = (status) => {
+    switch (status) {
+      case "pending":
+        return "Pend";
+      case "succeeded":
+        return "Done";
+      case "failed":
+        return "Fail";
+      case "canceled":
+        return "Canc";
+      case "cancellation_requested":
+        return "Canc Req";
+      case "refunded":
+        return "Refund";
+      case "all":
+        return "All";
+      default:
+        return status;
+    }
+  };
+
   const filteredOrders = orders.filter((order) => {
     const matchesFilter = filter === "all" || order.status === filter;
     const matchesSearch =
@@ -133,13 +154,13 @@ const MyOrders = () => {
       <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex items-center gap-3 mb-6">
-            <FaShoppingBag className="text-blue-400 text-3xl" />
-            <h1 className="text-3xl font-bold text-white">My Orders</h1>
+            <FaShoppingBag className="text-blue-400 text-2xl md:text-3xl" />
+            <h1 className="text-2xl md:text-3xl font-bold text-white">My Orders</h1>
           </div>
 
           {/* Search and Filter */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 max-w-full md:max-w-md">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
@@ -162,13 +183,20 @@ const MyOrders = () => {
                 <button
                   key={status}
                   onClick={() => setFilter(status)}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 ${
+                  className={`rounded-lg whitespace-nowrap transition-all duration-200 text-xs sm:text-sm px-3 py-1 sm:px-4 sm:py-2 ${
                     filter === status
                       ? "bg-blue-600 text-white shadow-lg"
                       : "bg-white/10 text-white/80 hover:bg-white/20"
                   }`}
                 >
-                  {status === "all" ? "All" : getStatusLabel(status)}
+                  {status === "all" ? (
+                    <span className="inline">All</span>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">{getStatusLabel(status)}</span>
+                      <span className="inline sm:hidden">{getStatusShortLabel(status)}</span>
+                    </>
+                  )}
                 </button>
               ))}
             </div>
@@ -219,9 +247,10 @@ const MyOrders = () => {
                         className={`px-3 py-1 rounded-full text-sm font-medium border flex items-center gap-2 ${getStatusColor(
                           order.status
                         )}`}
+                        title={getStatusLabel(order.status)}
                       >
                         {getStatusIcon(order.status)}
-                        {getStatusLabel(order.status)}
+                        <span className="hidden md:inline">{getStatusLabel(order.status)}</span>
                       </span>
                       <div className="text-right">
                         <p className="text-lg font-bold text-white">
@@ -239,8 +268,8 @@ const MyOrders = () => {
                 <div className="p-6">
                   <div className="space-y-4">
                     {order.items?.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-white/10 rounded-lg overflow-hidden">
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-lg overflow-hidden flex-shrink-0">
                           <img
                             src={item.image || "/Luxury1.png"}
                             alt={item.name}
@@ -250,8 +279,8 @@ const MyOrders = () => {
                             }}
                           />
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-white">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white truncate">
                             {item.name}
                           </h4>
                           <div className="text-sm text-gray-400">
@@ -310,8 +339,9 @@ const MyOrders = () => {
                             ? "bg-blue-100 text-blue-800"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
+                        title={getStatusLabel(order.status)}
                       >
-                        {order.status === "succeeded" ? "Paid" : order.status}
+                        {order.status === "succeeded" ? "Paid" : getStatusLabel(order.status)}
                       </span>
                     </div>
                   </div>
@@ -324,10 +354,10 @@ const MyOrders = () => {
                           setSelectedOrder(order);
                           setShowCancelModal(true);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors w-full sm:w-auto"
                       >
                         <FaTimes className="w-4 h-4" />
-                        Cancel Order
+                        <span className="truncate">Cancel Order</span>
                       </button>
                     )}
                   </div>

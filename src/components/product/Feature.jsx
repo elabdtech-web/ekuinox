@@ -1,8 +1,8 @@
 import React from "react";
-// eslint-disable-next-line no-unused-vars
+
 import { motion } from "framer-motion";
 import featuresData from "../../data/featuresData.json";
-// Page-level loader removed; rely on global splash at app start
+
 
 const { heroImage, heroTitle } = featuresData;
 

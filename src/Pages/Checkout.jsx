@@ -153,9 +153,9 @@ const Checkout = () => {
           <Link to="/product" className="text-white/70 hover:text-white text-sm">Continue shopping →</Link>
         </div>
 
-        <div className="flex  gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Left: Form */}
-          <div className="space-y-6 rounded-2xl w-2/3 border border-white/10 bg-white/5 p-6">
+          <div className="space-y-6 rounded-2xl w-full lg:w-2/3 border border-white/10 bg-white/5 p-6">
             {/* Contact Information */}
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-white border-b border-white/20 pb-3">
@@ -467,8 +467,8 @@ const Checkout = () => {
           </div>
 
           {/* Right: Summary */}
-          <div className="space-y-4 w-1/3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="space-y-4 w-full lg:w-1/3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 lg:sticky lg:top-24">
               <h3 className="font-medium mb-3">Order Summary</h3>
               <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                 {items.map(it => (

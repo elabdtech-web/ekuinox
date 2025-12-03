@@ -223,8 +223,8 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Settings (hidden on small screens) */}
-          <div className="hidden md:flex relative" ref={settingsRef}>
+          {/* Settings (hidden on small & tablet (md/lg) screens; show only on xl+) */}
+          <div className="hidden xl:flex relative" ref={settingsRef}>
             <button
               type="button"
               aria-label="settings"
@@ -334,10 +334,11 @@ const Navbar = () => {
 
       {/* Mobile menu (links only) */}
       <div
-        className={`md:hidden overflow-hidden  rounded-lg bg-[#293A51] transition-all duration-300 ${mobileOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+        className={`md:hidden rounded-lg bg-[#293A51] transition-all duration-300 ${mobileOpen ? "max-h-[80vh] opacity-100 overflow-y-auto" : "max-h-0 opacity-0 overflow-hidden"
           }`}
+        style={{ transitionProperty: 'max-height, opacity' }}
       >
-        <nav className="px-2 py-3  space-y-2">
+        <nav className="px-2 py-3  space-y-4">
           <Link
             to="/"
             onClick={() => setMobileOpen(false)}

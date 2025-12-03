@@ -14,6 +14,23 @@ const ProductDetail = ({ product, loading = false }) => {
 
   const { addItem, openCart } = useProductCart();
 
+  const formatPrice = (p) => {
+    if (p === undefined || p === null || p === '') return '$0.00';
+    // if already a string with $ return as-is
+    if (typeof p === 'string') {
+      return p.startsWith('$') ? p : `$${p}`;
+    }
+    // assume number
+    if (typeof p === 'number') {
+      try {
+        return `$${p.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      } catch (e) {
+        return `$${p.toFixed(2)}`;
+      }
+    }
+    return String(p);
+  };
+
   const [size, setSize] = useState("40mm");
   const [edition, setEdition] = useState("");
   const [color, setColor] = useState("");
@@ -94,7 +111,7 @@ const ProductDetail = ({ product, loading = false }) => {
               className="mt-6"
             >
               <div className="text-4xl font-semibold text-[#5695F5]">
-                {productData?.price || '$0.00'}
+                {formatPrice(productData?.price)}
               </div>
             </motion.div>
 
@@ -286,14 +303,14 @@ const ProductDetail = ({ product, loading = false }) => {
               <button
                 onClick={prev}
                 aria-label="previous"
-                className="absolute left-[100px] sm:left-[160px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"
+                className="absolute left-4 sm:left-[160px] bottom-4 sm:-bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center z-10"
               >
                 <IoArrowBack />
               </button>
               <button
                 onClick={next}
                 aria-label="next"
-                className="absolute right-[100px] sm:right-[160px] -bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"
+                className="absolute right-4 sm:right-[160px] bottom-4 sm:-bottom-16 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center z-10"
               >
                 <IoArrowForward />
               </button>
@@ -306,7 +323,7 @@ const ProductDetail = ({ product, loading = false }) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
             viewport={{ once: true }}
-            className="col-span-12 mt-4 lg:hidden"
+            className="col-span-12 mt-4 lg:hidden mb-6 lg:mb-0"
           >
             <div className="text-2xl text-white mb-2">Model Colors</div>
             <div className="flex flex-wrap items-center gap-3">
@@ -397,7 +414,7 @@ const ProductDetail = ({ product, loading = false }) => {
             viewport={{ once: true }}
             className="col-span-12 lg:col-span-4 flex flex-col w-full"
           >
-            <div className="bg-white/5 rounded-xl py-4 overflow-hidden border border-white/10">
+            <div className="bg-white/5 rounded-xl py-4 overflow-hidden border border-white/10 mt-4 lg:mt-0">
               <CustomVideoPlayer
                 videoUrl={productData?.videoUrl}
                 videoTitle={productData?.videoTitle || 'Product Video'}
