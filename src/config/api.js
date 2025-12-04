@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:5001/api";
+// const API_BASE_URL = "http://localhost:5001/api";
+const API_BASE_URL = "https://ekuinox-backend.vercel.app/api";
 
 // Auth endpoints
 export const AUTH_ENDPOINTS = {
