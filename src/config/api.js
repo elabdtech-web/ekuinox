@@ -1,29 +1,4 @@
-
-
-
-export const API_CONFIG = {
-  DEV_API_URL: 'http://localhost:5001/api',
-  PROD_API_URL: 'https://your-backend-domain.com/api',
-  
-  // Manual override - set this to force a specific URL
-  MANUAL_API_URL: null,
-
-  getApiUrl: () => {
-    if (API_CONFIG.MANUAL_API_URL) return API_CONFIG.MANUAL_API_URL;
-
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
-        return API_CONFIG.DEV_API_URL;
-      }
-    }
-
-    return API_CONFIG.PROD_API_URL;
-  }
-};
-
-// Export the current API URL
-export const API_BASE_URL = API_CONFIG.getApiUrl();
+const API_BASE_URL = "http://localhost:5001/api";
 
 // Auth endpoints
 export const AUTH_ENDPOINTS = {
@@ -93,5 +68,3 @@ export const ORDER_ENDPOINTS = {
   PROCESS_CANCELLATION: `${API_BASE_URL}/admin/payments`,
   GET_ORDER_ANALYTICS: `${API_BASE_URL}/admin/orders/analytics`
 };
-
-export default API_CONFIG;
