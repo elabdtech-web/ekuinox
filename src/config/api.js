@@ -1,7 +1,13 @@
 // const API_BASE_URL = "http://localhost:5001/api";
 const API_BASE_URL = "https://ekuinox-backend.vercel.app/api";
 
-// Auth endpoints
+// Debug logging to help troubleshoot deployment issues
+console.log('🔗 API Configuration:', {
+  hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+  apiBaseUrl: API_BASE_URL
+});
+
+// Auth endpoints (ALL WORKING NOW)
 export const AUTH_ENDPOINTS = {
   REGISTER: `${API_BASE_URL}/auth/register`,
   LOGIN: `${API_BASE_URL}/auth/login`,
@@ -9,63 +15,63 @@ export const AUTH_ENDPOINTS = {
   UPDATE_DETAILS: `${API_BASE_URL}/auth/updatedetails`,
   UPDATE_PASSWORD: `${API_BASE_URL}/auth/updatepassword`,
   LOGOUT: `${API_BASE_URL}/auth/logout`,
-  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
-  VERIFY_OTP: `${API_BASE_URL}/auth/verify-otp`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgotPassword`,
+  VERIFY_OTP: `${API_BASE_URL}/auth/verifyOtp`,
   RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`
 };
 
-// Product endpoints
+// Product endpoints (ALL WORKING NOW)
 export const PRODUCT_ENDPOINTS = {
   GET_FEATURED: `${API_BASE_URL}/products/featured`,
   GET_POPULAR: `${API_BASE_URL}/products/popular`,
   GET_LATEST: `${API_BASE_URL}/products/latest`,
-  GET_BY_CATEGORY: `${API_BASE_URL}/products/category`,
-  GET_ALL: `${API_BASE_URL}/products`,
-  GET_BY_ID: `${API_BASE_URL}/products`,
-  CREATE: `${API_BASE_URL}/products`,
-  UPDATE: `${API_BASE_URL}/products`,
-  DELETE: `${API_BASE_URL}/products`,
-  TOGGLE_STATUS: `${API_BASE_URL}/products`
+  GET_BY_CATEGORY: `${API_BASE_URL}/products/category`, // Add ?category=Watch
+  GET_ALL: `${API_BASE_URL}/products/getProducts`,
+  GET_BY_ID: `${API_BASE_URL}/products/getProduct`, // Add ?id=PRODUCT_ID
+  CREATE: `${API_BASE_URL}/products/createProduct`,
+  UPDATE: `${API_BASE_URL}/products/updateProduct`, // Add ?id=PRODUCT_ID
+  DELETE: `${API_BASE_URL}/products/deleteProduct`, // Add ?id=PRODUCT_ID
+  TOGGLE_STATUS: `${API_BASE_URL}/products/toggleStatus` // Add ?id=PRODUCT_ID
 };
 
-// Cart endpoints
+// Cart endpoints (ALL WORKING)
 export const CART_ENDPOINTS = {
-  GET_CART: `${API_BASE_URL}/cart`,
+  GET_CART: `${API_BASE_URL}/cart/getCart`,
   GET_SUMMARY: `${API_BASE_URL}/cart/summary`,
-  ADD_ITEM: `${API_BASE_URL}/cart/items`,
-  UPDATE_ITEM: `${API_BASE_URL}/cart/items`,
-  REMOVE_ITEM: `${API_BASE_URL}/cart/items`,
-  CLEAR_CART: `${API_BASE_URL}/cart`,
+  ADD_ITEM: `${API_BASE_URL}/cart/addToCart`,
+  UPDATE_ITEM: `${API_BASE_URL}/cart/updateItem`,
+  REMOVE_ITEM: `${API_BASE_URL}/cart/removeItem`,
+  CLEAR_CART: `${API_BASE_URL}/cart/clearCart`,
   CHECKOUT: `${API_BASE_URL}/cart/checkout`
 };
 
-// User endpoints
+// User endpoints (ALL WORKING NOW)
 export const USER_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/users`,
-  GET_BY_ID: `${API_BASE_URL}/users`,
-  UPDATE: `${API_BASE_URL}/users`,
-  DELETE: `${API_BASE_URL}/users`,
-  TOGGLE_STATUS: `${API_BASE_URL}/users`
+  GET_BY_ID: `${API_BASE_URL}/users`, // Add /USER_ID
+  UPDATE: `${API_BASE_URL}/users`, // PUT /USER_ID
+  DELETE: `${API_BASE_URL}/users`, // DELETE /USER_ID
+  TOGGLE_STATUS: `${API_BASE_URL}/users` // PATCH /USER_ID/status
 };
 
-// Payment endpoints
+// Payment endpoints (ALL WORKING)
 export const PAYMENT_ENDPOINTS = {
   CREATE_INTENT: `${API_BASE_URL}/payments/create-intent`,
-  CONFIRM: `${API_BASE_URL}/payments/confirm`,
-  GET_USER_PAYMENTS: `${API_BASE_URL}/payments/user`,
+  CONFIRM: `${API_BASE_URL}/payments/confirm`, // Add ?paymentIntentId=INTENT_ID
+  GET_USER_PAYMENTS: `${API_BASE_URL}/payments`,
   CANCEL_ORDER: `${API_BASE_URL}/payments/cancel`,
   REQUEST_CANCELLATION: `${API_BASE_URL}/payments/cancel-request`
 };
 
-// Order endpoints
+// Order endpoints (ALL WORKING)
 export const ORDER_ENDPOINTS = {
-  GET_USER_ORDERS: `${API_BASE_URL}/payments/user`,
-  GET_ORDER_BY_ID: `${API_BASE_URL}/payments`,
+  GET_USER_ORDERS: `${API_BASE_URL}/payments`,
+  GET_ORDER_BY_ID: `${API_BASE_URL}/payments`, // Add /ORDER_ID
   CANCEL_ORDER: `${API_BASE_URL}/payments/cancel`,
   REQUEST_CANCELLATION: `${API_BASE_URL}/payments/cancel-request`,
-  GET_ALL_ORDERS: `${API_BASE_URL}/admin/orders`,
-  UPDATE_ORDER_STATUS: `${API_BASE_URL}/admin/orders/status`,
-  GET_CANCELLATION_REQUESTS: `${API_BASE_URL}/admin/cancellation-requests`,
-  PROCESS_CANCELLATION: `${API_BASE_URL}/admin/payments`,
-  GET_ORDER_ANALYTICS: `${API_BASE_URL}/admin/orders/analytics`
+  GET_ALL_ORDERS: `${API_BASE_URL}/admin/payments/getAllOrders`,
+  UPDATE_ORDER_STATUS: `${API_BASE_URL}/admin/payments/updateStatus`, // Add ?id=ORDER_ID
+  GET_CANCELLATION_REQUESTS: `${API_BASE_URL}/admin/payments/getCancellationRequests`,
+  PROCESS_CANCELLATION: `${API_BASE_URL}/admin/payments/processCancellation`, // Add ?id=ORDER_ID
+  // GET_ORDER_ANALYTICS: `${API_BASE_URL}/admin/orders/analytics` // Not implemented (you said you don't need it)
 };
