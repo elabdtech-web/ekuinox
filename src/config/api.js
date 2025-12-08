@@ -61,6 +61,16 @@ export const CITY_ENDPOINTS = {
   REFRESH: `${API_BASE_URL}/city/refreshCity` // Add ?id=CITY_ID
 };
 
+// Country endpoints (ALL WORKING NOW)
+export const COUNTRY_ENDPOINTS = {
+  GET_ALL: `${API_BASE_URL}/countries`, // Add ?continent=Asia&page=1&limit=10&sort=name&search=united&isActive=true
+  GET_BY_ID: `${API_BASE_URL}/countries`, // Add /COUNTRY_ID  
+  CREATE: `${API_BASE_URL}/countries/create`, // Admin only
+  UPDATE: `${API_BASE_URL}/countries/update`, // Admin only - Add ?id=COUNTRY_ID
+  DELETE: `${API_BASE_URL}/countries/delete`, // Admin only - Add ?id=COUNTRY_ID
+  TOGGLE_STATUS: `${API_BASE_URL}/countries/toggle-status` // Admin only - Add ?id=COUNTRY_ID
+};
+
 // User endpoints (ALL WORKING NOW)
 export const USER_ENDPOINTS = {
   GET_ALL: `${API_BASE_URL}/users`,
@@ -104,16 +114,17 @@ export const ORDER_ENDPOINTS = {
 };
 
 // Export all endpoint collections for easy import
-export {
-  AUTH_ENDPOINTS,
-  PRODUCT_ENDPOINTS,
-  CART_ENDPOINTS,
-  CITY_ENDPOINTS,
-  USER_ENDPOINTS,
-  PAYMENT_ENDPOINTS,
-  ADMIN_ENDPOINTS,
-  ORDER_ENDPOINTS
-};
+// export {
+//   AUTH_ENDPOINTS,
+//   PRODUCT_ENDPOINTS,
+//   CART_ENDPOINTS,
+//   CITY_ENDPOINTS,
+//   COUNTRY_ENDPOINTS,
+//   USER_ENDPOINTS,
+//   PAYMENT_ENDPOINTS,
+//   ADMIN_ENDPOINTS,
+//   ORDER_ENDPOINTS
+// };
 
 // Default export for backwards compatibility
 export default {
@@ -123,6 +134,7 @@ export default {
   PRODUCT_ENDPOINTS,
   CART_ENDPOINTS,
   CITY_ENDPOINTS,
+  COUNTRY_ENDPOINTS,
   USER_ENDPOINTS,
   PAYMENT_ENDPOINTS,
   ADMIN_ENDPOINTS,

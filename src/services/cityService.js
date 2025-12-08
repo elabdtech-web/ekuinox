@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5001/api';
+import { CITY_ENDPOINTS } from '../config/api.js';
 
 class CityService {
   // Helper method to get auth headers
@@ -18,8 +18,8 @@ class CityService {
   async getAllCities() {
     try {
       console.log('Fetching all cities from API');
-      console.log('Using API_BASE_URL:', API_BASE_URL,'/cities');
-      const response = await fetch(`${API_BASE_URL}/cities`, {
+      console.log('Using CITY_ENDPOINTS.GET_ALL:', CITY_ENDPOINTS.GET_ALL);
+      const response = await fetch(CITY_ENDPOINTS.GET_ALL, {
         method: 'GET',
         headers: this.getAuthHeaders(),
       });
@@ -44,7 +44,7 @@ class CityService {
   async fetchCities(userId ) {
     try {
       console.log('Fetching cities for userId:000', userId);
-      const url =  `${API_BASE_URL}/cities/user/${userId}`;
+      const url = `${CITY_ENDPOINTS.GET_BY_USER}?userId=${userId}`;
       const response = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders(),
@@ -73,7 +73,7 @@ class CityService {
 
   async createCity(cityName) {
     try {
-      const response = await fetch(`${API_BASE_URL}/cities`, {
+      const response = await fetch(CITY_ENDPOINTS.CREATE, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ name: cityName.trim() }),
@@ -108,7 +108,7 @@ class CityService {
   async deleteCity(cityId) {
     console.log('Deleting city with ID:', cityId);
     try {
-      const response = await fetch(`${API_BASE_URL}/cities/${cityId}`, {
+      const response = await fetch(`${CITY_ENDPOINTS.DELETE}?id=${cityId}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
       });
@@ -138,7 +138,7 @@ class CityService {
 
   async getCity(cityId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/cities/${cityId}`, {
+      const response = await fetch(`${CITY_ENDPOINTS.GET_BY_ID}?id=${cityId}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
       });

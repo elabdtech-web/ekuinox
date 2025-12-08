@@ -46,7 +46,12 @@ const Register = () => {
       return;
     }
 
-    const result = await register({ name: form.name, email: form.email, password: form.password });
+    const result = await register({ 
+      name: form.name, 
+      email: form.email, 
+      password: form.password,
+      confirmPassword: form.confirmPassword 
+    });
     if (result.success) {
       // After successful registration, go to home or login
       navigate('/');
