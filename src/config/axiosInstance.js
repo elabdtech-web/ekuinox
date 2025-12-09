@@ -25,23 +25,32 @@ axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
   console.log("═══════════════════════════════════════════");
-  console.log("🔥 REQUEST INTERCEPTOR FIRED FOR:", config.url);
-  console.log("🔥 Token in localStorage:", token ? `${token.substring(0, 20)}...` : 'NULL');
-  console.log("🔥 Full token:", token);
-  console.log("🔥 Headers before setting:", config.headers);
-
+  console.log("🔥 REQUEST INTERCEPTOR EXECUTING");
+  console.log("🔥 URL:", config.url);
+  console.log("🔥 Token exists:", !!token);
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-    console.log("✅ Authorization header SET");
-  } else {
-    console.error("❌ NO TOKEN FOUND - Authorization header NOT set");
+    console.log("🔥 Token (first 30 chars):", token.substring(0, 30));
   }
 
-  console.log("🔥 Headers after setting:", config.headers);
+  if (token) {
+    // Ensure headers object exists
+    if (!config.headers) {
+      config.headers = {};
+    }
+    // Set Authorization header with Bearer token
+    config.headers.Authorization = `Bearer ${token}`;
+    console.log("✅ Authorization header SET");
+    console.log("✅ Full header value:", config.headers.Authorization.substring(0, 50) + "...");
+  } else {
+    console.warn("⚠️ No token found in localStorage - request will be unauthorized");
+  }
+
+  console.log("✅ Final headers:", config.headers);
   console.log("═══════════════════════════════════════════");
 
   return config;
 }, (error) => {
+  console.error("❌ Request interceptor error:", error);
   return Promise.reject(error);
 });
 

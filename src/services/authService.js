@@ -33,11 +33,21 @@ export const authService = {
       console.log('✅ Login successful, full response:', response);
       console.log('✅ response.data:', response.data);
       console.log('🔥 Token from response.data.token:', response.data.token);
+      console.log('🔥 Token type:', typeof response.data.token);
+      console.log('🔥 Token length:', response.data.token?.length);
 
       // Store token in localStorage
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        // Ensure token is a string, not a JSON-encoded string
+        let tokenToStore = response.data.token;
+        if (typeof tokenToStore === 'string' && (tokenToStore.startsWith('"') || tokenToStore.startsWith("'"))) {
+          console.warn('⚠️ Token appears to be JSON-encoded, removing quotes');
+          tokenToStore = tokenToStore.replace(/^["']|["']$/g, '');
+        }
+        
+        localStorage.setItem('token', tokenToStore);
         console.log('✅ Token STORED in localStorage');
+        console.log('✅ Stored token (first 50 chars):', tokenToStore.substring(0, 50));
         
         // Also store user data for persistence across page refreshes
         if (response.data.user) {
@@ -47,8 +57,8 @@ export const authService = {
         
         // Verify token was stored correctly
         const storedToken = localStorage.getItem('token');
-        console.log('✅ Verification - token in localStorage after storing:', storedToken);
-        console.log('✅ Token matches response token:', storedToken === response.data.token);
+        console.log('✅ Verification - token in localStorage after storing (first 50 chars):', storedToken.substring(0, 50));
+        console.log('✅ Token matches response token:', storedToken === tokenToStore);
       } else {
         console.error('❌ No token in login response!');
         console.error('❌ response.data keys:', Object.keys(response.data));
