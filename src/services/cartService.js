@@ -5,15 +5,11 @@ export const cartService = {
   // Get user's cart
   getCart: async () => {
     try {
-      const response = await axiosInstance.get('/cart/getCart');  
-        
-      });
-
-      console.log('Get cart response:', response);
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/cart/getCart');
+      return response.data;
     } catch (error) {
       console.error('Get cart error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get cart');
     }
   },
 
@@ -80,7 +76,6 @@ export const cartService = {
     } catch (error) {
       console.error('Checkout cart error:', error);
       throw new Error(error.response?.data?.message || 'Failed to checkout cart');
-    }
     }
   },
 

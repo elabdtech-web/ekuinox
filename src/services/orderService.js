@@ -44,9 +44,6 @@ const orderService = {
       throw new Error(error.response?.data?.message || 'Failed to get order');
     }
   },
-      throw error;
-    }
-  },
 
   // Helper: get color classes based on status
   getOrderStatusColor: (status) => {
