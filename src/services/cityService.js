@@ -36,20 +36,29 @@ class CityService {
 
   async createCity(cityName) {
     try {
+      console.log('🔥 Creating city with name:', cityName);
+      console.log('🔥 Token in localStorage BEFORE request:', localStorage.getItem('token'));
+      console.log('🔥 Using axiosInstance for city creation');
+      
       const response = await axiosInstance.post('/city/createCity', { name: cityName.trim() });
       
-      console.log('City created successfully:', response.data);
+      console.log('✅ City created successfully:', response.data);
       
       // Return the city data (handle both direct response and wrapped response)
       return response.data.data || response.data;
     } catch (error) {
-      console.error('Error creating city:', error);
+      console.error('❌ Error creating city:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Token in localStorage AFTER error:', localStorage.getItem('token'));
       
       if (error.response?.status === 409) {
         throw new Error(`City "${cityName}" already exists in your collection.`);
       } else if (error.response?.status === 400) {
         const message = error.response?.data?.error || 'Invalid city name or data.';
         throw new Error(message);
+      } else if (error.response?.status === 401) {
+        throw new Error('Not authorized - token missing or invalid. Please login again.');
       } else {
         throw new Error(error.response?.data?.message || 'Failed to create city');
       }

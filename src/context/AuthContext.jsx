@@ -19,22 +19,37 @@ export const AuthProvider = ({ children }) => {
   // Check if user is already logged in on app start
   useEffect(() => {
     const checkAuth = async () => {
-      const token = authService.getToken();
-      
-      if (token) {
-        try {
-          // Verify token with backend and get user data
-          const userData = await authService.getMe();
-          setUser(userData.data || userData);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Token verification failed:', error);
-          authService.clearAuth();
+      try {
+        const token = authService.getToken();
+        const storedUser = localStorage.getItem('user');
+        
+        console.log('🔍 Checking auth on app load - Token:', token ? '✅ Found' : '❌ Not found');
+        console.log('🔍 Checking auth on app load - User:', storedUser ? '✅ Found' : '❌ Not found');
+        
+        if (token && storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            console.log('✅ Auth restored from localStorage:', userData);
+            setUser(userData);
+            setIsAuthenticated(true);
+          } catch (parseError) {
+            console.error('Failed to parse stored user:', parseError);
+            authService.clearAuth();
+            setIsAuthenticated(false);
+            setUser(null);
+          }
+        } else {
+          console.log('❌ No token or user found - user not authenticated');
           setIsAuthenticated(false);
           setUser(null);
         }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
@@ -50,6 +65,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       
       const response = await authService.login({ email, password });
+      
+      // CRITICAL: Verify token was stored after login
+      const tokenAfterLogin = localStorage.getItem('token');
+      console.log('🔴 AFTER LOGIN - Token in localStorage:', tokenAfterLogin ? `${tokenAfterLogin.substring(0, 20)}...` : 'NULL');
       
       // Set user data from API response
       const userData = response.data || response.user;

@@ -30,11 +30,28 @@ export const authService = {
     try {
       const response = await axiosInstance.post('/auth/login', credentials);
       
-      console.log('✅ Login successful, response data:', response.data);
+      console.log('✅ Login successful, full response:', response);
+      console.log('✅ response.data:', response.data);
+      console.log('🔥 Token from response.data.token:', response.data.token);
 
       // Store token in localStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        console.log('✅ Token STORED in localStorage');
+        
+        // Also store user data for persistence across page refreshes
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          console.log('✅ User data STORED in localStorage');
+        }
+        
+        // Verify token was stored correctly
+        const storedToken = localStorage.getItem('token');
+        console.log('✅ Verification - token in localStorage after storing:', storedToken);
+        console.log('✅ Token matches response token:', storedToken === response.data.token);
+      } else {
+        console.error('❌ No token in login response!');
+        console.error('❌ response.data keys:', Object.keys(response.data));
       }
       
       return response.data;
@@ -115,13 +132,17 @@ export const authService = {
     try {
       const response = await axiosInstance.get('/auth/logout');
       
-      // Remove token from localStorage
+      // Remove token and user data from localStorage
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      console.log('✅ Token and user data cleared from localStorage');
       
       return response.data;
     } catch (error) {
-      // Still remove token even if API call fails
+      // Still remove token and user data even if API call fails
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      console.log('✅ Token and user data cleared from localStorage (after error)');
       console.error('Logout error:', error);
       throw new Error(error.response?.data?.message || 'Logout failed');
     }
@@ -140,6 +161,8 @@ export const authService = {
   // Clear authentication
   clearAuth: () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    console.log('✅ All auth data cleared');
   }
 };
 
