@@ -18,36 +18,51 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is already logged in on app start
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
+      console.log('═══════════════════════════════════════════');
+      console.log('🔍 AUTH CHECK RUNNING ON APP LOAD');
+      console.log('═══════════════════════════════════════════');
+      
       try {
-        const token = authService.getToken();
-        const storedUser = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const storedUserStr = localStorage.getItem('user');
         
-        console.log('🔍 Checking auth on app load - Token:', token ? '✅ Found' : '❌ Not found');
-        console.log('🔍 Checking auth on app load - User:', storedUser ? '✅ Found' : '❌ Not found');
+        console.log('🔍 Token from localStorage:', token ? `✅ Found (${token.substring(0, 20)}...)` : '❌ Not found');
+        console.log('🔍 User data from localStorage:', storedUserStr ? '✅ Found' : '❌ Not found');
         
-        if (token && storedUser) {
+        if (token && storedUserStr) {
           try {
-            const userData = JSON.parse(storedUser);
-            console.log('✅ Auth restored from localStorage:', userData);
+            const userData = JSON.parse(storedUserStr);
+            console.log('✅ Successfully parsed user data:', userData);
+            console.log('✅ Setting isAuthenticated to TRUE');
+            console.log('✅ Setting user to:', userData);
+            
             setUser(userData);
             setIsAuthenticated(true);
+            
+            console.log('✅ Auth restored successfully!');
           } catch (parseError) {
-            console.error('Failed to parse stored user:', parseError);
-            authService.clearAuth();
+            console.error('❌ Failed to parse stored user data:', parseError);
+            console.log('❌ Clearing all auth data due to parse error');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             setIsAuthenticated(false);
             setUser(null);
           }
         } else {
-          console.log('❌ No token or user found - user not authenticated');
+          console.log('⚠️ Token or user data missing:');
+          console.log('   - Token present:', !!token);
+          console.log('   - User present:', !!storedUserStr);
+          console.log('❌ User NOT authenticated');
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('❌ Unexpected error in auth check:', error);
         setIsAuthenticated(false);
         setUser(null);
       } finally {
+        console.log('═══════════════════════════════════════════');
         setLoading(false);
       }
     };

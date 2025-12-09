@@ -51,17 +51,11 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 errors globally
+    // Handle 401 errors globally - but only clear token if it's NOT from getMe or similar auth check calls
     if (error.response?.status === 401) {
-      console.log('🚨 401 Unauthorized - clearing token');
+      console.log('🚨 401 Unauthorized');
       console.log('🚨 Request that failed:', error.config?.url);
-      console.log('🚨 Current token before clearing:', localStorage.getItem('token'));
-      
-      // Clear invalid token
-      localStorage.removeItem('token');
-      
-      // Optional: redirect to login page
-      // window.location.href = '/login';
+      console.log('🚨 Keeping token for now - let the calling service decide what to do');
     }
     
     return Promise.reject(error);

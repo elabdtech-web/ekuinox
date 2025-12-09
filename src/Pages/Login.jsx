@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../config/axiosInstance';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -25,29 +24,6 @@ const Login = () => {
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
     setError('');
-  };
-
-  // Debug function to test token and API
-  const testTokenAndAPI = async () => {
-    console.log('🧪 TESTING TOKEN AND API...');
-    const token = localStorage.getItem('token');
-    console.log('🧪 Token in localStorage:', token);
-    
-    if (!token) {
-      console.error('❌ No token found. Please login first.');
-      alert('No token found. Please login first.');
-      return;
-    }
-    
-    try {
-      console.log('🧪 Testing API call with token...');
-      const response = await axiosInstance.get('/city/getCities');
-      console.log('✅ API call successful:', response.data);
-      alert('✅ API call successful! Token is working.');
-    } catch (err) {
-      console.error('❌ API call failed:', err);
-      alert('❌ API call failed: ' + err.message);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -188,14 +164,6 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          {/* DEBUG TEST BUTTON */}
-          <button
-            onClick={testTokenAndAPI}
-            className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm"
-          >
-            🧪 Test Token & API (Debug Only)
-          </button>
 
           <div className="mt-6 text-center text-white/70 text-sm">
             Don&apos;t have an account?{' '}
