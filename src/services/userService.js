@@ -1,24 +1,4 @@
-import { USER_ENDPOINTS } from '../config/api';
-
-// Helper function to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` })
-  };
-};
-
-// Helper function to handle API responses
-const handleResponse = async (response) => {
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
-  }
-  
-  return data;
-};
+import axiosInstance from '../config/axiosInstance';
 
 // User Service
 export const userService = {
@@ -34,80 +14,59 @@ export const userService = {
         }
       });
       
-      const url = `${USER_ENDPOINTS.GET_ALL}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-
-        console.log('Get users response:', response.data);
-      return await handleResponse(response);
+      const response = await axiosInstance.get(url);
+      
+      console.log('Get users response:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Get users error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get users');
     }
   },
 
-  // Get single user by ID (Admin only)
-  getUser: async (id) => {
+  // Get user by ID (Admin only)
+  getUserById: async (id) => {
     try {
-      const response = await fetch(`${USER_ENDPOINTS.GET_BY_ID}/${id}`, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get(`/users/${id}`);
+      return response.data;
     } catch (error) {
-      console.error('Get user error:', error);
-      throw error;
+      console.error('Get user by ID error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to get user');
     }
   },
 
   // Update user (Admin only)
   updateUser: async (id, userData) => {
     try {
-      const response = await fetch(`${USER_ENDPOINTS.UPDATE}/${id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(userData),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.put(`/users/${id}`, userData);
+      return response.data;
     } catch (error) {
       console.error('Update user error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to update user');
     }
   },
 
   // Delete user (Admin only)
   deleteUser: async (id) => {
     try {
-      const response = await fetch(`${USER_ENDPOINTS.DELETE}/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.delete(`/users/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete user error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to delete user');
     }
   },
 
   // Toggle user status (Admin only)
-  toggleUserStatus: async (id, status) => {
+  toggleUserStatus: async (id, isActive) => {
     try {
-      const response = await fetch(`${USER_ENDPOINTS.TOGGLE_STATUS}/${id}/status`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.patch(`/users/${id}/status`, { isActive });
+      return response.data;
     } catch (error) {
       console.error('Toggle user status error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to toggle user status');
     }
   },
 

@@ -1,76 +1,21 @@
-import { AUTH_ENDPOINTS } from '../config/api';
-
-// Helper function to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` })
-  };
-};
-
-// Helper function to handle API responses
-const handleResponse = async (response) => {
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    // If JSON parsing fails, try to get text
-    try {
-      const text = await response.text();
-      data = { message: text || 'Unable to parse response' };
-    } catch {
-      data = { message: 'Unable to parse response' };
-    }
-  }
-  
-  if (!response.ok) {
-    console.error('API Error Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.url,
-      data: data
-    });
-    
-    // Special handling for rate limiting
-    if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After') || '60';
-      data.message = `Too many requests. Please wait ${retryAfter} seconds before trying again.`;
-    }
-    
-    const error = new Error(data.message || 'API request failed');
-    error.status = response.status;
-    error.data = data;
-    throw error;
-  }
-  
-  return data;
-};
+import axiosInstance from '../config/axiosInstance';
 
 // Authentication Service
 export const authService = {
   // Register new user
   register: async (userData) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.REGISTER, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await handleResponse(response);
+      const response = await axiosInstance.post('/auth/register', userData);
       
       // Store token if registration includes auto-login
-      if (data.token) {
-        localStorage.setItem('token', data.token);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
       }
       
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Registration error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
   },
 
@@ -81,148 +26,104 @@ export const authService = {
       password: credentials.password ? '[REDACTED]' : 'MISSING',
       passwordLength: credentials.password?.length || 0
     });
-    console.log('🌐 Login endpoint:', AUTH_ENDPOINTS.LOGIN);
     
     try {
-      const requestBody = JSON.stringify(credentials);
-      console.log('📤 Request body:', requestBody);
+      const response = await axiosInstance.post('/auth/login', credentials);
       
-      const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: requestBody,
-      });
-      
-      console.log('📥 Response status:', response.status, response.statusText);
-      console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      const data = await handleResponse(response);
-
-      console.log('✅ Login successful, response data:', data);
+      console.log('✅ Login successful, response data:', response.data);
 
       // Store token in localStorage
-      if (data.token) {
-        localStorage.setItem('token', data.token);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
       }
       
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   },
 
   // Get current user profile
   getMe: async () => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.ME, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/auth/me');
+      return response.data;
     } catch (error) {
       console.error('Get user error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get user profile');
     }
   },
 
   // Forgot password
   forgotPassword: async (email) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.FORGOT_PASSWORD, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.post('/auth/forgotPassword', { email });
+      return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to send password reset email');
     }
   },
 
   // Verify OTP
   verifyOtp: async (email, otp) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.VERIFY_OTP, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp })
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.post('/auth/verifyOtp', { email, otp });
+      return response.data;
     } catch (error) {
       console.error('Verify OTP error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'OTP verification failed');
     }
   },
 
   // Reset password
   resetPassword: async ({ token, newPassword }) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.RESET_PASSWORD, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword })
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.put('/auth/reset-password', { token, newPassword });
+      return response.data;
     } catch (error) {
       console.error('Reset password error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Password reset failed');
     }
   },
 
   // Update user details
   updateDetails: async (userDetails) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.UPDATE_DETAILS, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(userDetails),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.put('/auth/updatedetails', userDetails);
+      return response.data;
     } catch (error) {
       console.error('Update details error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to update details');
     }
   },
 
   // Update password
   updatePassword: async (passwordData) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.UPDATE_PASSWORD, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(passwordData),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.put('/auth/updatepassword', passwordData);
+      return response.data;
     } catch (error) {
       console.error('Update password error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to update password');
     }
   },
 
   // Logout user
   logout: async () => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.LOGOUT, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-
-      // Remove token from localStorage regardless of response
+      const response = await axiosInstance.get('/auth/logout');
+      
+      // Remove token from localStorage
       localStorage.removeItem('token');
       
-      return await handleResponse(response);
+      return response.data;
     } catch (error) {
       // Still remove token even if API call fails
       localStorage.removeItem('token');
       console.error('Logout error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Logout failed');
     }
   },
 

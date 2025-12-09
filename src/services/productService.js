@@ -1,24 +1,4 @@
-import { PRODUCT_ENDPOINTS } from '../config/api';
-
-// Helper function to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` })
-  };
-};
-
-// Helper function to handle API responses
-const handleResponse = async (response) => {
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
-  }
-  
-  return data;
-};
+import axiosInstance from '../config/axiosInstance';
 
 // Product Service
 export const productService = {
@@ -36,104 +16,66 @@ export const productService = {
         }
       });
       
-      const url = `${PRODUCT_ENDPOINTS.GET_ALL}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/products/getProducts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get(url);
+      return response.data;
     } catch (error) {
       console.error('Get products error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get products');
     }
   },
 
   // Get featured products
   getFeaturedProducts: async () => {
     try {
-      const response = await fetch(PRODUCT_ENDPOINTS.GET_FEATURED, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/products/featured');
+      return response.data;
     } catch (error) {
       console.error('Get featured products error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get featured products');
     }
-    },
-  
-  //GET latest products
+  },  // Get latest products
   getLatestProducts: async () => {
     try {
-      const response = await fetch(PRODUCT_ENDPOINTS.GET_LATEST, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/products/latest');
+      return response.data;
     } catch (error) {
       console.error('Get latest products error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get latest products');
     }
   },
 
   // Get popular products
   getPopularProducts: async () => {
     try {
-      const response = await fetch(PRODUCT_ENDPOINTS.GET_POPULAR, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/products/popular');
+      return response.data;
     } catch (error) {
       console.error('Get popular products error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get popular products');
     }
   },
 
   // Get products by category
   getProductsByCategory: async (category) => {
     try {
-      const response = await fetch(`${PRODUCT_ENDPOINTS.GET_BY_CATEGORY}/${category}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get(`/products/category/${category}`);
+      return response.data;
     } catch (error) {
       console.error('Get products by category error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get products by category');
     }
   },
 
   // Get single product by ID
   getProduct: async (id) => {
     try {
-      const response = await fetch(`${PRODUCT_ENDPOINTS.GET_BY_ID}/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.get(`/products/getProduct/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Get product error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get product');
     }
   },
 
@@ -142,63 +84,44 @@ export const productService = {
   // Create new product (Admin only)
   createProduct: async (productData) => {
     try {
-      const response = await fetch(PRODUCT_ENDPOINTS.CREATE, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(productData),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.post('/products/createProduct', productData);
+      return response.data;
     } catch (error) {
       console.error('Create product error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to create product');
     }
   },
 
   // Update existing product (Admin only)
   updateProduct: async (id, productData) => {
     try {
-      const response = await fetch(`${PRODUCT_ENDPOINTS.UPDATE}/${id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(productData),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.put(`/products/updateProduct/${id}`, productData);
+      return response.data;
     } catch (error) {
       console.error('Update product error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to update product');
     }
   },
 
   // Delete product (Admin only)
   deleteProduct: async (id) => {
     try {
-      const response = await fetch(`${PRODUCT_ENDPOINTS.DELETE}/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.delete(`/products/deleteProduct/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete product error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to delete product');
     }
   },
 
   // Toggle product status (Admin only)
   toggleProductStatus: async (id, status) => {
     try {
-      const response = await fetch(`${PRODUCT_ENDPOINTS.TOGGLE_STATUS}/${id}/status`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
-
-      return await handleResponse(response);
+      const response = await axiosInstance.patch(`/products/toggleStatus/${id}/status`, { status });
+      return response.data;
     } catch (error) {
       console.error('Toggle product status error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to toggle product status');
     }
   },
 

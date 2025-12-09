@@ -1,83 +1,49 @@
-
-
-
-
-
-import { ORDER_ENDPOINTS } from '../config/api';
-
-// Helper to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` })
-  };
-};
-
-// Helper to handle API responses
-const handleResponse = async (response) => {
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || data.error || 'API request failed');
-  }
-  return data;
-};
+import axiosInstance from '../config/axiosInstance';
 
 const orderService = {
   // Get all orders of the logged-in user
   getUserOrders: async () => {
     try {
-      const response = await fetch(ORDER_ENDPOINTS.GET_USER_ORDERS, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.get('/payments');
+      return response.data;
     } catch (error) {
       console.error('Get user orders error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to get orders');
     }
   },
 
   // Cancel a pending order
   cancelOrder: async (orderId, reason) => {
     try {
-      const response = await fetch(ORDER_ENDPOINTS.CANCEL_ORDER, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ orderId, reason }),
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.post('/payments/cancel', { orderId, reason });
+      return response.data;
     } catch (error) {
       console.error('Cancel order error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to cancel order');
     }
   },
 
   // Request cancellation for a paid order
   requestCancellation: async (orderId, reason, additionalInfo = '') => {
     try {
-      const response = await fetch(ORDER_ENDPOINTS.REQUEST_CANCELLATION, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ orderId, reason, additionalInfo }),
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.post('/payments/cancel-request', { orderId, reason, additionalInfo });
+      return response.data;
     } catch (error) {
       console.error('Request cancellation error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Failed to request cancellation');
     }
   },
 
   // Get order by ID
   getOrderById: async (orderId) => {
     try {
-      const response = await fetch(`${ORDER_ENDPOINTS.GET_ORDER_BY_ID}/${orderId}`, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-      });
-      return await handleResponse(response);
+      const response = await axiosInstance.get(`/payments/${orderId}`);
+      return response.data;
     } catch (error) {
       console.error('Get order by ID error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to get order');
+    }
+  },
       throw error;
     }
   },

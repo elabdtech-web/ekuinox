@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { FaCreditCard, FaPaypal, FaMoneyBillWave, FaLock, FaShieldAlt } from "react-icons/fa";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import stripePromise from '../config/stripe';
-import { PAYMENT_ENDPOINTS } from '../config/api';
+import axiosInstance from '../config/axiosInstance';
 import { Country } from 'country-state-city';
 
 // Card Payment Form Component using Stripe Elements
@@ -116,16 +116,9 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
         }
       };
 
-      const response = await fetch(PAYMENT_ENDPOINTS.CREATE_INTENT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(paymentData)
-      });
+      const response = await axiosInstance.post('/payments/create-intent', paymentData);
 
-      const result = await response.json();
+      const result = response.data;
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to create payment intent');
@@ -154,24 +147,15 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
       }
 
       // Step 3: Confirm payment on backend
-      const confirmResponse = await fetch(`${PAYMENT_ENDPOINTS.CONFIRM}/${paymentIntent.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          paymentDetails: {
-            last4: paymentIntent.payment_method?.card?.last4 || 'N/A',
-            brand: paymentIntent.payment_method?.card?.brand || 'unknown',
-            cardName: cardholderName
-          }
-        })
+      const confirmResponse = await axiosInstance.post(`/payments/confirm/${paymentIntent.id}`, {
+        paymentDetails: {
+          last4: paymentIntent.payment_method?.card?.last4 || 'N/A',
+          brand: paymentIntent.payment_method?.card?.brand || 'unknown',
+          cardName: cardholderName
+        }
       });
 
-      if (!confirmResponse.ok) {
-        throw new Error('Failed to confirm payment on server');
-      }
+      // Success - axiosInstance handles the response parsing
 
       try {
         // Clear cart after successful payment confirmation
