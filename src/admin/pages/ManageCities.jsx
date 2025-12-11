@@ -78,63 +78,7 @@ const ManageCities = () => {
     setShowAddModal(true);
   };
 
-  // const handleEditCity = (city) => {
-  //   setFormData({
-
-  //     label: city.label,
-  //     value: city.value
-  //   });
-  //   setEditingCity(city);
-  //   setShowAddModal(true);
-  // };
-
-  // const handleDeleteCity = (city) => {
-  //   console.log('Deleting city with ID:', city.id);
-  //   toast(
-  //     ({ closeToast }) => (
-  //       <div>
-  //         <p className="mb-3">
-  //           Are you sure you want to delete <strong>{city.label}</strong>?
-  //         </p>
-  //         <div className="flex gap-2">
-  //           <button
-  //             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-  //             onClick={async () => {
-  //               closeToast();
-  //               try {
-  //                 await cityService.deleteCity(city.id);
-  //                 toast.success(`${city.label} deleted successfully! 🗑️`);
-  //                 // Reload cities from API
-  //                 await loadCities();
-  //               } catch (err) {
-  //                 console.error("Failed to delete city:", err);
-  //                 let msg = "Failed to delete city. Please try again.";
-  //                 if (err.message && err.message.includes("401")) msg = "Please log in to delete cities.";
-  //                 else if (err.message && err.message.includes("404"))
-  //                   msg = "City not found or you don't have permission to delete it.";
-  //                 toast.error(msg);
-  //               }
-  //             }}
-  //           >
-  //             Delete
-  //           </button>
-  //           <button
-  //             className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-  //             onClick={closeToast}
-  //           >
-  //             Cancel
-  //           </button>
-  //         </div>
-  //       </div>
-  //     ),
-  //     {
-  //       position: "top-right",
-  //       autoClose: false,
-  //       closeButton: false,
-  //       draggable: false,
-  //     }
-  //   );
-  // };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

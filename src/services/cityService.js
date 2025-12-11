@@ -1,19 +1,21 @@
 import axiosInstance from '../config/axiosInstance';
 
 class CityService {
-  async getAllCities() {
+  // Fetch all cities. Pass `all = true` to request admin list (uses ?all=true)
+  async getAllCities(all = false) {
     try {
-      console.log('Fetching all cities from API');
-      const response = await axiosInstance.get('/city/getCities');
-      
+      console.log('Fetching all cities from API', { all });
+      const url = all ? '/city/getCities?all=true' : '/city/getCities';
+      const response = await axiosInstance.get(url);
+
       console.log('Get all cities response status:', response.status);
       console.log('Fetched all cities:-----', response.data);
-      
+
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching all cities:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch cities');
-    } 
+    }
   }
 
   async fetchCities(userId) {

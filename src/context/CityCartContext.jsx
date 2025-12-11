@@ -101,8 +101,18 @@ export function CityCartProvider({ children }) {
         return newCities;
       });
     } catch (error) {
-      console.error("Failed to create city via API, adding locally:", error);
-      // Fallback: add to local state only
+      console.error("Failed to create city via API:", error);
+      
+      // Check for specific error messages from backend
+      const errorMessage = error?.response?.data?.message || error?.message || "";
+      
+      // If it's an OpenWeather error or other specific errors, throw it to the UI
+      if (errorMessage.includes("OpenWeather") || errorMessage.includes("not found") || 
+          error?.response?.status === 404 || error?.response?.status === 401) {
+        throw error;
+      }
+      
+      // For other errors, fall back to local state
       setSavedCities(prev => [...prev, { ...city, addedAt: new Date().toISOString() }]);
     }
   };

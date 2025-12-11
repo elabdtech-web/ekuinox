@@ -36,6 +36,20 @@ export default function MyCities() {
       setIsAddOpen(false);
     } catch (err) {
       console.error("Failed to add city:", err);
+      
+      // Show specific error message based on backend response
+      const errorMessage = err?.response?.data?.message || err?.message || "";
+      
+      if (errorMessage.includes("OpenWeather")) {
+        toast.error(`❌ ${trimmedName} not found in OpenWeather`);
+      } else if (errorMessage.includes("not found")) {
+        toast.error(`❌ City not found. Please check the spelling.`);
+      } else if (err?.response?.status === 401) {
+        toast.error(`🔒 Please log in to add cities`);
+      } else {
+        toast.error(`❌ Failed to add ${trimmedName}. Please try again.`);
+      }
+      
       throw err;
     } finally {
       setIsAdding(false);

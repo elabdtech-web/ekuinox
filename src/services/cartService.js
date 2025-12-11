@@ -79,6 +79,58 @@ export const cartService = {
     }
   },
 
+  // Create Payment Intent for Stripe
+  createPaymentIntent: async (paymentData) => {
+    try {
+      console.log('Creating payment intent with data:', paymentData);
+      
+      const response = await axiosInstance.post('/payments/create-intent', {
+        amount: paymentData.amount,
+        currency: paymentData.currency || 'usd',
+        customerInfo: {
+          firstName: paymentData.customerInfo?.firstName || '',
+          lastName: paymentData.customerInfo?.lastName || '',
+          email: paymentData.customerInfo?.email || '',
+          phone: paymentData.customerInfo?.phone || ''
+        },
+        shippingAddress: paymentData.shippingAddress || {},
+        billingAddress: paymentData.billingAddress || {},
+        items: paymentData.items || [],
+        paymentMethod: 'card'
+      });
+      
+      console.log('Payment Intent Response:', response.data);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to create payment intent');
+      }
+      
+      if (!response.data.data?.clientSecret) {
+        throw new Error('No client secret received from server');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Create payment intent error:', error);
+      console.error('Error response:', error.response?.data);
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create payment intent');
+    }
+  },
+
+  // Confirm Payment Intent (after Stripe confirmation)
+  confirmPayment: async (paymentIntentId, paymentData = {}) => {
+    try {
+      const response = await axiosInstance.post('/payments/confirm-payment', {
+        paymentIntentId,
+        ...paymentData
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Confirm payment error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to confirm payment');
+    }
+  },
+
   // Utility functions
 
   // Format cart item data for API

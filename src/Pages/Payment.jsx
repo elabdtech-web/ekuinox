@@ -125,7 +125,17 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
       }
 
       // Step 2: Confirm payment with Stripe
-      const { error, paymentIntent } = await stripe.confirmCardPayment(result.data.clientSecret, {
+      const clientSecret = result.data.clientSecret;
+      
+      // Log for debugging
+      console.log('🔑 Using clientSecret:', clientSecret);
+      console.log('🆔 PaymentIntent ID:', result.data.paymentIntentId);
+      
+      if (!clientSecret) {
+        throw new Error('No client secret received from server');
+      }
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
@@ -143,30 +153,30 @@ const CardPaymentForm = ({ checkoutData, total, items, onSuccess, onError, submi
       });
 
       if (error) {
+        console.error('❌ Stripe confirmation error:', error);
         throw new Error(error.message);
       }
 
-      // Step 3: Confirm payment on backend
-      const confirmResponse = await axiosInstance.post(`/payments/confirm/${paymentIntent.id}`, {
-        paymentDetails: {
-          last4: paymentIntent.payment_method?.card?.last4 || 'N/A',
-          brand: paymentIntent.payment_method?.card?.brand || 'unknown',
-          cardName: cardholderName
+      if (paymentIntent.status === 'succeeded') {
+        console.log('✅ Payment succeeded with Stripe:', paymentIntent.id);
+        console.log('🎉 Payment completed successfully!');
+        
+        // Clear cart after successful payment
+        try {
+          await clearCart();
+          console.log('✅ Cart cleared after successful payment');
+        } catch (cartError) {
+          console.warn('⚠️ Failed to clear cart:', cartError);
         }
-      });
-
-      // Success - axiosInstance handles the response parsing
-
-      try {
-        // Clear cart after successful payment confirmation
-        await clearCart();
-      } catch (e) {
-        console.warn('Cart clear after card payment failed:', e);
+        
+        // Call success handler
+        onSuccess();
+      } else {
+        throw new Error(`Payment not completed. Status: ${paymentIntent.status}`);
       }
-      onSuccess();
 
     } catch (err) {
-      console.error('Payment error:', err);
+      console.error('❌ Payment error:', err);
       onError(err?.message || "Payment failed");
     } finally {
       setSubmitting(false);

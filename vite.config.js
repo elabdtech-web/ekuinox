@@ -10,7 +10,7 @@ export default defineConfig({
       '/api': {
         target: 'https://vercel-node-api-rho.vercel.app/api',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }

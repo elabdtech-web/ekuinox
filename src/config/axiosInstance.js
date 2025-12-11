@@ -4,11 +4,13 @@ import axios from "axios";
 console.log("🌐 Environment:", import.meta.env.MODE);
 console.log("🌐 DEV mode:", import.meta.env.DEV);
 
-// Determine the API base URL based on environment
+// Use proxy in development to avoid CORS, direct URL in production
 const isDev = import.meta.env.DEV;
 const apiBaseUrl = isDev ? "/api" : "https://vercel-node-api-rho.vercel.app/api";
 
+console.log("🌐 Environment:", import.meta.env.MODE);
 console.log("🌐 API Base URL:", apiBaseUrl);
+console.log("🌐 Using:", isDev ? "Vite proxy" : "Direct backend URL");
 
 const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
