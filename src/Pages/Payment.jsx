@@ -435,6 +435,7 @@ const Payment = () => {
                 items={items}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
+                submitting={submitting}
                 setSubmitting={setSubmitting}
               />
             )}

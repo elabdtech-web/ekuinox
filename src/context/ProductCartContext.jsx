@@ -288,11 +288,17 @@ export function ProductCartProvider({ children }) {
         });
         return;
       }
-      await cartService.removeFromCart(id);
-      await loadCart();
+      
+      // Remove item immediately from UI
+      setItems((prev) => prev.filter((p) => p.id !== id));
+      
+      // Remove from server in background
+      cartService.removeFromCart(id).catch((error) => {
+        console.error("Failed to remove item from server:", error);
+        // Optionally revert or show error without affecting UI flow
+      });
     } catch (error) {
       console.error("Failed to remove item from cart:", error);
-      setError(error.message);
     }
   };
 
@@ -312,11 +318,17 @@ export function ProductCartProvider({ children }) {
       }
       const current = items.find((i) => i.id === id);
       if (!current) return;
-      await cartService.updateCartItem(id, { quantity: current.qty + 1 });
-      await loadCart();
+      
+      // Update UI immediately
+      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p)));
+      
+      // Update server in background
+      cartService.updateCartItem(id, { quantity: current.qty + 1 }).catch((error) => {
+        console.error("Failed to increment item on server:", error);
+        // Optionally revert or show error without affecting UI flow
+      });
     } catch (error) {
       console.error("Failed to increment item:", error);
-      setError(error.message);
     }
   };
 
@@ -336,11 +348,17 @@ export function ProductCartProvider({ children }) {
       }
       const current = items.find((i) => i.id === id);
       if (!current || current.qty <= 1) return;
-      await cartService.updateCartItem(id, { quantity: current.qty - 1 });
-      await loadCart();
+      
+      // Update UI immediately
+      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, qty: Math.max(1, p.qty - 1) } : p)));
+      
+      // Update server in background
+      cartService.updateCartItem(id, { quantity: current.qty - 1 }).catch((error) => {
+        console.error("Failed to decrement item on server:", error);
+        // Optionally revert or show error without affecting UI flow
+      });
     } catch (error) {
       console.error("Failed to decrement item:", error);
-      setError(error.message);
     }
   };
 

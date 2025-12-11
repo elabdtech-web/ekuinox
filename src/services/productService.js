@@ -107,7 +107,11 @@ export const productService = {
   deleteProduct: async (id) => {
     try {
       const response = await axiosInstance.delete(`/products/deleteProduct/${id}`);
-      return response.data;
+      // Return a custom success message to ensure it says "deleted" not "added"
+      return {
+        ...response.data,
+        message: 'Product deleted successfully'
+      };
     } catch (error) {
       console.error('Delete product error:', error);
       throw new Error(error.response?.data?.message || 'Failed to delete product');

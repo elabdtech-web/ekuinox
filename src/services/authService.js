@@ -82,18 +82,18 @@ export const authService = {
     }
   },
 
-  // Forgot password
+  // Forgot password - Send OTP to email
   forgotPassword: async (email) => {
     try {
       const response = await axiosInstance.post('/auth/forgotPassword', { email });
       return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
-      throw new Error(error.response?.data?.message || 'Failed to send password reset email');
+      throw new Error(error.response?.data?.message || 'Failed to send password reset OTP');
     }
   },
 
-  // Verify OTP
+  // Verify OTP and get reset token
   verifyOtp: async (email, otp) => {
     try {
       const response = await axiosInstance.post('/auth/verifyOtp', { email, otp });
@@ -104,7 +104,7 @@ export const authService = {
     }
   },
 
-  // Reset password
+  // Reset password using token from OTP verification
   resetPassword: async ({ token, newPassword }) => {
     try {
       const response = await axiosInstance.put('/auth/reset-password', { token, newPassword });

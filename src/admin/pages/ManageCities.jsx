@@ -32,16 +32,21 @@ const ManageCities = () => {
   const loadCities = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await cityService.getAllCities();
-      console.log('Load cities response:', response.data);
-      const citiesData = response.data || response.cities || response || [];
+      // Call with all=true to get all cities for admin view
+      const response = await cityService.getAllCities(true);
+      console.log('Load cities response:', response);
+      
+      // The response should be an array of cities
+      const citiesData = Array.isArray(response) ? response : [];
 
       // Transform API data to match component format if needed
-      const formattedCities = citiesData.map(city => ({
-        id: city._id ,
-        label: city.label || city.name || city.city,
-        value: city.value || city.id || city._id,
-        country: city.country || 'Unknown'
+      const formattedCities = citiesData.map((city, index) => ({
+        id: city._id || city.id || index,
+        label: city.name || city.label || city.city,
+        value: city._id || city.id || city.value || index.toString(),
+        country: city.country || 'Unknown',
+        createdAt: city.createdAt || new Date().toISOString(),
+        userId: city.userId || 'System'
       }));
 
       setCities(formattedCities);
@@ -49,7 +54,7 @@ const ManageCities = () => {
     } catch (error) {
       console.error('Error loading cities:', error);
       toast.error('Failed to load cities. Please try again.');
-  // Fallback to demo data
+      // Fallback to demo data
       setCities(demoCities);
       setFilteredCities(demoCities);
     } finally {
